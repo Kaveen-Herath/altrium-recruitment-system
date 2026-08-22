@@ -5,6 +5,8 @@ const session = require("express-session");
 const pgSession = require("connect-pg-simple")(session);
 const crypto = require("crypto");
 const transporter = require("./email");
+const multer = require("multer");
+const supabase = require("./supabase");
 
 
 
@@ -30,6 +32,112 @@ app.use(
             maxAge: 1000 * 60 * 60 * 24
         }
     })
+);
+
+const profilePhotoUpload = multer({
+    storage: multer.memoryStorage(),
+
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5 MB
+    },
+
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+        ];
+
+        if (allowedTypes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error("Only JPG, PNG and WEBP images are allowed."));
+        }
+    }
+});
+
+
+// ===============================================================================
+// ROUTES ========================================================================
+
+app.post(
+    "/api/profile/photo",
+    profilePhotoUpload.single("profilePhoto"),
+    async (req, res) => {
+        try {
+            // User must be logged in
+            if (!req.session.userId) {
+                return res.status(401).json({
+                    success: false,
+                    message: "You must be logged in."
+                });
+            }
+
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Please select a profile photo."
+                });
+            }
+
+            const extensionMap = {
+                "image/jpeg": "jpg",
+                "image/png": "png",
+                "image/webp": "webp"
+            };
+
+            const extension = extensionMap[req.file.mimetype];
+
+            const filePath =
+                `user-${req.session.userId}/profile-${crypto.randomUUID()}.${extension}`;
+
+            // Upload actual image to Supabase Storage
+            const { error: uploadError } = await supabase.storage
+                .from("profile-photos")
+                .upload(filePath, req.file.buffer, {
+                    contentType: req.file.mimetype,
+                    upsert: false
+                });
+
+            if (uploadError) {
+                console.error("Profile photo upload error:", uploadError);
+
+                return res.status(500).json({
+                    success: false,
+                    message: "Unable to upload profile photo."
+                });
+            }
+
+            // Save only the file path in PostgreSQL
+            await pool.query(
+                `
+                UPDATE users
+                SET profile_photo_path = $1
+                WHERE id = $2
+                `,
+                [filePath, req.session.userId]
+            );
+
+            // Because your bucket is public, get its display URL
+            const { data: publicUrlData } = supabase.storage
+                .from("profile-photos")
+                .getPublicUrl(filePath);
+
+            return res.json({
+                success: true,
+                message: "Profile photo updated successfully.",
+                profilePhotoUrl: publicUrlData.publicUrl
+            });
+
+        } catch (error) {
+            console.error("Profile photo error:", error);
+
+            return res.status(500).json({
+                success: false,
+                message: "Something went wrong while uploading the photo."
+            });
+        }
+    }
 );
 
 app.use(express.json()); // allows Express to read that information.
@@ -320,80 +428,137 @@ app.post("/api/auth/login", async (req, res) => {
 });
 
 
-app.get("/api/auth/me", async (req, res) => {
+app.get(
+    "/api/auth/me",
+    async (req, res) => {
 
-    try {
+        try {
 
-        if (!req.session.userId) {
+            /* ---------------------------------------------
+               Check login session
+            --------------------------------------------- */
 
-            return res.status(401).json({
-                success: false,
-                message: "You are not logged in."
-            });
+            if (!req.session.userId) {
 
-        }
-
-
-        const result = await pool.query(
-            `SELECT
-                id,
-                first_name,
-                last_name,
-                email,
-                phone_number,
-                role,
-                created_at
-             FROM users
-             WHERE id = $1`,
-            [req.session.userId]
-        );
-
-
-        if (result.rows.length === 0) {
-
-            return res.status(404).json({
-                success: false,
-                message: "User not found."
-            });
-
-        }
-
-
-        const user = result.rows[0];
-
-
-        res.json({
-            success: true,
-
-            user: {
-                id: user.id,
-                firstName: user.first_name,
-                lastName: user.last_name,
-                email: user.email,
-                phone: user.phone_number,
-                role: user.role,
-                createdAt: user.created_at
+                return res.status(401).json({
+                    success: false,
+                    message: "You are not logged in."
+                });
             }
-        });
 
+
+            /* ---------------------------------------------
+               Get user from PostgreSQL
+            --------------------------------------------- */
+
+            const result =
+                await pool.query(
+                    `
+                    SELECT
+                        id,
+                        first_name,
+                        last_name,
+                        email,
+                        phone_number,
+                        role,
+                        created_at,
+                        profile_photo_path
+                    FROM users
+                    WHERE id = $1
+                    `,
+                    [req.session.userId]
+                );
+
+
+            if (result.rows.length === 0) {
+
+                return res.status(404).json({
+                    success: false,
+                    message: "User not found."
+                });
+            }
+
+
+            const dbUser =
+                result.rows[0];
+
+
+            /* ---------------------------------------------
+               Build profile photo URL
+            --------------------------------------------- */
+
+            let profilePhotoUrl = null;
+
+
+            if (dbUser.profile_photo_path) {
+
+                const { data } =
+                    supabase.storage
+                        .from("profile-photos")
+                        .getPublicUrl(
+                            dbUser.profile_photo_path
+                        );
+
+
+                profilePhotoUrl =
+                    data.publicUrl;
+            }
+
+
+            /* ---------------------------------------------
+               Send safe user data
+            --------------------------------------------- */
+
+            return res.json({
+
+                success: true,
+
+                user: {
+
+                    id:
+                        dbUser.id,
+
+                    firstName:
+                        dbUser.first_name,
+
+                    lastName:
+                        dbUser.last_name,
+
+                    email:
+                        dbUser.email,
+
+                    phoneNumber:
+                        dbUser.phone_number,
+
+                    role:
+                        dbUser.role,
+
+                    createdAt:
+                        dbUser.created_at,
+
+                    profilePicture:
+                        profilePhotoUrl
+                }
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Get current user error:",
+                error
+            );
+
+
+            return res.status(500).json({
+                success: false,
+                message: "Unable to load user."
+            });
+        }
     }
-
-    catch (error) {
-
-        console.error(
-            "Current user error:",
-            error
-        );
-
-
-        res.status(500).json({
-            success: false,
-            message: "Unable to load your profile."
-        });
-
-    }
-
-});
+);
 
 // ---------------------------------------------------------------------------------
 // Backend Verification for the 6 Digit Verfitication Popup

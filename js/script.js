@@ -59,6 +59,207 @@ document.addEventListener("keydown", (event) => {
 
 });
 
+/* =====================================================
+   CURRENT USER / NAVBAR
+   ===================================================== */
+
+async function updateNavbarAccount() {
+
+    const profileLink =
+        document.getElementById(
+            "profileLink"
+        );
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/auth/me",
+                {
+                    method: "GET",
+                    credentials: "same-origin"
+                }
+            );
+
+
+        /* ---------------------------------------------
+           User is not logged in
+        --------------------------------------------- */
+
+        if (!response.ok) {
+
+            document.body.classList.remove(
+                "logged-in"
+            );
+
+            return;
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !data.success ||
+            !data.user
+        ) {
+
+            document.body.classList.remove(
+                "logged-in"
+            );
+
+            return;
+        }
+
+
+        /* ---------------------------------------------
+           User is logged in
+        --------------------------------------------- */
+
+        document.body.classList.add(
+            "logged-in"
+        );
+
+
+        if (!profileLink) {
+            return;
+        }
+
+
+        const user =
+            data.user;
+
+
+        /* ---------------------------------------------
+           Correct destination based on role
+        --------------------------------------------- */
+
+        if (user.role === "admin") {
+
+            profileLink.href =
+                "admin-dashboard.html";
+
+            profileLink.title =
+                "Admin Dashboard";
+
+        }
+
+        else {
+
+            profileLink.href =
+                "profile.html";
+
+            profileLink.title =
+                "My Profile";
+        }
+
+
+        /* ---------------------------------------------
+           Clear old SVG / photo / initials
+        --------------------------------------------- */
+
+        profileLink.innerHTML = "";
+
+
+        /* ---------------------------------------------
+           If user has uploaded a profile photo
+        --------------------------------------------- */
+
+        if (user.profilePicture) {
+
+            const image =
+                document.createElement(
+                    "img"
+                );
+
+
+            image.src =
+                user.profilePicture;
+
+
+            image.alt =
+                "Profile";
+
+
+            image.className =
+                "nav-profile-avatar";
+
+
+            profileLink.appendChild(
+                image
+            );
+
+        }
+
+        else {
+
+            /* -----------------------------------------
+               No photo → create initials
+            ----------------------------------------- */
+
+            const firstInitial =
+                user.firstName
+                    ? user.firstName
+                        .trim()
+                        .charAt(0)
+                        .toUpperCase()
+                    : "";
+
+
+            const lastInitial =
+                user.lastName
+                    ? user.lastName
+                        .trim()
+                        .charAt(0)
+                        .toUpperCase()
+                    : "";
+
+
+            const initials =
+                firstInitial +
+                lastInitial;
+
+
+            const initialsCircle =
+                document.createElement(
+                    "span"
+                );
+
+
+            initialsCircle.className =
+                "nav-profile-initials";
+
+
+            initialsCircle.textContent =
+                initials || "U";
+
+
+            profileLink.appendChild(
+                initialsCircle
+            );
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Navbar authentication check failed:",
+            error
+        );
+
+
+        document.body.classList.remove(
+            "logged-in"
+        );
+    }
+}
+
+
+updateNavbarAccount();
+
 
 /* ================= FILTERS ================= */
 

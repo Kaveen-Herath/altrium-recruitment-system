@@ -685,14 +685,23 @@ if (avatarUpload) {
                Check file type
             --------------------------------------------- */
 
-            if (!file.type.startsWith("image/")) {
+            const allowedTypes = [
+                "image/jpeg",
+                "image/png",
+                "image/webp"
+            ];
+
+
+            if (!allowedTypes.includes(file.type)) {
 
                 showProfileToast(
-                    "Please select an image file.", "error"
+                    "Please select a JPG, PNG or WEBP image.",
+                    "error"
                 );
 
-                return;
+                avatarUpload.value = "";
 
+                return;
             }
 
 
@@ -703,29 +712,39 @@ if (avatarUpload) {
             if (file.size > 5 * 1024 * 1024) {
 
                 showProfileToast(
-                    "Image must be smaller than 5MB.", "error"
+                    "Image must be smaller than 5MB.",
+                    "error"
                 );
 
-                return;
+                avatarUpload.value = "";
 
+                return;
             }
 
+
+            /* ---------------------------------------------
+               Prepare image for backend
+            --------------------------------------------- */
 
             const formData =
                 new FormData();
 
 
             formData.append(
-                "profile_picture",
+                "profilePhoto",
                 file
             );
 
 
             try {
 
+                /* -----------------------------------------
+                   Send image to Node backend
+                ----------------------------------------- */
+
                 const response =
                     await fetch(
-                        "/api/profile/picture",
+                        "/api/profile/photo",
                         {
                             method: "POST",
 
@@ -741,6 +760,10 @@ if (avatarUpload) {
                     await response.json();
 
 
+                /* -----------------------------------------
+                   Handle upload error
+                ----------------------------------------- */
+
                 if (
                     !response.ok ||
                     !data.success
@@ -748,16 +771,18 @@ if (avatarUpload) {
 
                     showProfileToast(
                         data.message ||
-                        "Unable to upload image.", "error"
+                        "Unable to upload profile picture.",
+                        "error"
                     );
 
-                    return;
+                    avatarUpload.value = "";
 
+                    return;
                 }
 
 
                 /* -----------------------------------------
-                   Display new image
+                   Display new image immediately
                 ----------------------------------------- */
 
                 const profileImage =
@@ -769,26 +794,36 @@ if (avatarUpload) {
                 if (profileImage) {
 
                     profileImage.src =
-                        data.profilePicture;
-
+                        data.profilePhotoUrl;
                 }
 
 
                 /* -----------------------------------------
-                   Update current JS user
+                   Update current JS user object
                 ----------------------------------------- */
 
                 if (user) {
 
                     user.profilePicture =
-                        data.profilePicture;
-
+                        data.profilePhotoUrl;
                 }
 
 
+                /* -----------------------------------------
+                   Success notification
+                ----------------------------------------- */
+
                 showProfileToast(
-                    "Profile picture updated.", "error"
+                    "Profile picture updated successfully.",
+                    "success"
                 );
+
+
+                /* -----------------------------------------
+                   Reset file input
+                ----------------------------------------- */
+
+                avatarUpload.value = "";
 
             }
 
@@ -799,10 +834,14 @@ if (avatarUpload) {
                     error
                 );
 
+
                 showProfileToast(
-                    "Unable to upload profile picture.", "error"
+                    "Unable to upload profile picture.",
+                    "error"
                 );
 
+
+                avatarUpload.value = "";
             }
 
         }
