@@ -83,10 +83,11 @@ app.post("/api/auth/register", async (req, res) => {
     );
 
     // 6. Send success response
-    res.status(201).json({
-      message: "Account created successfully!",
-      user: result.rows[0]
-    });
+      res.status(201).json({
+        success: true,
+        message: "Account created successfully!",
+        user: result.rows[0]
+      });
 
   } catch (error) {
     console.error("Registration error:", error);

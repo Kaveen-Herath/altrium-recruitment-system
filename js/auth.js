@@ -1,4 +1,84 @@
+function showToast(message, type = "error") {
 
+    const container =
+        document.getElementById("toastContainer");
+
+    if (!container) {
+        console.error(message);
+        return;
+    }
+
+
+    const toast =
+        document.createElement("div");
+
+    toast.className =
+        `toast ${type}`;
+
+
+    const icon =
+        type === "success" ? "✓" : "!";
+
+
+    const title =
+        type === "success"
+            ? "Success"
+            : "Something went wrong";
+
+
+    toast.innerHTML = `
+        <div class="toast-icon">
+            ${icon}
+        </div>
+
+        <div class="toast-content">
+            <p class="toast-title">
+                ${title}
+            </p>
+
+            <p class="toast-message"></p>
+        </div>
+
+        <button
+            class="toast-close"
+            type="button"
+            aria-label="Close notification">
+            ×
+        </button>
+    `;
+
+
+    toast.querySelector(".toast-message")
+        .textContent = message;
+
+
+    container.appendChild(toast);
+
+
+    const removeToast = () => {
+
+        toast.classList.add("hide");
+
+        setTimeout(() => {
+            toast.remove();
+        }, 250);
+
+    };
+
+
+    toast
+        .querySelector(".toast-close")
+        .addEventListener(
+            "click",
+            removeToast
+        );
+
+
+    setTimeout(
+        removeToast,
+        4500
+    );
+}
 
 /* =====================================================
    NAVBAR AUTH STATUS
@@ -275,20 +355,27 @@ if (registerForm) {
                 |--------------------------------------------------------------------------
                 */
 
-                alert(
-                    "Account created successfully!"
-                );
+                const successPopup =
+                    document.getElementById(
+                        "registrationSuccessPopup"
+                    );
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | The backend has created the session.
-                | No localStorage required.
-                |--------------------------------------------------------------------------
-                */
+                if (successPopup) {
 
-                window.location.href =
-                    "profile.html";
+                    successPopup.classList.add(
+                        "show"
+                    );
+
+                }
+
+
+                setTimeout(function () {
+
+                    window.location.href =
+                        "profile.html";
+
+                }, 1800);
 
             }
 
@@ -427,18 +514,15 @@ if (loginForm) {
                 |--------------------------------------------------------------------------
                 */
 
-                if (
-                    !response.ok ||
-                    !data.success
-                ) {
+                if (!response.ok || !data.success) {
 
-                    alert(
+                    showToast(
                         data.message ||
-                        "Incorrect email or password."
+                        "Unable to create your account.",
+                        "error"
                     );
 
                     return;
-
                 }
 
 
@@ -466,13 +550,13 @@ if (loginForm) {
             catch (error) {
 
                 console.error(
-                    "Login error:",
+                    "Registration error:",
                     error
                 );
 
-
-                alert(
-                    "Unable to connect to the server."
+                showToast(
+                    "We couldn't create your account. Please try again.",
+                    "error"
                 );
 
             }
