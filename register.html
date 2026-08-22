@@ -252,6 +252,130 @@
     aria-atomic="true">
 </div>
 
+<!-- =====================================================
+     EMAIL VERIFICATION POPUP
+     ===================================================== -->
+
+<div
+    class="verification-popup"
+    id="verificationPopup"
+    aria-hidden="true"
+>
+
+    <div class="verification-card">
+
+        <div class="verification-icon">
+            ✉
+        </div>
+
+        <p class="verification-label">
+            VERIFY YOUR EMAIL
+        </p>
+
+        <h2>
+            Check your inbox.
+        </h2>
+
+        <p class="verification-description">
+            We've sent a 6-digit verification code to
+            <span id="verificationEmail">
+                your email
+            </span>
+        </p>
+
+
+        <div class="verification-code-inputs">
+
+            <input
+                type="text"
+                inputmode="numeric"
+                maxlength="1"
+                class="verification-digit"
+                aria-label="Verification digit 1"
+            >
+
+            <input
+                type="text"
+                inputmode="numeric"
+                maxlength="1"
+                class="verification-digit"
+                aria-label="Verification digit 2"
+            >
+
+            <input
+                type="text"
+                inputmode="numeric"
+                maxlength="1"
+                class="verification-digit"
+                aria-label="Verification digit 3"
+            >
+
+            <input
+                type="text"
+                inputmode="numeric"
+                maxlength="1"
+                class="verification-digit"
+                aria-label="Verification digit 4"
+            >
+
+            <input
+                type="text"
+                inputmode="numeric"
+                maxlength="1"
+                class="verification-digit"
+                aria-label="Verification digit 5"
+            >
+
+            <input
+                type="text"
+                inputmode="numeric"
+                maxlength="1"
+                class="verification-digit"
+                aria-label="Verification digit 6"
+            >
+
+        </div>
+
+
+        <button
+            type="button"
+            class="verify-email-btn"
+            id="verifyEmailButton"
+        >
+            Verify email
+            <span>→</span>
+        </button>
+
+
+        <div class="verification-resend">
+
+            <span>
+                Didn't receive the code?
+            </span>
+
+            <button
+                type="button"
+                id="resendVerificationButton"
+                class="resend-code-btn"
+            >
+                Resend code
+            </button>
+
+        </div>
+
+
+        <p
+            class="verification-timer"
+            id="verificationTimer"
+        >
+            Code expires in 10:00
+        </p>
+
+    </div>
+
+</div>
+
+
 <script src="js/auth.js"></script>
 
 </body>

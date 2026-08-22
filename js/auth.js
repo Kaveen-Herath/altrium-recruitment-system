@@ -1,3 +1,5 @@
+let pendingVerificationEmail = "";
+
 function showToast(message, type = "error") {
 
     const container =
@@ -351,31 +353,69 @@ if (registerForm) {
 
                 /*
                 |--------------------------------------------------------------------------
-                | Registration successful
+                | ACCOUNT CREATED - EMAIL VERIFICATION REQUIRED
                 |--------------------------------------------------------------------------
                 */
 
-                const successPopup =
+                pendingVerificationEmail =
+                    data.email;
+
+
+                const verificationPopup =
                     document.getElementById(
-                        "registrationSuccessPopup"
+                        "verificationPopup"
                     );
 
 
-                if (successPopup) {
+                const verificationEmail =
+                    document.getElementById(
+                        "verificationEmail"
+                    );
 
-                    successPopup.classList.add(
+
+                if (
+                    verificationPopup &&
+                    verificationEmail
+                ) {
+
+                    verificationEmail.textContent =
+                        pendingVerificationEmail;
+
+
+                    verificationPopup.classList.add(
                         "show"
                     );
 
+
+                    verificationPopup.setAttribute(
+                        "aria-hidden",
+                        "false"
+                    );
+
+
+                    const verificationDigits =
+                        document.querySelectorAll(
+                            ".verification-digit"
+                        );
+
+
+                    verificationDigits.forEach(
+                        function (input) {
+                            input.value = "";
+                        }
+                    );
+
+
+                    if (verificationDigits.length > 0) {
+
+                        setTimeout(
+                            function () {
+                                verificationDigits[0].focus();
+                            },
+                            300
+                        );
+                    }
                 }
-
-
-                setTimeout(function () {
-
-                    window.location.href =
-                        "profile.html";
-
-                }, 1800);
 
             }
 
@@ -398,6 +438,395 @@ if (registerForm) {
 
 }
 
+
+/* =====================================================
+   VERIFICATION CODE INPUTS
+   ===================================================== */
+
+const verificationDigits =
+    document.querySelectorAll(
+        ".verification-digit"
+    );
+
+
+if (verificationDigits.length > 0) {
+
+    verificationDigits.forEach(
+        function (input, index) {
+
+            /*
+            |----------------------------------------------------------
+            | When user types
+            |----------------------------------------------------------
+            */
+
+            input.addEventListener(
+                "input",
+                function () {
+
+                    // Allow numbers only
+                    input.value =
+                        input.value.replace(
+                            /\D/g,
+                            ""
+                        );
+
+
+                    // Keep only one digit
+                    input.value =
+                        input.value.slice(0, 1);
+
+
+                    // Move to next box
+                    if (
+                        input.value &&
+                        index <
+                        verificationDigits.length - 1
+                    ) {
+
+                        verificationDigits[
+                            index + 1
+                        ].focus();
+
+                    }
+
+                }
+            );
+
+
+            /*
+            |----------------------------------------------------------
+            | Backspace navigation
+            |----------------------------------------------------------
+            */
+
+            input.addEventListener(
+                "keydown",
+                function (event) {
+
+                    if (
+                        event.key === "Backspace" &&
+                        !input.value &&
+                        index > 0
+                    ) {
+
+                        verificationDigits[
+                            index - 1
+                        ].focus();
+
+                    }
+
+                }
+            );
+
+
+            /*
+            |----------------------------------------------------------
+            | Paste full verification code
+            |----------------------------------------------------------
+            */
+
+            input.addEventListener(
+                "paste",
+                function (event) {
+
+                    event.preventDefault();
+
+
+                    const pastedText =
+                        event.clipboardData
+                            .getData("text")
+                            .replace(/\D/g, "")
+                            .slice(0, 6);
+
+
+                    if (!pastedText) {
+                        return;
+                    }
+
+
+                    pastedText
+                        .split("")
+                        .forEach(
+                            function (digit, pasteIndex) {
+
+                                if (
+                                    verificationDigits[
+                                        pasteIndex
+                                    ]
+                                ) {
+
+                                    verificationDigits[
+                                        pasteIndex
+                                    ].value =
+                                        digit;
+
+                                }
+
+                            }
+                        );
+
+
+                    const lastFilledIndex =
+                        Math.min(
+                            pastedText.length - 1,
+                            verificationDigits.length - 1
+                        );
+
+
+                    verificationDigits[
+                        lastFilledIndex
+                    ].focus();
+
+                }
+            );
+
+        }
+    );
+
+}
+
+/* =====================================================
+   VERIFY EMAIL
+   ===================================================== */
+
+const verifyEmailButton =
+    document.getElementById(
+        "verifyEmailButton"
+    );
+
+
+if (verifyEmailButton) {
+
+    verifyEmailButton.addEventListener(
+        "click",
+        async function () {
+
+            /*
+            |----------------------------------------------------------
+            | Collect the 6 digits
+            |----------------------------------------------------------
+            */
+
+            const verificationDigits =
+                document.querySelectorAll(
+                    ".verification-digit"
+                );
+
+
+            const verificationCode =
+                Array.from(
+                    verificationDigits
+                )
+                .map(
+                    function (input) {
+                        return input.value;
+                    }
+                )
+                .join("");
+
+
+            /*
+            |----------------------------------------------------------
+            | Validate
+            |----------------------------------------------------------
+            */
+
+            if (
+                !/^\d{6}$/.test(
+                    verificationCode
+                )
+            ) {
+
+                showToast(
+                    "Please enter the complete 6-digit verification code.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            if (!pendingVerificationEmail) {
+
+                showToast(
+                    "We couldn't identify the email being verified. Please register again.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            /*
+            |----------------------------------------------------------
+            | Disable button while checking
+            |----------------------------------------------------------
+            */
+
+            verifyEmailButton.disabled = true;
+
+            const originalButtonText =
+                verifyEmailButton.innerHTML;
+
+
+            verifyEmailButton.innerHTML =
+                "Verifying...";
+
+
+            /*
+            |----------------------------------------------------------
+            | Send verification request
+            |----------------------------------------------------------
+            */
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/auth/verify-email",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            credentials:
+                                "same-origin",
+
+                            body: JSON.stringify({
+                                email:
+                                    pendingVerificationEmail,
+
+                                code:
+                                    verificationCode
+                            })
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                /*
+                |----------------------------------------------------------
+                | Verification failed
+                |----------------------------------------------------------
+                */
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    showToast(
+                        data.message ||
+                        "Unable to verify your email.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                /*
+                |----------------------------------------------------------
+                | EMAIL VERIFIED
+                |----------------------------------------------------------
+                */
+
+                const verificationPopup =
+                    document.getElementById(
+                        "verificationPopup"
+                    );
+
+
+                if (verificationPopup) {
+
+                    verificationPopup.classList.remove(
+                        "show"
+                    );
+
+                    verificationPopup.setAttribute(
+                        "aria-hidden",
+                        "true"
+                    );
+
+                }
+
+
+                /*
+                |----------------------------------------------------------
+                | Show big success animation
+                |----------------------------------------------------------
+                */
+
+                const successPopup =
+                    document.getElementById(
+                        "registrationSuccessPopup"
+                    );
+
+
+                if (successPopup) {
+
+                    successPopup.classList.add(
+                        "show"
+                    );
+
+                }
+
+
+                /*
+                |----------------------------------------------------------
+                | User already has a session from backend
+                | Redirect to profile
+                |----------------------------------------------------------
+                */
+
+                setTimeout(
+                    function () {
+
+                        window.location.href =
+                            "profile.html";
+
+                    },
+                    1800
+                );
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Verification error:",
+                    error
+                );
+
+
+                showToast(
+                    "Unable to verify your email right now. Please try again.",
+                    "error"
+                );
+
+            }
+
+            finally {
+
+                verifyEmailButton.disabled =
+                    false;
+
+                verifyEmailButton.innerHTML =
+                    originalButtonText;
+
+            }
+
+        }
+    );
+
+}
 
 /* =====================================================
    LOGIN
