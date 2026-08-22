@@ -1,3 +1,92 @@
+function showProfileToast(message, type = "error") {
+
+    const container =
+        document.getElementById(
+            "profileToastContainer"
+        );
+
+    if (!container) {
+        console.error(message);
+        return;
+    }
+
+
+    const toast =
+        document.createElement("div");
+
+    toast.className =
+        `toast ${type}`;
+
+
+    const icon =
+        type === "success"
+            ? "✓"
+            : "!";
+
+
+    const title =
+        type === "success"
+            ? "Success"
+            : "Something went wrong";
+
+
+    toast.innerHTML = `
+        <div class="toast-icon">
+            ${icon}
+        </div>
+
+        <div class="toast-content">
+
+            <p class="toast-title">
+                ${title}
+            </p>
+
+            <p class="toast-message"></p>
+
+        </div>
+
+        <button
+            class="toast-close"
+            type="button"
+            aria-label="Close notification">
+            ×
+        </button>
+    `;
+
+
+    toast.querySelector(
+        ".toast-message"
+    ).textContent = message;
+
+
+    container.appendChild(toast);
+
+
+    const removeToast = () => {
+
+        toast.classList.add("hide");
+
+        setTimeout(() => {
+            toast.remove();
+        }, 250);
+    };
+
+
+    toast.querySelector(
+        ".toast-close"
+    ).addEventListener(
+        "click",
+        removeToast
+    );
+
+
+    setTimeout(
+        removeToast,
+        4500
+    );
+}
+
+
 /* =========================================================
    ALTRIUM — FRONTEND PROFILE SYSTEM
    Node API ready version
@@ -20,7 +109,7 @@ async function loadUserProfile() {
     try {
 
         const response = await fetch(
-            "/api/profile",
+            "/api/auth/me",
             {
                 method: "GET",
                 credentials: "same-origin"
@@ -34,7 +123,7 @@ async function loadUserProfile() {
            Not logged in
         --------------------------------------------- */
 
-        if (!response.ok || !data.loggedIn) {
+        if (!response.ok || !data.success) {
 
             window.location.href = "login.html";
 
@@ -65,10 +154,10 @@ async function loadUserProfile() {
             error
         );
 
-        alert(
-            "Unable to load your profile. Please try again."
+        showProfileToast(
+            "Unable to load your profile. Please try again.",
+            "error"
         );
-
     }
 
 }
@@ -375,9 +464,9 @@ async function updateProfile(changes) {
 
         if (!response.ok || !data.success) {
 
-            alert(
+            showProfileToast(
                 data.message ||
-                "Unable to save your profile."
+                "Unable to save your profile.", "error"
             );
 
             return;
@@ -395,8 +484,8 @@ async function updateProfile(changes) {
         loadProfile();
 
 
-        alert(
-            "Profile updated successfully."
+        showProfileToast(
+            "Profile updated successfully.", "error"
         );
 
     }
@@ -408,8 +497,8 @@ async function updateProfile(changes) {
             error
         );
 
-        alert(
-            "Something went wrong while saving your profile."
+        showProfileToast(
+            "Something went wrong while saving your profile.", "error"
         );
 
     }
@@ -598,8 +687,8 @@ if (avatarUpload) {
 
             if (!file.type.startsWith("image/")) {
 
-                alert(
-                    "Please select an image file."
+                showProfileToast(
+                    "Please select an image file.", "error"
                 );
 
                 return;
@@ -613,8 +702,8 @@ if (avatarUpload) {
 
             if (file.size > 5 * 1024 * 1024) {
 
-                alert(
-                    "Image must be smaller than 5MB."
+                showProfileToast(
+                    "Image must be smaller than 5MB.", "error"
                 );
 
                 return;
@@ -657,9 +746,9 @@ if (avatarUpload) {
                     !data.success
                 ) {
 
-                    alert(
+                    showProfileToast(
                         data.message ||
-                        "Unable to upload image."
+                        "Unable to upload image.", "error"
                     );
 
                     return;
@@ -697,8 +786,8 @@ if (avatarUpload) {
                 }
 
 
-                alert(
-                    "Profile picture updated."
+                showProfileToast(
+                    "Profile picture updated.", "error"
                 );
 
             }
@@ -710,8 +799,8 @@ if (avatarUpload) {
                     error
                 );
 
-                alert(
-                    "Unable to upload profile picture."
+                showProfileToast(
+                    "Unable to upload profile picture.", "error"
                 );
 
             }

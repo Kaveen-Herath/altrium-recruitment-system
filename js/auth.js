@@ -404,9 +404,7 @@ if (registerForm) {
    ===================================================== */
 
 const loginForm =
-    document.getElementById(
-        "loginForm"
-    );
+    document.getElementById("loginForm");
 
 
 if (loginForm) {
@@ -419,9 +417,9 @@ if (loginForm) {
 
 
             /*
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------
             | Get login information
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------
             */
 
             const email =
@@ -449,26 +447,26 @@ if (loginForm) {
 
 
             /*
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------
             | Validate
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------
             */
 
             if (!email || !password) {
 
-                alert(
-                    "Please enter your email and password."
+                showToast(
+                    "Please enter your email and password.",
+                    "error"
                 );
 
                 return;
-
             }
 
 
             /*
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------
             | Send login request to Node API
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------
             */
 
             try {
@@ -488,18 +486,10 @@ if (loginForm) {
                                 "same-origin",
 
                             body: JSON.stringify({
-
-                                email:
-                                    email,
-
-                                password:
-                                    password,
-
-                                rememberMe:
-                                    rememberMe
-
+                                email: email,
+                                password: password,
+                                rememberMe: rememberMe
                             })
-
                         }
                     );
 
@@ -509,16 +499,16 @@ if (loginForm) {
 
 
                 /*
-                |--------------------------------------------------------------------------
+                |----------------------------------------------------------
                 | Login failed
-                |--------------------------------------------------------------------------
+                |----------------------------------------------------------
                 */
 
                 if (!response.ok || !data.success) {
 
                     showToast(
                         data.message ||
-                        "Unable to create your account.",
+                        "Unable to log in.",
                         "error"
                     );
 
@@ -527,35 +517,57 @@ if (loginForm) {
 
 
                 /*
-                |--------------------------------------------------------------------------
+                |----------------------------------------------------------
                 | LOGIN SUCCESS
-                |--------------------------------------------------------------------------
+                |----------------------------------------------------------
                 |
-                | PHP creates the session.
+                | Node creates the session.
                 |
-                | We DO NOT store:
+                | We do NOT store the user account in localStorage.
                 |
-                | localStorage.setItem(...)
-                |
-                | The PHP session is now the source
-                | of truth.
-                |--------------------------------------------------------------------------
+                | The server-side session is the source of truth.
+                |----------------------------------------------------------
                 */
 
-                window.location.href =
-                    "index.html";
+                showToast(
+                    "Login successful!",
+                    "success"
+                );
+
+
+                setTimeout(
+                    function () {
+
+                        if (
+                            data.user.role ===
+                            "admin"
+                        ) {
+
+                            window.location.href =
+                                "admin-dashboard.html";
+
+                        } else {
+
+                            window.location.href =
+                                "profile.html";
+                        }
+
+                    },
+                    900
+                );
 
             }
 
             catch (error) {
 
                 console.error(
-                    "Registration error:",
+                    "Login error:",
                     error
                 );
 
+
                 showToast(
-                    "We couldn't create your account. Please try again.",
+                    "Unable to connect to the server. Please try again.",
                     "error"
                 );
 

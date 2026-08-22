@@ -4,6 +4,7 @@
 <head>
 
     <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
 
     <meta
         name="viewport"
@@ -39,9 +40,8 @@
 
 <header class="auth-navbar">
 
-    <a href="index.html" class="logo">
-        <span class="logo-box">A</span>
-        <span class="logo-text">ALTRIUM</span>
+    <a href="index.html">
+        <img src="assets/altrium_logoW.png" alt="Company Logo" style="height: 30px; width: auto;">
     </a>
 
     <a href="index.html" class="back-home">
@@ -95,7 +95,7 @@
         </div>
 
 
-        <form>
+        <form id="loginForm">
 
             <div class="input-group">
 
@@ -145,6 +145,7 @@
 
                     <input
                         type="checkbox"
+                        id="rememberMe"
                         name="remember_me"
                     >
 
@@ -186,6 +187,12 @@
 
 </main>
 
+<div
+    id="toastContainer"
+    class="toast-container"
+    aria-live="polite"
+    aria-atomic="true">
+</div>
 
 <script src="js/auth.js"></script>
 
