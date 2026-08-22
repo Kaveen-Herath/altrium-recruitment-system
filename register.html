@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Create Account</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/auth.css">
+
+</head>
+
+<body>
+
+<header class="auth-navbar">
+
+    <a href="index.html" class="logo">
+
+        <span class="logo-box">A</span>
+
+        <span class="logo-text">
+            ALTRIUM
+        </span>
+
+    </a>
+
+    <a href="index.html" class="back-home">
+        ← Back home
+    </a>
+
+</header>
+
+
+<main class="auth-page register-page">
+
+<section class="auth-card glass">
+
+    <div class="auth-heading">
+
+        <span class="section-label">
+            JOIN ALTRIUM
+        </span>
+
+        <h1>
+            Create your
+            <em>profile.</em>
+        </h1>
+
+        <p>
+            Build your professional profile and
+            discover opportunities that fit you.
+        </p>
+
+    </div>
+
+
+    <button
+        class="google-btn"
+        id="googleRegister"
+    >
+
+        <span class="google-icon">
+            G
+        </span>
+
+        Sign up with Google
+
+    </button>
+
+
+    <div class="divider">
+        <span>or create with email</span>
+    </div>
+
+
+        <form>
+
+            <div class="two-inputs">
+
+                <div class="input-group">
+
+                    <label>First name</label>
+
+                    <input
+                        type="text"
+                        id="firstName"
+                        name="first_name"
+                        placeholder="John"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="input-group">
+
+                    <label>Last name</label>
+
+                    <input
+                        type="text"
+                        id="lastName"
+                        name="last_name"
+                        placeholder="Doe"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label>Email address</label>
+
+                <input
+                    type="email"
+                    id="registerEmail"
+                    name="email"
+                    placeholder="you@example.com"
+                    required
+                >
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label>Phone number</label>
+
+                <input
+                    type="tel"
+                    id="registerPhone"
+                    name="phone"
+                    placeholder="+94 77 123 4567"
+                >
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label>Password</label>
+
+                <div class="password-input">
+
+                    <input
+                        type="password"
+                        id="registerPassword"
+                        name="password"
+                        placeholder="Create a password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="password-toggle"
+                        onclick="togglePassword('registerPassword', this)"
+                    >
+                        Show
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <label class="terms">
+
+                <input
+                    type="checkbox"
+                    name="terms"
+                    required
+                >
+
+                <span></span>
+
+                I agree to the Altrium
+                <a href="#">Terms & Conditions</a>
+
+            </label>
+
+
+            <button
+                type="submit"
+                class="auth-submit"
+            >
+
+                Create account
+
+                <span>→</span>
+
+            </button>
+
+        </form>
+
+
+    <div class="auth-footer">
+
+        Already have an account?
+
+        <a href="login.html">
+            Sign in
+        </a>
+
+    </div>
+
+</section>
+
+</main>
+
+
+<script src="js/auth.js"></script>
+
+</body>
+</html>

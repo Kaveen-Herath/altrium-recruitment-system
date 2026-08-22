@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+
+    <title>ALTRIUM - Find Your Perfect Fit</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<!-- Background glow -->
+<div class="glow glow-one"></div>
+<div class="glow glow-two"></div>
+
+<!-- ================= NAVBAR ================= -->
+
+<header class="navbar" id="navbar">
+
+    <a href="index.html">
+        <img src="assets/altrium_logoW.png" alt="Company Logo" style="height: 30px; width: auto;">
+    </a>
+
+    <nav class="nav-links" id="navLinks">
+        <a href="index.html" class="active">Home</a>
+        <a href="about.html">About Altrium</a>
+        <a href="contact.html">Contact Us</a>
+    </nav>
+
+    <div class="nav-right" id="navRight">
+
+        <button class="search-trigger" id="searchTrigger">
+            <span class="search-symbol">⌕</span>
+            <span>Search jobs...</span>
+        </button>
+
+        <div class="nav-account" id="navAccount">
+            <a href="login.html" id="signInLink">SIGN IN</a>
+
+            <a href="profile.html"
+            id="profileLink"
+            class="profile-nav-icon"
+            aria-label="My Profile"
+            title="My Profile">
+                <span>👤</span>
+            </a>
+        </div>
+
+    </div>
+
+    <div class="expanded-search" id="expandedSearch">
+
+        <span class="expanded-search-icon">⌕</span>
+
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search jobs by keyword, role, title..."
+        >
+
+        <button class="filter-btn" data-filter="type">
+            Type <span>⌄</span>
+        </button>
+
+        <button class="filter-btn" data-filter="position">
+            Position <span>⌄</span>
+        </button>
+
+        <button class="filter-btn" data-filter="title">
+            Job title <span>⌄</span>
+        </button>
+
+        <button class="filter-btn" data-filter="location">
+            Location <span>⌄</span>
+        </button>
+
+        <button class="search-btn" id="searchButton">
+            Search
+        </button>
+
+        <button class="close-search" id="closeSearch">
+            ×
+        </button>
+
+        <div class="filter-dropdown" id="filterDropdown"></div>
+
+    </div>
+
+</header>
+
+
+<!-- ================= HERO ================= -->
+
+<main>
+
+<section class="hero" id="home">
+
+    <div class="hero-content">
+
+        <div class="eyebrow">
+            <span></span>
+            ALTRIUM CAREER PORTAL
+        </div>
+
+        <h1>
+            Find work that
+            <em>fits you.</em>
+        </h1>
+
+        <p class="hero-description">
+            Discover meaningful opportunities, build your professional
+            profile and take your next career step with Altrium.
+        </p>
+
+        <div class="hero-actions">
+
+            <a href="#vacancies" class="primary-btn">
+                Explore vacancies
+                <span>↗</span>
+            </a>
+
+            <a href="register.html" class="secondary-btn">
+                Create your profile
+            </a>
+
+        </div>
+
+        <div class="hero-stats">
+
+            <div>
+                <strong>24+</strong>
+                <span>Open roles</span>
+            </div>
+
+            <div>
+                <strong>08</strong>
+                <span>Departments</span>
+            </div>
+
+            <div>
+                <strong>01</strong>
+                <span>Perfect fit</span>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Dashboard card -->
+
+    <div class="dashboard-card glass">
+
+        <div class="dashboard-header">
+
+            <div>
+                <span class="card-label">
+                    YOUR CAREER DASHBOARD
+                </span>
+
+                <h3>
+                    Good evening<span>.</span>
+                </h3>
+            </div>
+
+            <div class="online">
+                <i></i>
+                Online
+            </div>
+
+        </div>
+        <br>
+
+
+        <div class="dashboard-grid">
+
+            <div class="dashboard-tile">
+
+                <span>Applications</span>
+
+                <strong>03</strong>
+
+                <small>
+                    1 awaiting review
+                </small>
+
+            </div>
+
+
+            <div class="dashboard-tile">
+
+                <span>Saved jobs</span>
+
+                <strong>07</strong>
+
+                <small>
+                    2 new matches
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="tip-box">
+
+            <div class="tip-icon">
+                ✦
+            </div>
+
+            <div>
+                <b>Today's tip</b>
+
+                <p>
+                    Tailor your CV to the role you want.
+                    Relevance gets noticed.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= OPPORTUNITIES ================= -->
+
+<section class="opportunities" id="vacancies">
+
+    <div class="section-heading">
+
+        <div>
+            <span class="section-label">
+                OPEN OPPORTUNITIES
+            </span>
+
+            <h2>
+                Roles worth
+                <em>exploring.</em>
+            </h2>
+        </div>
+
+        <a href="#" class="view-link">
+            View all roles ↗
+        </a>
+
+    </div>
+
+
+    <div class="main-grid">
+
+        <!-- Career tips -->
+
+        <div class="career-card glass">
+
+            <div class="career-image">
+
+                <div class="image-glow"></div>
+
+                <span class="slide-number">
+                    01 / 04
+                </span>
+
+                <span class="career-tag">
+                    CAREER TIP
+                </span>
+
+            </div>
+
+
+            <div class="career-content">
+
+                <span class="section-label">
+                    MAKE YOUR MOVE
+                </span>
+
+                <h3 id="tipTitle">
+                    Find your perfect spot.
+                </h3>
+
+                <p id="tipText">
+                    Look beyond the title. Find a role where
+                    your strengths, ambitions and the culture align.
+                </p>
+
+
+                <div class="slider-controls">
+
+                    <button onclick="previousTip()">
+                        ←
+                    </button>
+
+                    <div class="slider-bars">
+
+                        <i class="active"></i>
+                        <i></i>
+                        <i></i>
+                        <i></i>
+
+                    </div>
+
+                    <button onclick="nextTip()">
+                        →
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Calendar -->
+
+        <aside class="calendar-card glass">
+
+            <div class="calendar-header">
+
+                <div>
+                    <span class="section-label">
+                        YOUR CALENDAR
+                    </span>
+
+                    <h3 id="calendarTitle">
+                        August 2026
+                    </h3>
+                </div>
+
+                <button class="calendar-connect">
+                    ↗
+                </button>
+
+            </div>
+
+
+            <div class="calendar-weekdays">
+
+                <span>SU</span>
+                <span>MO</span>
+                <span>TU</span>
+                <span>WE</span>
+                <span>TH</span>
+                <span>FR</span>
+                <span>SA</span>
+
+            </div>
+
+
+            <div class="calendar-days" id="calendarDays">
+                <!-- JS creates dates -->
+            </div>
+
+
+            <div class="events">
+
+                <div class="events-header">
+
+                    <span>
+                        UPCOMING EVENTS
+                    </span>
+
+                    <button
+                        class="calendar-connect"
+                        id="connectCalendarBtn"
+                        type="button"
+                    >
+                        Connect Google Calendar
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="calendar-status"
+                    id="calendarStatus"
+                >
+                    Google Calendar is not connected.
+                </div>
+
+
+                <div
+                    class="events-list"
+                    id="eventsList"
+                >
+                    <!-- Google Calendar events will appear here -->
+                </div>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+</section>
+
+
+<!-- ================= JOBS ================= -->
+
+<section class="latest-jobs">
+
+    <div class="section-heading">
+
+        <div>
+            <span class="section-label">
+                LATEST VACANCIES
+            </span>
+
+            <h2>
+                Make your next
+                <em>move.</em>
+            </h2>
+        </div>
+
+    </div>
+
+
+    <div class="job-grid">
+
+
+        <article class="job-card glass">
+
+            <div class="job-top">
+
+                <span class="job-type">
+                    FULL TIME
+                </span>
+
+                <span>
+                    ↗
+                </span>
+
+            </div>
+
+            <h3>
+                UI/UX Designer
+            </h3>
+
+            <p>
+                Creative Studio · Colombo
+            </p>
+
+            <div class="job-bottom">
+
+                <span>
+                    Design
+                </span>
+
+                <span>
+                    Posted 2d ago
+                </span>
+
+            </div>
+
+        </article>
+
+
+        <article class="job-card glass">
+
+            <div class="job-top">
+
+                <span class="job-type">
+                    HYBRID
+                </span>
+
+                <span>
+                    ↗
+                </span>
+
+            </div>
+
+            <h3>
+                Software Engineer
+            </h3>
+
+            <p>
+                Technology · Colombo
+            </p>
+
+            <div class="job-bottom">
+
+                <span>
+                    Engineering
+                </span>
+
+                <span>
+                    Posted 3d ago
+                </span>
+
+            </div>
+
+        </article>
+
+
+        <article class="job-card glass">
+
+            <div class="job-top">
+
+                <span class="job-type">
+                    INTERNSHIP
+                </span>
+
+                <span>
+                    ↗
+                </span>
+
+            </div>
+
+            <h3>
+                Marketing Intern
+            </h3>
+
+            <p>
+                Growth Team · Colombo
+            </p>
+
+            <div class="job-bottom">
+
+                <span>
+                    Marketing
+                </span>
+
+                <span>
+                    Posted 4d ago
+                </span>
+
+            </div>
+
+        </article>
+
+    </div>
+
+</section>
+
+
+<!-- ================= ABOUT ================= -->
+
+<section class="about" id="about">
+
+    <div>
+
+        <span class="section-label">
+            ABOUT ALTRIUM
+        </span>
+
+        <h2>
+            Where potential
+            meets <em>opportunity.</em>
+        </h2>
+
+    </div>
+
+
+    <div class="about-text">
+
+        <p>
+            Altrium connects ambitious people with opportunities
+            where they can do meaningful work and grow.
+            Our platform makes the search simple, personal and transparent.
+        </p>
+
+        <a href="#contact" class="view-link">
+            Talk to us ↗
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- ================= CONTACT ================= -->
+
+<section class="contact" id="contact">
+
+    <div class="contact-card glass">
+
+        <span class="section-label">
+            CONTACT US
+        </span>
+
+        <h2>
+            Ready for your
+            <em>next chapter?</em>
+        </h2>
+
+        <p>
+            Have a question about a role, your application
+            or Altrium? We'd love to hear from you.
+        </p>
+
+        <a href="mailto:careers@altrium.com" class="primary-btn">
+            Get in touch ↗
+        </a>
+
+    </div>
+
+</section>
+
+</main>
+
+
+<footer>
+
+    <span>
+        © 2026 ALTRIUM
+    </span>
+
+    <span>
+        Find your perfect fit.
+    </span>
+
+</footer>
+
+
+<script src="js/script.js"></script>
+<script src="js/auth.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>My Profile</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/profile.css">
+
+</head>
+
+<body>
+
+
+<header class="navbar">
+
+    <a href="index.html" class="logo">
+
+        <span class="logo-box">
+            A
+        </span>
+
+        <span class="logo-text">
+            ALTRIUM
+        </span>
+
+    </a>
+
+
+    <nav class="nav-links">
+
+        <a href="index.html">
+            Home
+        </a>
+
+        <a href="jobs.html">
+            Find jobs
+        </a>
+
+        <a href="about.html">
+            About Altrium
+        </a>
+
+        <a href="contact.html">
+            Contact Us
+        </a>
+
+    </nav>
+
+
+    <div class="profile-nav">
+
+        <a href="profile.html">
+            My profile
+        </a>
+
+        <button onclick="logout()">
+            Sign out
+        </button>
+
+    </div>
+
+</header>
+
+
+<main class="profile-page">
+
+
+    <!-- PROFILE HERO -->
+
+    <section class="profile-hero glass">
+
+        <div class="profile-identity">
+
+            <div class="avatar-wrapper">
+
+                <img
+                    id="profileImage"
+                    src="https://ui-avatars.com/api/?name=Altrium+User&background=ff841f&color=111&size=200"
+                    alt="Profile picture"
+                >
+
+                <label
+                    for="avatarUpload"
+                    class="avatar-edit"
+                >
+                    +
+                </label>
+
+                <input
+                    type="file"
+                    id="avatarUpload"
+                    accept="image/*"
+                    hidden
+                >
+
+            </div>
+
+
+            <div>
+
+                <span class="section-label">
+                    YOUR PROFILE
+                </span>
+
+                <h1 id="profileName">
+                    Your Name
+                </h1>
+
+                <p id="profileEmail">
+                    your@email.com
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="profile-completion">
+
+            <span>
+                PROFILE STRENGTH
+            </span>
+
+            <strong id="profilePercentage">
+                35%
+            </strong>
+
+            <div class="profile-progress-large">
+
+                <span id="profileProgress"></span>
+
+            </div>
+
+            <small>
+                Complete your profile to stand out.
+            </small>
+
+        </div>
+
+    </section>
+
+
+    <!-- PROFILE GRID -->
+
+    <div class="profile-layout">
+
+
+        <!-- SIDEBAR -->
+
+        <aside class="profile-sidebar glass">
+
+            <button
+                class="profile-tab active"
+                data-section="personal"
+            >
+                <span>01</span>
+                Personal details
+            </button>
+
+            <button
+                class="profile-tab"
+                data-section="career"
+            >
+                <span>02</span>
+                Career details
+            </button>
+
+            <button
+                class="profile-tab"
+                data-section="experience"
+            >
+                <span>03</span>
+                Experience
+            </button>
+
+            <button
+                class="profile-tab"
+                data-section="applications"
+            >
+                <span>04</span>
+                Applied jobs
+            </button>
+
+        </aside>
+
+
+        <!-- CONTENT -->
+
+        <section class="profile-content">
+
+
+            <!-- PERSONAL -->
+
+            <div
+                class="profile-section active"
+                id="personal"
+            >
+
+                <div class="profile-section-heading">
+
+                    <div>
+
+                        <span class="section-label">
+                            PERSONAL DETAILS
+                        </span>
+
+                        <h2>
+                            Tell us about <em>you.</em>
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-card glass">
+
+                    <div class="form-grid">
+
+                        <div class="profile-input">
+
+                            <label>First name</label>
+
+                            <input
+                                type="text"
+                                id="profileFirstName"
+                                value=""
+                                placeholder="Your first name"
+                            >
+
+                        </div>
+
+
+                        <div class="profile-input">
+
+                            <label>Last name</label>
+
+                            <input
+                                type="text"
+                                id="profileLastName"
+                                value=""
+                                placeholder="Your last name"
+                            >
+
+                        </div>
+
+
+                        <div class="profile-input">
+
+                            <label>Email</label>
+
+                            <input
+                                type="email"
+                                id="profileEmailInput"
+                                disabled
+                            >
+
+                        </div>
+
+
+                        <div class="profile-input">
+
+                            <label>Phone</label>
+
+                            <input
+                                type="tel"
+                                id="profilePhone"
+                                placeholder="+94..."
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        class="save-btn"
+                        onclick="savePersonalDetails()"
+                    >
+                        Save changes
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- CAREER -->
+
+            <div
+                class="profile-section"
+                id="career"
+            >
+
+                <div class="profile-section-heading">
+
+                    <div>
+
+                        <span class="section-label">
+                            CAREER DETAILS
+                        </span>
+
+                        <h2>
+                            Shape your
+                            <em>future.</em>
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-card glass">
+
+
+                    <div class="profile-input">
+
+                        <label>
+                            Education
+                        </label>
+
+                        <textarea
+                            id="profileEducation"
+                            placeholder="Tell us about your education..."
+                        ></textarea>
+
+                    </div>
+
+
+                    <div class="profile-input">
+
+                        <label>
+                            Skills
+                        </label>
+
+                        <input
+                            type="text"
+                            id="profileSkills"
+                            placeholder="UI Design, Figma, HTML, CSS..."
+                        >
+
+                        <small>
+                            Separate skills with commas.
+                        </small>
+
+                    </div>
+
+
+                    <div class="profile-input">
+
+                        <label>
+                            Preferred job type
+                        </label>
+
+                        <select id="preferredJobType">
+
+                            <option value="">
+                                Select job type
+                            </option>
+
+                            <option>
+                                Full time
+                            </option>
+
+                            <option>
+                                Part time
+                            </option>
+
+                            <option>
+                                Internship
+                            </option>
+
+                            <option>
+                                Contract
+                            </option>
+
+                            <option>
+                                Remote
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <button
+                        class="save-btn"
+                        onclick="saveCareerDetails()"
+                    >
+                        Save career details
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- EXPERIENCE -->
+
+            <div
+                class="profile-section"
+                id="experience"
+            >
+
+                <div class="profile-section-heading">
+
+                    <div>
+
+                        <span class="section-label">
+                            WORK EXPERIENCE
+                        </span>
+
+                        <h2>
+                            Your journey
+                            <em>so far.</em>
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-card glass">
+
+                    <div class="profile-input">
+
+                        <label>
+                            Work experience
+                        </label>
+
+                        <textarea
+                            id="profileExperience"
+                            placeholder="Describe your previous roles, responsibilities and achievements..."
+                        ></textarea>
+
+                    </div>
+
+
+                    <button
+                        class="save-btn"
+                        onclick="saveExperience()"
+                    >
+                        Save experience
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- APPLICATIONS -->
+
+            <div
+                class="profile-section"
+                id="applications"
+            >
+
+                <div class="profile-section-heading">
+
+                    <div>
+
+                        <span class="section-label">
+                            APPLICATIONS
+                        </span>
+
+                        <h2>
+                            Jobs you've
+                            <em>applied for.</em>
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="applications-list">
+
+
+                    <article class="application-card glass">
+
+                        <div>
+
+                            <span>
+                                SOFTWARE ENGINEERING
+                            </span>
+
+                            <h3>
+                                Software Engineer
+                            </h3>
+
+                            <p>
+                                Technology Department
+                            </p>
+
+                        </div>
+
+                        <div class="application-status reviewing">
+                            Under review
+                        </div>
+
+                    </article>
+
+
+                    <article class="application-card glass">
+
+                        <div>
+
+                            <span>
+                                DESIGN
+                            </span>
+
+                            <h3>
+                                UI/UX Designer
+                            </h3>
+
+                            <p>
+                                Creative Studio
+                            </p>
+
+                        </div>
+
+                        <div class="application-status interview">
+                            Interview
+                        </div>
+
+                    </article>
+
+
+                    <article class="application-card glass">
+
+                        <div>
+
+                            <span>
+                                MARKETING
+                            </span>
+
+                            <h3>
+                                Marketing Intern
+                            </h3>
+
+                            <p>
+                                Growth Department
+                            </p>
+
+                        </div>
+
+                        <div class="application-status submitted">
+                            Submitted
+                        </div>
+
+                    </article>
+
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+    </div>
+
+</main>
+
+
+<script src="js/profile.js"></script>
+
+</body>
+</html>
