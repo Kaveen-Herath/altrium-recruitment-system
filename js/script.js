@@ -131,6 +131,27 @@ async function updateNavbarAccount() {
         const user =
             data.user;
 
+        const dashboardLink =
+            document.getElementById(
+                "dashboardLink"
+            );
+
+
+        if (dashboardLink) {
+
+            if (user.role === "admin") {
+
+                dashboardLink.style.display =
+                    "inline-block";
+
+            } else {
+
+                dashboardLink.style.display =
+                    "none";
+
+            }
+
+        }
 
         /* ---------------------------------------------
            Correct destination based on role

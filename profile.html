@@ -57,10 +57,6 @@
 
     <div class="profile-nav">
 
-        <a href="profile.html">
-            My profile
-        </a>
-
         <button onclick="logout()">
             Sign out
         </button>
@@ -83,7 +79,7 @@
 
                 <img
                     id="profileImage"
-                    src="https://ui-avatars.com/api/?name=Altrium+User&background=ff841f&color=111&size=200"
+                    src="https://ui-avatars.com/api/?name=User&background=ff841f&color=111&size=200&bold=true"
                     alt="Profile picture"
                 >
 
@@ -360,35 +356,64 @@
                             Preferred job type
                         </label>
 
-                        <select id="preferredJobType">
+                        <div class="job-type-dropdown" id="jobTypeDropdown">
 
-                            <option value="">
-                                Select job type
-                            </option>
+                            <button
+                                type="button"
+                                class="job-type-trigger"
+                                id="jobTypeTrigger"
+                            >
+                                <span id="jobTypeSelected">
+                                    Select job type
+                                </span>
 
-                            <option>
-                                Full time
-                            </option>
+                                <span class="job-type-arrow">
+                                    ↓
+                                </span>
+                            </button>
 
-                            <option>
-                                Part time
-                            </option>
 
-                            <option>
-                                Internship
-                            </option>
+                            <div class="job-type-menu">
 
-                            <option>
-                                Contract
-                            </option>
+                                <button type="button" data-value="Full time">
+                                    Full time
+                                </button>
 
-                            <option>
-                                Remote
-                            </option>
+                                <button type="button" data-value="Part time">
+                                    Part time
+                                </button>
 
-                        </select>
+                                <button type="button" data-value="Internship">
+                                    Internship
+                                </button>
 
-                    </div>
+                                <button type="button" data-value="Contract">
+                                    Contract
+                                </button>
+
+                                <button type="button" data-value="Remote">
+                                    Remote
+                                </button>
+
+                            </div>
+
+
+                            <!-- Keep this for your existing JS/database code -->
+
+                            <select id="preferredJobType" hidden>
+
+                                <option value="">Select job type</option>
+                                <option value="Full time">Full time</option>
+                                <option value="Part time">Part time</option>
+                                <option value="Internship">Internship</option>
+                                <option value="Contract">Contract</option>
+                                <option value="Remote">Remote</option>
+
+                            </select>
+
+                        </div>
+
+                        </div>
 
 
                     <button

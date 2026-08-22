@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <link
+        rel="icon"
+        type="image/x-icon"
+        href="../favicon.ico?v=2"
+    >
+
+    <title>Admin Dashboard | Altrium</title>
+
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- Main Altrium styles -->
+    <link
+        rel="stylesheet"
+        href="../css/style.css"
+    >
+
+
+    <!-- Admin styles -->
+    <link
+        rel="stylesheet"
+        href="admin-dashboard.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<!-- ================= HEADER ================= -->
+
+<header class="admin-header">
+
+    <a
+        href="../index.html"
+        class="admin-logo"
+    >
+
+        <img
+            src="../assets/altrium_logoW.png"
+            alt="Altrium"
+        >
+
+    </a>
+
+
+    <div class="admin-header-right">
+
+        <span class="admin-role-badge">
+            ADMIN
+        </span>
+
+        <button
+            type="button"
+            id="adminLogoutButton"
+            class="admin-logout"
+        >
+            Sign out
+        </button>
+
+    </div>
+
+</header>
+
+
+
+<!-- ================= ADMIN LAYOUT ================= -->
+
+<div class="admin-layout">
+
+
+    <!-- SIDEBAR -->
+
+    <aside class="admin-sidebar">
+
+        <div class="admin-sidebar-heading">
+
+            <span>
+                ALTRIUM
+            </span>
+
+            <strong>
+                Admin Panel
+            </strong>
+
+        </div>
+
+
+        <nav class="admin-navigation">
+
+            <button
+                type="button"
+                class="admin-nav-item active"
+                data-section="dashboard"
+            >
+
+                <span class="admin-nav-number">
+                    01
+                </span>
+
+                Dashboard
+
+            </button>
+
+
+            <button
+                type="button"
+                class="admin-nav-item"
+                data-section="vacancies"
+            >
+
+                <span class="admin-nav-number">
+                    02
+                </span>
+
+                Job Vacancies
+
+            </button>
+
+
+            <button
+                type="button"
+                class="admin-nav-item"
+                data-section="applications"
+            >
+
+                <span class="admin-nav-number">
+                    03
+                </span>
+
+                Applications
+
+            </button>
+
+        </nav>
+
+    </aside>
+
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+
+    <main class="admin-content">
+
+
+        <!-- DASHBOARD SECTION -->
+
+        <section
+            class="admin-section active"
+            id="dashboard"
+        >
+
+            <div class="admin-page-heading">
+
+                <span class="admin-section-label">
+                    OVERVIEW
+                </span>
+
+                <h1>
+                    Recruitment
+                    <em>dashboard.</em>
+                </h1>
+
+                <p>
+                    Manage vacancies and candidate applications.
+                </p>
+
+            </div>
+
+
+
+            <!-- STAT CARDS -->
+
+            <div class="admin-stats">
+
+
+                <article class="admin-stat-card">
+
+                    <span>
+                        ACTIVE VACANCIES
+                    </span>
+
+                    <strong id="activeVacanciesCount">
+                        0
+                    </strong>
+
+                    <p>
+                        Currently accepting applications
+                    </p>
+
+                </article>
+
+
+
+                <article class="admin-stat-card">
+
+                    <span>
+                        TOTAL APPLICATIONS
+                    </span>
+
+                    <strong id="totalApplicationsCount">
+                        0
+                    </strong>
+
+                    <p>
+                        Applications received
+                    </p>
+
+                </article>
+
+
+
+                <article class="admin-stat-card">
+
+                    <span>
+                        WAITING FOR REVIEW
+                    </span>
+
+                    <strong id="waitingReviewCount">
+                        0
+                    </strong>
+
+                    <p>
+                        Candidates requiring attention
+                    </p>
+
+                </article>
+
+
+
+                <article class="admin-stat-card">
+
+                    <span>
+                        INTERVIEWS
+                    </span>
+
+                    <strong id="interviewsCount">
+                        0
+                    </strong>
+
+                    <p>
+                        Candidates at interview stage
+                    </p>
+
+                </article>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- JOB VACANCIES SECTION -->
+
+        <section
+            class="admin-section"
+            id="vacancies"
+        >
+
+            <div class="admin-page-heading">
+
+                <span class="admin-section-label">
+                    JOB VACANCIES
+                </span>
+
+                <h1>
+                    Manage
+                    <em>vacancies.</em>
+                </h1>
+
+                <p>
+                    Create and manage job opportunities.
+                </p>
+
+            </div>
+
+
+            <div class="admin-placeholder">
+
+                <h2>
+                    Job vacancies
+                </h2>
+
+                <p>
+                    The create vacancy system will go here next.
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- APPLICATIONS SECTION -->
+
+        <section
+            class="admin-section"
+            id="applications"
+        >
+
+            <div class="admin-page-heading">
+
+                <span class="admin-section-label">
+                    APPLICATIONS
+                </span>
+
+                <h1>
+                    Review
+                    <em>candidates.</em>
+                </h1>
+
+                <p>
+                    View candidates who have applied for vacancies.
+                </p>
+
+            </div>
+
+
+            <div class="admin-placeholder">
+
+                <h2>
+                    Candidate applications
+                </h2>
+
+                <p>
+                    Applicant information will appear here later.
+                </p>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+
+<script src="admin-dashboard.js"></script>
+
+</body>
+
+</html>

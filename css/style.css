@@ -1,3 +1,7 @@
+#dashboardLink {
+    display: none;
+}
+
 :root {
     --black: #050505;
     --black-soft: #0b0b0b;

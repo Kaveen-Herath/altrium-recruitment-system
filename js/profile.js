@@ -181,24 +181,26 @@ function loadProfile() {
     --------------------------------------------- */
 
     const profileName =
-        document.getElementById("profileName");
+        document.getElementById(
+            "profileName"
+        );
 
     if (profileName) {
 
         profileName.textContent =
             fullName || "Your Name";
-
     }
 
 
     const profileEmail =
-        document.getElementById("profileEmail");
+        document.getElementById(
+            "profileEmail"
+        );
 
     if (profileEmail) {
 
         profileEmail.textContent =
             user.email || "your@email.com";
-
     }
 
 
@@ -206,47 +208,58 @@ function loadProfile() {
        Personal information
     --------------------------------------------- */
 
-    const firstName =
-        document.getElementById("profileFirstName");
+    const firstNameInput =
+        document.getElementById(
+            "profileFirstName"
+        );
 
-    if (firstName) {
+    if (firstNameInput) {
 
-        firstName.value =
+        firstNameInput.value =
             user.firstName || "";
-
     }
 
 
-    const lastName =
-        document.getElementById("profileLastName");
+    const lastNameInput =
+        document.getElementById(
+            "profileLastName"
+        );
 
-    if (lastName) {
+    if (lastNameInput) {
 
-        lastName.value =
+        lastNameInput.value =
             user.lastName || "";
-
     }
 
 
-    const email =
-        document.getElementById("profileEmailInput");
+    const emailInput =
+        document.getElementById(
+            "profileEmailInput"
+        );
 
-    if (email) {
+    if (emailInput) {
 
-        email.value =
+        emailInput.value =
             user.email || "";
-
     }
 
 
-    const phone =
-        document.getElementById("profilePhone");
+    const phoneInput =
+        document.getElementById(
+            "profilePhone"
+        );
 
-    if (phone) {
+    if (phoneInput) {
 
-        phone.value =
-            user.phone || "";
+        /*
+         * Support both property names while
+         * we keep the frontend/backend consistent.
+         */
 
+        phoneInput.value =
+            user.phoneNumber ||
+            user.phone ||
+            "";
     }
 
 
@@ -255,70 +268,189 @@ function loadProfile() {
     --------------------------------------------- */
 
     const education =
-        document.getElementById("profileEducation");
+        document.getElementById(
+            "profileEducation"
+        );
 
     if (education) {
 
         education.value =
             user.education || "";
-
     }
 
 
     const skills =
-        document.getElementById("profileSkills");
+        document.getElementById(
+            "profileSkills"
+        );
 
     if (skills) {
 
         skills.value =
             user.skills || "";
-
     }
 
 
     const experience =
-        document.getElementById("profileExperience");
+        document.getElementById(
+            "profileExperience"
+        );
 
     if (experience) {
 
         experience.value =
             user.experience || "";
-
     }
 
+    /* =========================================================
+   PREFERRED JOB TYPE DROPDOWN
+   ========================================================= */
+
+const jobTypeDropdown =
+    document.getElementById("jobTypeDropdown");
+
+const jobTypeTrigger =
+    document.getElementById("jobTypeTrigger");
+
+const jobTypeSelected =
+    document.getElementById("jobTypeSelected");
+
+const preferredJobTypeSelect =
+    document.getElementById("preferredJobType");
+
+
+if (jobTypeDropdown && jobTypeTrigger) {
+
+    jobTypeTrigger.addEventListener(
+        "click",
+        () => {
+
+            jobTypeDropdown.classList.toggle(
+                "open"
+            );
+
+        }
+    );
+
+
+    const options =
+        jobTypeDropdown.querySelectorAll(
+            ".job-type-menu button"
+        );
+
+
+    options.forEach(option => {
+
+        option.addEventListener(
+            "click",
+            () => {
+
+                const value =
+                    option.dataset.value;
+
+
+                preferredJobTypeSelect.value =
+                    value;
+
+
+                jobTypeSelected.textContent =
+                    value;
+
+
+                options.forEach(item => {
+                    item.classList.remove("selected");
+                });
+
+
+                option.classList.add(
+                    "selected"
+                );
+
+
+                jobTypeDropdown.classList.remove(
+                    "open"
+                );
+
+            }
+        );
+
+    });
+
+
+    document.addEventListener(
+        "click",
+        event => {
+
+            if (
+                !jobTypeDropdown.contains(
+                    event.target
+                )
+            ) {
+
+                jobTypeDropdown.classList.remove(
+                    "open"
+                );
+
+            }
+
+        }
+    );
+
+}
 
     const preferredJobType =
-        document.getElementById("preferredJobType");
+        document.getElementById(
+            "preferredJobType"
+        );
 
     if (preferredJobType) {
 
         preferredJobType.value =
             user.preferredJobType || "";
+    }
+
+    if (jobTypeSelected) {
+
+    jobTypeSelected.textContent =
+        user.preferredJobType ||
+        "Select job type";
 
     }
 
-
     /* ---------------------------------------------
-       Profile image
+       Profile image / initials
     --------------------------------------------- */
 
-    if (user.profilePicture) {
-
-        const profileImage =
-            document.getElementById("profileImage");
+    const profileImage =
+    document.getElementById("profileImage");
 
         if (profileImage) {
 
-            profileImage.src =
-                user.profilePicture;
+            if (user.profilePicture) {
+
+                // User has uploaded a real photo
+                profileImage.src =
+                    user.profilePicture;
+
+            } else {
+
+                // No photo — create avatar using real name
+                const fullName =
+                    `${user.firstName || ""} ${user.lastName || ""}`.trim();
+
+                profileImage.src =
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=ff841f&color=111&size=200&bold=true`;
+
+            }
 
         }
 
-    }
 
+    /* ---------------------------------------------
+       Profile strength
+    --------------------------------------------- */
 
     updateProfileStrength();
-
 }
 
 
@@ -371,22 +503,48 @@ async function saveCareerDetails() {
     if (!user) return;
 
 
-    const education =
+    const educationInput =
         document.getElementById(
             "profileEducation"
-        ).value.trim();
+        );
+
+    const skillsInput =
+        document.getElementById(
+            "profileSkills"
+        );
+
+    const jobTypeInput =
+        document.getElementById(
+            "preferredJobType"
+        );
+
+
+    const education =
+        educationInput
+            ? educationInput.value.trim()
+            : "";
 
 
     const skills =
-        document.getElementById(
-            "profileSkills"
-        ).value.trim();
+        skillsInput
+            ? skillsInput.value.trim()
+            : "";
 
 
     const preferredJobType =
-        document.getElementById(
-            "preferredJobType"
-        ).value;
+        jobTypeInput
+            ? jobTypeInput.value
+            : "";
+
+
+    console.log(
+        "CAREER DETAILS:",
+        {
+            education,
+            skills,
+            preferredJobType
+        }
+    );
 
 
     await updateProfile({
@@ -485,7 +643,7 @@ async function updateProfile(changes) {
 
 
         showProfileToast(
-            "Profile updated successfully.", "error"
+            "Profile updated successfully.", "success"
         );
 
     }
@@ -526,7 +684,7 @@ function updateProfileStrength() {
 
         user.email,
 
-        user.phone,
+        user.phoneNumber,
 
         user.education,
 

@@ -58,6 +58,179 @@ const profilePhotoUpload = multer({
     }
 });
 
+// ===============================================================================
+// ADMIN ========================================================================
+
+function requireAdmin(req, res, next) {
+
+    if (!req.session.userId) {
+        return res.status(401).json({
+            success: false,
+            message: "You must be logged in."
+        });
+    }
+
+    if (req.session.role !== "admin") {
+        return res.status(403).json({
+            success: false,
+            message: "Admin access required."
+        });
+    }
+
+    next();
+}
+
+// ADMIN CREATE JOB VACANCIES
+
+app.post(
+    "/api/admin/jobs",
+    requireAdmin,
+    async (req, res) => {
+
+        try {
+
+            const {
+                jobTitle,
+                department,
+                location,
+                employmentType,
+                salary,
+                applicationDeadline,
+                experienceRequired,
+                educationRequired,
+                description,
+                responsibilities,
+                skills,
+                numberOfOpenings
+            } = req.body;
+
+
+            // Required fields
+            if (
+                !jobTitle ||
+                !department ||
+                !location ||
+                !employmentType ||
+                !description
+            ) {
+
+                return res.status(400).json({
+                    success: false,
+                    message: "Please complete all required job fields."
+                });
+
+            }
+
+
+            const openings =
+                Number(numberOfOpenings) || 1;
+
+
+            if (openings < 1) {
+
+                return res.status(400).json({
+                    success: false,
+                    message: "Number of openings must be at least 1."
+                });
+
+            }
+
+
+            const result = await pool.query(
+                `
+                INSERT INTO jobs (
+
+                    job_title,
+                    department,
+                    location,
+                    employment_type,
+                    salary,
+                    application_deadline,
+                    experience_required,
+                    education_required,
+                    description,
+                    responsibilities,
+                    skills,
+                    number_of_openings,
+                    created_by
+
+                )
+
+                VALUES (
+                    $1, $2, $3, $4,
+                    $5, $6, $7, $8,
+                    $9, $10, $11, $12,
+                    $13
+                )
+
+                RETURNING *
+                `,
+                [
+                    jobTitle.trim(),
+                    department.trim(),
+                    location.trim(),
+                    employmentType.trim(),
+
+                    salary?.trim() || null,
+
+                    applicationDeadline || null,
+
+                    experienceRequired?.trim() || null,
+
+                    educationRequired?.trim() || null,
+
+                    description.trim(),
+
+                    responsibilities?.trim() || null,
+
+                    skills?.trim() || null,
+
+                    openings,
+
+                    req.session.userId
+                ]
+            );
+
+
+            return res.status(201).json({
+                success: true,
+                message: "Job vacancy created successfully.",
+                job: result.rows[0]
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Create job error:",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                message: "Unable to create job vacancy."
+            });
+
+        }
+
+    }
+);
+
+// ================================= TEMP TEST ROUTE
+
+app.get(
+    "/api/admin/test",
+    requireAdmin,
+    (req, res) => {
+
+        res.json({
+            success: true,
+            message: "Admin access confirmed."
+        });
+
+    }
+);
 
 // ===============================================================================
 // ROUTES ========================================================================
@@ -142,6 +315,167 @@ app.post(
     }
 );
 
+app.post("/api/profile", async (req, res) => {
+
+    try {
+
+        // User must be logged in
+        if (!req.session.userId) {
+            return res.status(401).json({
+                success: false,
+                message: "You must be logged in."
+            });
+        }
+
+
+        const {
+            firstName,
+            lastName,
+            phone,
+            education,
+            skills,
+            preferredJobType,
+            experience
+        } = req.body;
+
+
+        // Update only fields that were actually sent
+        const result = await pool.query(
+            `
+            UPDATE users
+            SET
+                first_name =
+                    COALESCE($1, first_name),
+
+                last_name =
+                    COALESCE($2, last_name),
+
+                phone_number =
+                    COALESCE($3, phone_number),
+
+                education =
+                    COALESCE($4, education),
+
+                skills =
+                    COALESCE($5, skills),
+
+                preferred_job_type =
+                    COALESCE($6, preferred_job_type),
+
+                work_experience =
+                    COALESCE($7, work_experience)
+
+            WHERE id = $8
+
+            RETURNING
+                id,
+                first_name,
+                last_name,
+                email,
+                phone_number,
+                role,
+                created_at,
+                profile_photo_path,
+                education,
+                skills,
+                preferred_job_type,
+                work_experience
+            `,
+            [
+                firstName ?? null,
+                lastName ?? null,
+                phone ?? null,
+                education ?? null,
+                skills ?? null,
+                preferredJobType ?? null,
+                experience ?? null,
+                req.session.userId
+            ]
+        );
+
+
+        const dbUser = result.rows[0];
+
+
+        if (!dbUser) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found."
+            });
+        }
+
+
+        // Get profile photo URL if user has one
+        let profilePhotoUrl = null;
+
+        if (dbUser.profile_photo_path) {
+
+            const { data } = supabase.storage
+                .from("profile-photos")
+                .getPublicUrl(
+                    dbUser.profile_photo_path
+                );
+
+            profilePhotoUrl =
+                data.publicUrl;
+        }
+
+
+        return res.json({
+            success: true,
+            message: "Profile updated successfully.",
+
+            user: {
+                id: dbUser.id,
+
+                firstName:
+                    dbUser.first_name,
+
+                lastName:
+                    dbUser.last_name,
+
+                email:
+                    dbUser.email,
+
+                phoneNumber:
+                    dbUser.phone_number,
+
+                role:
+                    dbUser.role,
+
+                createdAt:
+                    dbUser.created_at,
+
+                education:
+                    dbUser.education,
+
+                skills:
+                    dbUser.skills,
+
+                preferredJobType:
+                    dbUser.preferred_job_type,
+
+                experience:
+                    dbUser.work_experience,
+
+                profilePicture:
+                    profilePhotoUrl
+            }
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Profile update error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to update profile."
+        });
+    }
+});
 
 // ================ LOGOUT ============================================
 
@@ -632,8 +966,7 @@ app.post("/api/auth/login", async (req, res) => {
 });
 
 
-app.get(
-    "/api/auth/me",
+app.get("/api/auth/me",
     async (req, res) => {
 
         try {
@@ -666,7 +999,11 @@ app.get(
                         phone_number,
                         role,
                         created_at,
-                        profile_photo_path
+                        profile_photo_path,
+                        education,
+                        skills,
+                        preferred_job_type,
+                        work_experience
                     FROM users
                     WHERE id = $1
                     `,
@@ -739,6 +1076,18 @@ app.get(
 
                     createdAt:
                         dbUser.created_at,
+
+                    education: 
+                        dbUser.education,
+
+                    skills: 
+                        dbUser.skills,
+
+                    preferredJobType: 
+                        dbUser.preferred_job_type,
+
+                    experience: 
+                        dbUser.work_experience,
 
                     profilePicture:
                         profilePhotoUrl
