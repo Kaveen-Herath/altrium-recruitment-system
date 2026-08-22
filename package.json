@@ -19,6 +19,9 @@
   },
   "homepage": "https://github.com/Kaveen-Herath/altrium-recruitment-system#readme",
   "dependencies": {
-    "express": "^5.2.1"
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "pg": "^8.23.0"
   }
 }
