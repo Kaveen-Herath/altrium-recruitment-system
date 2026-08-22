@@ -464,6 +464,27 @@ body::before {
    NAVBAR PROFILE
    ========================================================= */
 
+#signInLink {
+    color: #ffffff;
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    transition:
+        color 0.2s ease,
+        opacity 0.2s ease;
+}
+
+#signInLink:visited {
+    color: #ffffff;
+}
+
+#signInLink:hover {
+    color: #ff8a00;
+    text-decoration: none;
+}
+
 .profile-nav-icon {
     display: none;
 
@@ -1568,6 +1589,259 @@ footer {
 
     letter-spacing: 1px;
 }
+
+
+/* =========================================================
+   HOMEPAGE TEXT VISIBILITY OVERRIDES
+   ========================================================= */
+
+
+/* ================= NAVBAR ================= */
+
+.nav-links a {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: #ffffff;
+}
+
+
+/* Search text */
+
+.search-trigger {
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 12px;
+}
+
+
+/* Sign in */
+
+#signInLink {
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+/* ================= HERO ================= */
+
+/* Small ALTRIUM CAREER PORTAL label */
+
+.eyebrow {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+
+/* Hero paragraph */
+
+.hero-description {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 16px;
+    line-height: 1.8;
+}
+
+
+/* Hero buttons */
+
+.primary-btn,
+.secondary-btn {
+    font-size: 12px;
+}
+
+.secondary-btn {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+
+/* Hero stats numbers */
+
+.hero-stats strong {
+    color: #ffffff;
+    font-size: 24px;
+}
+
+
+/* Hero stats labels */
+
+.hero-stats span {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 10px;
+    font-weight: 500;
+}
+
+
+/* ================= DASHBOARD ================= */
+
+/* "YOUR CAREER DASHBOARD" */
+
+.card-label,
+.section-label {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 10px;
+}
+
+
+/* Dashboard heading */
+
+.dashboard-header h3 {
+    color: #ffffff;
+    font-size: 26px;
+}
+
+
+/* Online status */
+
+.online {
+    font-size: 10px;
+}
+
+
+/* Application / saved-job labels */
+
+.dashboard-tile span {
+    color: rgba(255, 255, 255, 0.58);
+    font-size: 10px;
+}
+
+
+/* Dashboard numbers */
+
+.dashboard-tile strong {
+    color: #ffffff;
+    font-size: 30px;
+}
+
+
+/* Dashboard small status text */
+
+.dashboard-tile small {
+    color: rgba(255, 255, 255, 0.46);
+    font-size: 10px;
+}
+
+
+/* Today's tip heading */
+
+.tip-box b {
+    color: #ffffff;
+    font-size: 11px;
+}
+
+
+/* Today's tip description */
+
+.tip-box p {
+    color: rgba(255, 255, 255, 0.58);
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+
+/* ================= GENERAL SECTION LABELS ================= */
+
+.section-label {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+
+/* Section headings */
+
+.section-heading h2,
+.about h2 {
+    color: #ffffff;
+}
+
+
+/* ================= CAREER CARD ================= */
+
+.career-content p {
+    color: rgba(255, 255, 255, 0.66);
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.slide-number {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 10px;
+}
+
+.career-tag {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 9px;
+}
+
+
+/* ================= CALENDAR ================= */
+
+.calendar-weekdays {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 9px;
+}
+
+.calendar-days span {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 10px;
+}
+
+.events-header {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 9px;
+}
+
+.event strong {
+    color: #ffffff;
+    font-size: 11px;
+}
+
+.event small {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 9px;
+}
+
+
+/* ================= JOB CARDS ================= */
+
+.job-card p {
+    color: rgba(255, 255, 255, 0.66);
+    font-size: 12px;
+}
+
+.job-bottom {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 10px;
+}
+
+
+/* ================= ABOUT ================= */
+
+.about-text p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 15px;
+}
+
+
+/* ================= CONTACT ================= */
+
+.contact-card p {
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 14px;
+}
+
+
+/* ================= FOOTER ================= */
+
+footer {
+    color: rgba(255, 255, 255, 0.48);
+    font-size: 10px;
+}
+
+
 
 
 /* ================= RESPONSIVE ================= */

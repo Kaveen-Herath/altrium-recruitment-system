@@ -9,9 +9,11 @@ const multer = require("multer");
 const supabase = require("./supabase");
 
 
-
-
 const app = express();
+
+
+app.use(express.json()); // allows Express to read that information.
+
 
 app.use(
     session({
@@ -140,7 +142,209 @@ app.post(
     }
 );
 
-app.use(express.json()); // allows Express to read that information.
+
+// ================ LOGOUT ============================================
+
+app.post(
+    "/api/auth/logout",
+    (req, res) => {
+
+        if (!req.session) {
+            return res.json({
+                success: true,
+                message: "Logged out successfully."
+            });
+        }
+
+        req.session.destroy((error) => {
+
+            if (error) {
+
+                console.error(
+                    "Logout error:",
+                    error
+                );
+
+                return res.status(500).json({
+                    success: false,
+                    message: "Unable to log out."
+                });
+            }
+
+
+            res.clearCookie("connect.sid");
+
+
+            return res.json({
+                success: true,
+                message: "Logged out successfully."
+            });
+
+        });
+    }
+);
+
+// ================= FORGOT PASSWORD =============================================
+
+app.post(
+    "/api/auth/forgot-password",
+    async (req, res) => {
+        try {
+            const { email } = req.body;
+
+            if (!email) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Please enter your email address."
+                });
+            }
+
+            const cleanEmail = email.trim().toLowerCase();
+
+            const userResult = await pool.query(
+                `
+                SELECT id, first_name, email
+                FROM users
+                WHERE email = $1
+                `,
+                [cleanEmail]
+            );
+
+            /*
+             * Security:
+             * We return the same response even if the email
+             * does not exist, so people cannot discover
+             * which emails are registered.
+             */
+            if (userResult.rows.length === 0) {
+                return res.json({
+                    success: true,
+                    message:
+                        "If an account exists for this email, a reset code has been sent."
+                });
+            }
+
+            const user = userResult.rows[0];
+
+            const resetCode =
+                crypto.randomInt(
+                    100000,
+                    1000000
+                ).toString();
+
+            const resetCodeHash =
+                await bcrypt.hash(
+                    resetCode,
+                    10
+                );
+
+            const resetExpiresAt =
+                new Date(
+                    Date.now() +
+                    10 * 60 * 1000
+                );
+
+            await pool.query(
+                `
+                UPDATE users
+                SET
+                    password_reset_code_hash = $1,
+                    password_reset_expires_at = $2,
+                    password_reset_sent_at = NOW()
+                WHERE id = $3
+                `,
+                [
+                    resetCodeHash,
+                    resetExpiresAt,
+                    user.id
+                ]
+            );
+
+            await transporter.sendMail({
+                from:
+                    `"Altrium" <${process.env.EMAIL_FROM}>`,
+
+                to:
+                    user.email,
+
+                subject:
+                    "Reset your Altrium password",
+
+                html: `
+                    <div style="
+                        font-family: Arial, sans-serif;
+                        background: #0b0b0b;
+                        color: #ffffff;
+                        padding: 32px;
+                    ">
+
+                        <h2 style="
+                            margin-bottom: 12px;
+                            color: #ff841f;
+                        ">
+                            Reset your password
+                        </h2>
+
+                        <p>
+                            Hi ${user.first_name},
+                        </p>
+
+                        <p>
+                            Use the code below to reset
+                            your Altrium password.
+                        </p>
+
+                        <div style="
+                            margin: 24px 0;
+                            font-size: 32px;
+                            font-weight: bold;
+                            letter-spacing: 8px;
+                            color: #ff841f;
+                        ">
+                            ${resetCode}
+                        </div>
+
+                        <p style="
+                            color: #aaaaaa;
+                        ">
+                            This code expires in 10 minutes.
+                        </p>
+
+                        <p style="
+                            color: #777777;
+                            font-size: 12px;
+                        ">
+                            If you did not request a password
+                            reset, you can ignore this email.
+                        </p>
+
+                    </div>
+                `
+            });
+
+            return res.json({
+                success: true,
+                message:
+                    "If an account exists for this email, a reset code has been sent."
+            });
+        }
+
+        catch (error) {
+            console.error(
+                "Forgot password error:",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Unable to process the password reset request."
+            });
+        }
+    }
+);
+
+
 
 const PORT = 3000; // Creates the backend application
 
@@ -751,3 +955,407 @@ app.post("/api/auth/verify-email", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
+/* =========================================================
+   VERIFY PASSWORD RESET CODE
+   ========================================================= */
+
+app.post(
+    "/api/auth/verify-reset-code",
+    async (req, res) => {
+
+        try {
+
+            const {
+                email,
+                code
+            } = req.body;
+
+
+            /* ---------------------------------------------
+               Basic validation
+            --------------------------------------------- */
+
+            if (!email || !code) {
+
+                return res.status(400).json({
+                    success: false,
+                    message: "Email and reset code are required."
+                });
+            }
+
+
+            const cleanEmail =
+                email.trim().toLowerCase();
+
+
+            const cleanCode =
+                code.trim();
+
+
+            if (!/^\d{6}$/.test(cleanCode)) {
+
+                return res.status(400).json({
+                    success: false,
+                    message: "Please enter a valid 6-digit code."
+                });
+            }
+
+
+            /* ---------------------------------------------
+               Find account
+            --------------------------------------------- */
+
+            const result =
+                await pool.query(
+                    `
+                    SELECT
+                        id,
+                        password_reset_code_hash,
+                        password_reset_expires_at
+                    FROM users
+                    WHERE email = $1
+                    `,
+                    [cleanEmail]
+                );
+
+
+            /*
+             * Keep the error generic so this endpoint
+             * cannot easily be used to discover accounts.
+             */
+
+            if (result.rows.length === 0) {
+
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid or expired reset code."
+                });
+            }
+
+
+            const user =
+                result.rows[0];
+
+
+            /* ---------------------------------------------
+               Check reset code exists
+            --------------------------------------------- */
+
+            if (!user.password_reset_code_hash) {
+
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid or expired reset code."
+                });
+            }
+
+
+            /* ---------------------------------------------
+               Check expiry
+            --------------------------------------------- */
+
+            if (
+                !user.password_reset_expires_at ||
+                new Date(
+                    user.password_reset_expires_at
+                ) < new Date()
+            ) {
+
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid or expired reset code."
+                });
+            }
+
+
+            /* ---------------------------------------------
+               Compare code with bcrypt hash
+            --------------------------------------------- */
+
+            const codeMatches =
+                await bcrypt.compare(
+                    cleanCode,
+                    user.password_reset_code_hash
+                );
+
+
+            if (!codeMatches) {
+
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid or expired reset code."
+                });
+            }
+
+
+            /* ---------------------------------------------
+               Code is correct.
+
+               Store temporary reset permission
+               inside the server-side session.
+            --------------------------------------------- */
+
+            req.session.passwordResetUserId =
+                user.id;
+
+
+            req.session.passwordResetVerifiedAt =
+                Date.now();
+
+
+            /* ---------------------------------------------
+               Remove the used code from PostgreSQL
+            --------------------------------------------- */
+
+            await pool.query(
+                `
+                UPDATE users
+                SET
+                    password_reset_code_hash = NULL,
+                    password_reset_expires_at = NULL
+                WHERE id = $1
+                `,
+                [user.id]
+            );
+
+
+            /* ---------------------------------------------
+               Save session
+            --------------------------------------------- */
+
+            req.session.save(
+                (sessionError) => {
+
+                    if (sessionError) {
+
+                        console.error(
+                            "Reset verification session error:",
+                            sessionError
+                        );
+
+
+                        return res.status(500).json({
+                            success: false,
+                            message:
+                                "Unable to verify reset code."
+                        });
+                    }
+
+
+                    return res.json({
+                        success: true,
+                        message:
+                            "Reset code verified successfully."
+                    });
+
+                }
+            );
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Verify reset code error:",
+                error
+            );
+
+
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Unable to verify reset code."
+            });
+
+        }
+
+    }
+);
+
+/* =========================================================
+   RESET PASSWORD
+   ========================================================= */
+
+app.post(
+    "/api/auth/reset-password",
+    async (req, res) => {
+
+        try {
+
+            const {
+                newPassword,
+                confirmPassword
+            } = req.body;
+
+
+            /* ---------------------------------------------
+               Make sure reset code was verified first
+            --------------------------------------------- */
+
+            if (
+                !req.session.passwordResetUserId ||
+                !req.session.passwordResetVerifiedAt
+            ) {
+
+                return res.status(401).json({
+                    success: false,
+                    message:
+                        "Password reset verification has expired. Please start again."
+                });
+            }
+
+
+            /* ---------------------------------------------
+               Reset permission lasts only 10 minutes
+            --------------------------------------------- */
+
+            const verificationAge =
+                Date.now() -
+                req.session.passwordResetVerifiedAt;
+
+
+            const tenMinutes =
+                10 * 60 * 1000;
+
+
+            if (verificationAge > tenMinutes) {
+
+                delete req.session.passwordResetUserId;
+                delete req.session.passwordResetVerifiedAt;
+
+
+                return res.status(401).json({
+                    success: false,
+                    message:
+                        "Password reset verification has expired. Please start again."
+                });
+            }
+
+
+            /* ---------------------------------------------
+               Validate passwords
+            --------------------------------------------- */
+
+            if (
+                !newPassword ||
+                !confirmPassword
+            ) {
+
+                return res.status(400).json({
+                    success: false,
+                    message:
+                        "Please enter and confirm your new password."
+                });
+            }
+
+
+            if (newPassword.length < 8) {
+
+                return res.status(400).json({
+                    success: false,
+                    message:
+                        "Password must be at least 8 characters long."
+                });
+            }
+
+
+            if (
+                newPassword !==
+                confirmPassword
+            ) {
+
+                return res.status(400).json({
+                    success: false,
+                    message:
+                        "Passwords do not match."
+                });
+            }
+
+
+            /* ---------------------------------------------
+               Hash the new password
+            --------------------------------------------- */
+
+            const newPasswordHash =
+                await bcrypt.hash(
+                    newPassword,
+                    12
+                );
+
+
+            const userId =
+                req.session.passwordResetUserId;
+
+
+            /* ---------------------------------------------
+               Update PostgreSQL
+            --------------------------------------------- */
+
+            await pool.query(
+                `
+                UPDATE users
+                SET
+                    password_hash = $1,
+                    password_reset_code_hash = NULL,
+                    password_reset_expires_at = NULL,
+                    password_reset_sent_at = NULL
+                WHERE id = $2
+                `,
+                [
+                    newPasswordHash,
+                    userId
+                ]
+            );
+
+
+            /* ---------------------------------------------
+               Remove temporary reset permission
+            --------------------------------------------- */
+
+            delete req.session.passwordResetUserId;
+            delete req.session.passwordResetVerifiedAt;
+
+
+            req.session.save(
+                (sessionError) => {
+
+                    if (sessionError) {
+
+                        console.error(
+                            "Password reset session error:",
+                            sessionError
+                        );
+
+                    }
+
+
+                    return res.json({
+                        success: true,
+                        message:
+                            "Your password has been changed successfully."
+                    });
+
+                }
+            );
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Reset password error:",
+                error
+            );
+
+
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Unable to reset your password."
+            });
+
+        }
+
+    }
+);

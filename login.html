@@ -4,7 +4,7 @@
 <head>
 
     <meta charset="UTF-8">
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 
     <meta
         name="viewport"
@@ -45,7 +45,7 @@
     </a>
 
     <a href="index.html" class="back-home">
-        ← Back home
+        Back home
     </a>
 
 </header>
@@ -139,27 +139,22 @@
             </div>
 
 
-            <div class="login-options">
+                <div class="login-options">
 
-                <label class="remember-me">
+                    <label class="remember">
+                        <input
+                            type="checkbox"
+                            id="rememberMe"
+                        >
+                        <span></span>
+                        Remember me
+                    </label>
 
-                    <input
-                        type="checkbox"
-                        id="rememberMe"
-                        name="remember_me"
-                    >
+                    <a href="#" class="forgot-password" id="forgotPasswordLink">
+                        Forgot password?
+                    </a>
 
-                    <span></span>
-
-                    Remember me
-
-                </label>
-
-                <a href="#">
-                    Forgot password?
-                </a>
-
-            </div>
+                </div>
 
 
             <button
@@ -167,7 +162,6 @@
                 class="auth-submit"
             >
                 Sign in
-                <span>→</span>
             </button>
 
         </form>
@@ -193,6 +187,275 @@
     aria-live="polite"
     aria-atomic="true">
 </div>
+
+<!-- =====================================================
+     FORGOT PASSWORD POPUP
+     ===================================================== -->
+
+<div
+    class="forgot-password-popup"
+    id="forgotPasswordPopup"
+    aria-hidden="true"
+>
+    <div class="forgot-password-card">
+
+        <!-- Close button -->
+        <button
+            type="button"
+            class="forgot-password-close"
+            id="forgotPasswordClose"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+
+        <!-- =================================================
+             STEP 1 - ENTER EMAIL
+             ================================================= -->
+
+        <div id="forgotEmailStep">
+
+            <div class="forgot-password-icon">
+                🔐
+            </div>
+
+
+            <div class="forgot-password-label">
+                PASSWORD RECOVERY
+            </div>
+
+
+            <h2>
+                Forgot your password?
+            </h2>
+
+
+            <p class="forgot-password-description">
+                Enter the email address connected to your
+                Altrium account and we'll send you a
+                6-digit reset code.
+            </p>
+
+
+            <div class="input-group">
+
+                <label for="forgotPasswordEmail">
+                    Email address
+                </label>
+
+                <input
+                    type="email"
+                    id="forgotPasswordEmail"
+                    placeholder="you@example.com"
+                    autocomplete="email"
+                >
+
+            </div>
+
+
+            <button
+                type="button"
+                class="forgot-password-submit"
+                id="sendResetCodeButton"
+            >
+                SEND RESET CODE
+            </button>
+
+
+            <button
+                type="button"
+                class="forgot-password-back"
+                id="backToLoginButton"
+            >
+                Back to sign in
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             STEP 2 - ENTER RESET CODE
+             ================================================= -->
+
+        <div
+            id="forgotCodeStep"
+            class="forgot-password-step-hidden"
+        >
+
+            <div class="forgot-password-icon">
+                ✉️
+            </div>
+
+
+            <div class="forgot-password-label">
+                VERIFY RESET CODE
+            </div>
+
+
+            <h2>
+                Check your inbox.
+            </h2>
+
+
+            <p class="forgot-password-description">
+                We sent a 6-digit password reset code to
+                <strong id="resetCodeEmail"></strong>
+            </p>
+
+
+            <!-- Six digit inputs -->
+
+            <div
+                class="verification-code-inputs"
+                id="resetCodeInputs"
+            >
+
+                <input
+                    class="reset-code-digit"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="1"
+                    aria-label="Digit 1"
+                >
+
+                <input
+                    class="reset-code-digit"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="1"
+                    aria-label="Digit 2"
+                >
+
+                <input
+                    class="reset-code-digit"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="1"
+                    aria-label="Digit 3"
+                >
+
+                <input
+                    class="reset-code-digit"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="1"
+                    aria-label="Digit 4"
+                >
+
+                <input
+                    class="reset-code-digit"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="1"
+                    aria-label="Digit 5"
+                >
+
+                <input
+                    class="reset-code-digit"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="1"
+                    aria-label="Digit 6"
+                >
+
+            </div>
+
+
+            <button
+                type="button"
+                class="forgot-password-submit"
+                id="verifyResetCodeButton"
+            >
+                VERIFY CODE
+            </button>
+
+
+            <button
+                type="button"
+                class="forgot-password-back"
+                id="changeResetEmailButton"
+            >
+                Use a different email
+            </button>
+
+        </div>
+
+        <!-- =================================================
+            STEP 3 - CREATE NEW PASSWORD
+            ================================================= -->
+
+        <div
+            id="forgotNewPasswordStep"
+            class="forgot-password-step-hidden"
+        >
+
+            <div class="forgot-password-icon">
+                🔑
+            </div>
+
+
+            <div class="forgot-password-label">
+                CREATE NEW PASSWORD
+            </div>
+
+
+            <h2>
+                Choose a new password.
+            </h2>
+
+
+            <p class="forgot-password-description">
+                Your reset code was verified.
+                Enter your new password below.
+            </p>
+
+
+            <div class="input-group">
+
+                <label for="newResetPassword">
+                    New password
+                </label>
+
+                <input
+                    type="password"
+                    id="newResetPassword"
+                    placeholder="Enter new password"
+                    autocomplete="new-password"
+                >
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label for="confirmResetPassword">
+                    Confirm password
+                </label>
+
+                <input
+                    type="password"
+                    id="confirmResetPassword"
+                    placeholder="Confirm new password"
+                    autocomplete="new-password"
+                >
+
+            </div>
+
+
+            <button
+                type="button"
+                class="forgot-password-submit"
+                id="resetPasswordButton"
+            >
+                RESET PASSWORD
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
 
 <script src="js/auth.js"></script>
 

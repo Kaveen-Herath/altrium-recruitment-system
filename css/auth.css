@@ -31,11 +31,11 @@
 
 
 .back-home {
-    color: #777;
+    color: #ffffff;
 
     text-decoration: none;
 
-    font-size: 11px;
+    font-size: 14px;
 
     transition: .25s;
 }
@@ -300,13 +300,16 @@
 
 .remember,
 .terms {
+
+    font-size: 11px;
+
     display: flex;
 
     align-items: center;
 
     gap: 8px;
 
-    color: #777;
+    color: #bdbdbd;
 
     cursor: pointer;
 }
@@ -1050,6 +1053,537 @@
     font-size: 9px;
 
     letter-spacing: 0.3px;
+}
+
+/* =====================================================
+   FORGOT PASSWORD POPUP
+   ===================================================== */
+
+.forgot-password-popup {
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(5, 5, 5, 0.75);
+    backdrop-filter: blur(10px);
+
+    opacity: 0;
+    visibility: hidden;
+
+    transition:
+        opacity 0.3s ease,
+        visibility 0.3s ease;
+
+    z-index: 9999;
+}
+
+
+.forgot-password-popup.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+.forgot-password-card {
+    position: relative;
+
+    width: 100%;
+    max-width: 430px;
+
+    padding: 38px 32px;
+
+    border-radius: 24px;
+
+    background: rgba(18, 18, 18, 0.98);
+
+    border: 1px solid rgba(255, 255, 255, 0.09);
+
+    box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.45);
+
+    transform:
+        translateY(18px)
+        scale(0.97);
+
+    transition:
+        transform 0.35s ease;
+}
+
+
+.forgot-password-popup.show
+.forgot-password-card {
+    transform:
+        translateY(0)
+        scale(1);
+}
+
+
+/* Close button */
+
+.forgot-password-close {
+    position: absolute;
+
+    top: 16px;
+    right: 18px;
+
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 50%;
+
+    background: transparent;
+
+    color: #777;
+
+    font-size: 22px;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+
+.forgot-password-close:hover {
+    color: var(--orange);
+
+    background:
+        rgba(255, 132, 31, 0.08);
+}
+
+
+/* Icon */
+
+.forgot-password-icon {
+    width: 64px;
+    height: 64px;
+
+    margin: 0 auto 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--orange),
+            var(--yellow)
+        );
+
+    color: #111;
+
+    font-size: 26px;
+}
+
+
+/* Small heading */
+
+.forgot-password-label {
+    margin-bottom: 8px;
+
+    text-align: center;
+
+    color: var(--orange);
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 2px;
+}
+
+
+/* Main heading */
+
+.forgot-password-card h2 {
+    margin-bottom: 12px;
+
+    text-align: center;
+
+    color: #ffffff;
+
+    font-size: 28px;
+}
+
+
+/* Description */
+
+.forgot-password-description {
+    max-width: 340px;
+
+    margin:
+        0 auto
+        26px;
+
+    text-align: center;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.65
+        );
+
+    font-size: 13px;
+
+    line-height: 1.7;
+}
+
+
+/* Email field */
+
+.forgot-password-card
+.input-group {
+    margin-bottom: 20px;
+}
+
+
+.forgot-password-card
+.input-group label {
+    color: #ffffff;
+
+    font-size: 12px;
+
+    font-weight: 500;
+}
+
+
+.forgot-password-card
+.input-group input {
+    min-height: 48px;
+
+    padding: 14px 16px;
+
+    color: #ffffff;
+
+    font-size: 14px;
+}
+
+
+.forgot-password-card
+.input-group input::placeholder {
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.38
+        );
+}
+
+
+/* Main button */
+
+.forgot-password-submit {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 14px;
+
+    padding: 15px 18px;
+
+    border: none;
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            100deg,
+            var(--orange),
+            var(--yellow)
+        );
+
+    color: #111;
+
+    font-family: inherit;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        opacity 0.2s ease;
+}
+
+
+.forgot-password-submit:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 12px 30px
+        rgba(
+            255,
+            132,
+            31,
+            0.16
+        );
+}
+
+
+.forgot-password-submit:disabled {
+    opacity: 0.5;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+
+/* Back button */
+
+.forgot-password-back {
+    width: 100%;
+
+    margin-top: 16px;
+
+    border: none;
+
+    background: transparent;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.55
+        );
+
+    font-family: inherit;
+
+    font-size: 11px;
+
+    cursor: pointer;
+
+    transition: color 0.2s ease;
+}
+
+
+.forgot-password-back:hover {
+    color: var(--orange);
+}
+
+
+/* Mobile */
+
+@media (max-width: 520px) {
+
+    .forgot-password-card {
+        padding:
+            34px
+            22px;
+    }
+
+
+    .forgot-password-card h2 {
+        font-size: 24px;
+    }
+
+}
+
+/* =====================================================
+   FORGOT PASSWORD STEPS
+   ===================================================== */
+
+.forgot-password-step-hidden {
+    display: none;
+}
+
+
+/* Reset code digits */
+
+.reset-code-digit {
+    width: 100%;
+    min-width: 0;
+
+    aspect-ratio: 1 / 1;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.1);
+
+    border-radius: 12px;
+
+    outline: none;
+
+    background: #161616;
+
+    color: #ffffff;
+
+    text-align: center;
+
+    font-family: inherit;
+
+    font-size: 22px;
+    font-weight: 700;
+
+    caret-color: var(--orange);
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.reset-code-digit:focus {
+    border-color: var(--orange);
+
+    background: #1c1c1c;
+
+    transform: translateY(-2px);
+}
+
+
+#resetCodeEmail {
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   AUTH FORM TEXT VISIBILITY - OVERRIDES
+   ========================================================= */
+
+
+/* Main heading */
+.auth-heading h1 {
+    font-size: 46px;
+    line-height: 1.05;
+}
+
+
+/* Subtitle below heading */
+.auth-heading p {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+
+/* Field labels */
+.input-group label {
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+
+/* Input text */
+.input-group input {
+    color: #ffffff;
+    font-size: 12px;
+
+    padding: 12px;
+
+    min-height: 40px;
+}
+
+
+/* Placeholder text */
+.input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.38);
+    opacity: 1;
+}
+
+
+/* Google button text */
+.google-btn {
+    color: #ffffff;
+    font-size: 13px;
+}
+
+
+/* Divider */
+.divider {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+}
+
+
+/* Terms and conditions text */
+.terms {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 11px;
+}
+
+
+/* Terms link */
+.terms a {
+    color: var(--orange);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+/* Bottom text */
+.auth-footer {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 12px;
+}
+
+
+/* Bottom Sign in link */
+.auth-footer a {
+    color: var(--orange);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+/* Password Show button */
+.password-toggle {
+    font-size: 10px;
+    font-weight: 600;
+}
+
+
+/* Create account button */
+.auth-submit {
+    font-size: 12px;
+}
+
+
+/* Slightly enlarge card */
+.auth-card {
+    max-width: 520px;
+    padding: 46px;
+}
+
+
+/* Mobile */
+@media (max-width: 550px) {
+
+    .auth-card {
+        padding: 30px 22px;
+    }
+
+    .auth-heading h1 {
+        font-size: 38px;
+    }
+
+    .input-group label {
+        font-size: 11px;
+    }
+
+    .input-group input {
+        font-size: 14px;
+    }
 }
 
 
