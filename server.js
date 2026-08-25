@@ -100,7 +100,7 @@ app.post(
                 educationRequired,
                 description,
                 responsibilities,
-                skills,
+                requiredSkills,
                 numberOfOpenings
             } = req.body;
 
@@ -150,7 +150,7 @@ app.post(
                     education_required,
                     description,
                     responsibilities,
-                    skills,
+                    required_skills,
                     number_of_openings,
                     created_by
 
@@ -183,7 +183,7 @@ app.post(
 
                     responsibilities?.trim() || null,
 
-                    skills?.trim() || null,
+                    requiredSkills?.trim() || null,
 
                     openings,
 
@@ -210,6 +210,170 @@ app.post(
             return res.status(500).json({
                 success: false,
                 message: "Unable to create job vacancy."
+            });
+
+        }
+
+    }
+);
+
+// ADMIN LOAD JOB VACANCIES
+
+app.get(
+    "/api/admin/jobs",
+    requireAdmin,
+    async (req, res) => {
+
+        try {
+
+            const result = await pool.query(
+                `
+                SELECT
+                    jobs.id,
+                    jobs.job_title,
+                    jobs.department,
+                    jobs.location,
+                    jobs.employment_type,
+                    jobs.salary,
+                    jobs.application_deadline,
+                    jobs.experience_required,
+                    jobs.education_required,
+                    jobs.description,
+                    jobs.responsibilities,
+                    jobs.required_skills,
+                    jobs.number_of_openings,
+                    jobs.status,
+                    jobs.created_by,
+                    jobs.created_at,
+                    jobs.updated_at,
+
+                    users.first_name AS creator_first_name,
+                    users.last_name AS creator_last_name
+
+                FROM jobs
+
+                LEFT JOIN users
+                    ON users.id = jobs.created_by
+
+                ORDER BY jobs.created_at DESC
+                `
+            );
+
+
+            return res.json({
+                success: true,
+                jobs: result.rows
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Load admin jobs error:",
+                error
+            );
+
+
+            return res.status(500).json({
+                success: false,
+                message: "Unable to load job vacancies."
+            });
+
+        }
+
+    }
+);
+
+// ADMIN CHANGE JOB STATUS
+
+app.patch(
+    "/api/admin/jobs/:id/status",
+    requireAdmin,
+    async (req, res) => {
+
+        try {
+
+            const jobId =
+                req.params.id;
+
+            const {
+                status
+            } = req.body;
+
+
+            const allowedStatuses = [
+                "active",
+                "closed",
+                "draft"
+            ];
+
+
+            if (
+                !allowedStatuses.includes(status)
+            ) {
+
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid job status."
+                });
+
+            }
+
+
+            const result =
+                await pool.query(
+                    `
+                    UPDATE jobs
+
+                    SET
+                        status = $1,
+                        updated_at = NOW()
+
+                    WHERE id = $2
+
+                    RETURNING *
+                    `,
+                    [
+                        status,
+                        jobId
+                    ]
+                );
+
+
+            if (result.rows.length === 0) {
+
+                return res.status(404).json({
+                    success: false,
+                    message: "Job vacancy not found."
+                });
+
+            }
+
+
+            return res.json({
+                success: true,
+                message:
+                    status === "closed"
+                        ? "Job vacancy closed successfully."
+                        : "Job vacancy status updated.",
+                job: result.rows[0]
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Update job status error:",
+                error
+            );
+
+
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Unable to update job status."
             });
 
         }

@@ -292,16 +292,60 @@
             </div>
 
 
-            <div class="admin-placeholder">
+            <!-- ================= VACANCY TOOLBAR ================= -->
 
-                <h2>
-                    Job vacancies
-                </h2>
+            <div class="vacancy-toolbar">
 
-                <p>
-                    The create vacancy system will go here next.
-                </p>
+                <div class="vacancy-toolbar-text">
 
+                    <h2>
+                        Job vacancies
+                    </h2>
+
+                    <p>
+                        Create and manage current job openings.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="create-vacancy-button"
+                    id="openCreateVacancyModal"
+                >
+
+                    <span class="create-vacancy-plus">
+                        +
+                    </span>
+
+                    Create job vacancy
+
+                </button>
+
+            </div>
+
+
+            <!-- ================= CURRENT VACANCIES ================= -->
+
+            <div class="vacancies-heading">
+
+                <span>
+                    CURRENT VACANCIES
+                </span>
+
+                <strong id="vacancyCount">
+                    0 vacancies
+                </strong>
+
+            </div>
+
+
+            <div
+                class="vacancy-list"
+                id="vacancyList"
+            >
+                <!-- Created jobs will appear here -->
             </div>
 
         </section>
@@ -349,6 +393,524 @@
 
 
     </main>
+
+</div>
+
+<!-- =====================================================
+     CREATE JOB VACANCY POPUP
+     ===================================================== -->
+
+<div
+    class="admin-modal"
+    id="createVacancyModal"
+>
+
+    <div class="admin-modal-backdrop"></div>
+
+
+    <div class="admin-modal-card">
+
+        <!-- HEADER -->
+
+        <div class="admin-modal-header">
+
+            <div>
+
+                <span class="admin-section-label">
+                    NEW VACANCY
+                </span>
+
+                <h2>
+                    Create job vacancy.
+                </h2>
+
+                <p>
+                    Add the details candidates will see.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="admin-modal-close"
+                id="closeCreateVacancyModal"
+                aria-label="Close"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- FORM -->
+
+        <form id="createJobForm">
+
+
+            <!-- BASIC DETAILS -->
+
+            <div class="vacancy-form-section">
+
+                <h3 style="color: orange;">
+                    Basic information
+                </h3>
+
+
+                <div class="admin-form-grid">
+
+
+                    <div class="admin-input">
+
+                        <label for="jobTitle">
+                            Job title *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="jobTitle"
+                            placeholder="e.g. Software Engineer"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="admin-input">
+
+                        <label for="jobDepartment">
+                            Department *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="jobDepartment"
+                            placeholder="e.g. Technology"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="admin-input">
+
+                        <label for="jobLocation">
+                            Location *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="jobLocation"
+                            placeholder="e.g. Colombo"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="admin-input">
+
+                        <label>
+                            Employment type *
+                        </label>
+
+
+                        <div
+                            class="admin-custom-select"
+                            id="employmentDropdown"
+                        >
+
+                            <button
+                                type="button"
+                                class="admin-custom-select-trigger"
+                                id="employmentDropdownTrigger"
+                            >
+
+                                <span id="employmentTypeText">
+                                    Select employment type
+                                </span>
+
+                                <span class="admin-select-arrow">
+                                    ↓
+                                </span>
+
+                            </button>
+
+
+                            <div class="admin-custom-select-menu">
+
+                                <button
+                                    type="button"
+                                    data-value="Full time"
+                                >
+                                    Full time
+                                </button>
+
+                                <button
+                                    type="button"
+                                    data-value="Part time"
+                                >
+                                    Part time
+                                </button>
+
+                                <button
+                                    type="button"
+                                    data-value="Internship"
+                                >
+                                    Internship
+                                </button>
+
+                                <button
+                                    type="button"
+                                    data-value="Contract"
+                                >
+                                    Contract
+                                </button>
+
+                                <button
+                                    type="button"
+                                    data-value="Remote"
+                                >
+                                    Remote
+                                </button>
+
+                            </div>
+
+
+                            <!-- Actual value used when saving -->
+
+                            <select
+                                id="employmentType"
+                                hidden
+                            >
+
+                                <option value=""></option>
+                                <option value="Full time">Full time</option>
+                                <option value="Part time">Part time</option>
+                                <option value="Internship">Internship</option>
+                                <option value="Contract">Contract</option>
+                                <option value="Remote">Remote</option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="admin-input">
+
+                        <label for="jobSalary">
+                            Salary
+                        </label>
+
+                        <input
+                            type="text"
+                            id="jobSalary"
+                            placeholder="e.g. LKR 150,000 - 200,000"
+                        >
+
+                    </div>
+
+
+                    <div class="admin-input">
+
+                        <label>
+                            Application deadline
+                        </label>
+
+
+                        <div
+                            class="admin-date-picker"
+                            id="deadlinePicker"
+                        >
+
+                            <button
+                                type="button"
+                                class="admin-date-trigger"
+                                id="deadlineTrigger"
+                            >
+
+                                <span id="deadlineText">
+                                    Select deadline
+                                </span>
+
+                                <span class="admin-date-icon">
+                                    ▦
+                                </span>
+
+                            </button>
+
+
+                            <div
+                                class="admin-calendar"
+                                id="deadlineCalendar"
+                            >
+
+                                <div class="admin-calendar-header">
+
+                                    <button
+                                        type="button"
+                                        id="previousDeadlineMonth"
+                                    >
+                                        ‹
+                                    </button>
+
+
+                                    <strong id="deadlineMonthLabel">
+                                    </strong>
+
+
+                                    <button
+                                        type="button"
+                                        id="nextDeadlineMonth"
+                                    >
+                                        ›
+                                    </button>
+
+                                </div>
+
+
+                                <div class="admin-calendar-weekdays">
+
+                                    <span>Su</span>
+                                    <span>Mo</span>
+                                    <span>Tu</span>
+                                    <span>We</span>
+                                    <span>Th</span>
+                                    <span>Fr</span>
+                                    <span>Sa</span>
+
+                                </div>
+
+
+                                <div
+                                    class="admin-calendar-days"
+                                    id="deadlineDays"
+                                >
+                                </div>
+
+                            </div>
+
+
+                            <!-- Real value sent to Node/PostgreSQL -->
+
+                            <input
+                                type="hidden"
+                                id="applicationDeadline"
+                            >
+
+                        </div>
+
+                    </div>
+
+                    <div class="admin-input">
+
+                        <label for="numberOfOpenings">
+                            Number of openings
+                        </label>
+
+                        <input
+                            type="number"
+                            id="numberOfOpenings"
+                            min="1"
+                            value="1"
+                        >
+
+                    </div>
+
+                </div>
+            
+
+            </div>
+
+
+            <!-- REQUIREMENTS -->
+
+            <div class="vacancy-form-section">
+
+                <h3 style="color: orange;">
+                    Candidate requirements
+                </h3>
+
+
+                <div class="admin-form-grid">
+
+
+                    <div class="admin-input">
+
+                        <label for="experienceRequired">
+                            Experience required
+                        </label>
+
+                        <input
+                            type="text"
+                            id="experienceRequired"
+                            placeholder="e.g. 2+ years"
+                        >
+
+                    </div>
+
+
+                    <div class="admin-input">
+
+                        <label for="educationRequired">
+                            Education required
+                        </label>
+
+                        <input
+                            type="text"
+                            id="educationRequired"
+                            placeholder="e.g. Bachelor's degree"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="admin-input admin-input-full">
+
+                    <label for="jobSkills">
+                        Required skills
+                    </label>
+
+                    <input
+                        type="text"
+                        id="jobSkills"
+                        placeholder="JavaScript, Node.js, PostgreSQL, Git"
+                    >
+
+                    <small>
+                        Separate skills with commas.
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <!-- JOB INFORMATION -->
+
+            <div class="vacancy-form-section">
+
+                <h3>
+                    Job details
+                </h3>
+
+
+                <div class="admin-input admin-input-full">
+
+                    <label for="jobDescription">
+                        Job description *
+                    </label>
+
+                    <textarea
+                        id="jobDescription"
+                        placeholder="Describe the job vacancy..."
+                        required
+                    ></textarea>
+
+                </div>
+
+
+                <div class="admin-input admin-input-full">
+
+                    <label for="jobResponsibilities">
+                        Responsibilities
+                    </label>
+
+                    <textarea
+                        id="jobResponsibilities"
+                        placeholder="Describe the main responsibilities..."
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+
+            <!-- BUTTONS -->
+
+            <div class="admin-modal-actions">
+
+                <button
+                    type="button"
+                    class="admin-cancel-button"
+                    id="cancelCreateVacancy"
+                >
+                    Cancel
+                </button>
+
+
+                <button
+                    type="submit"
+                    class="admin-create-job-btn"
+                >
+                    Create vacancy
+                </button>
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+</div>
+
+<!-- =====================================================
+     CLOSE VACANCY CONFIRMATION
+     ===================================================== -->
+
+<div
+    class="admin-modal"
+    id="closeVacancyModal"
+>
+
+    <div
+        class="admin-modal-backdrop"
+        id="closeVacancyBackdrop"
+    ></div>
+
+
+    <div class="close-vacancy-modal-card">
+
+        <span class="admin-section-label">
+            CLOSE VACANCY
+        </span>
+
+        <h2>
+            Close this position?
+        </h2>
+
+        <p id="closeVacancyMessage">
+            Candidates will no longer be able to apply for this vacancy.
+        </p>
+
+
+        <div class="close-vacancy-actions">
+
+            <button
+                type="button"
+                class="admin-cancel-button"
+                id="cancelCloseVacancy"
+            >
+                Cancel
+            </button>
+
+
+            <button
+                type="button"
+                class="confirm-close-vacancy-button"
+                id="confirmCloseVacancy"
+            >
+                Close vacancy
+            </button>
+
+        </div>
+
+    </div>
 
 </div>
 
