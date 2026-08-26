@@ -894,10 +894,1071 @@
 </div>
 
 
+<!-- =========================================================
+     APPLICATION FORM MODAL
+     ========================================================= -->
+
+<div
+    class="application-modal"
+    id="applicationModal"
+    aria-hidden="true"
+>
+
+    <div
+        class="application-modal-backdrop"
+        id="applicationModalBackdrop"
+    ></div>
+
+
+    <div class="application-modal-card">
+
+        <!-- HEADER -->
+
+        <div class="application-modal-header">
+
+            <div>
+
+                <span class="section-label">
+                    JOB APPLICATION
+                </span>
+
+                <h2>
+                    Apply for
+                    <em id="applicationJobTitle">
+                        Vacancy
+                    </em>
+                </h2>
+
+                <p id="applicationJobMeta">
+                    Complete your application carefully before submitting.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="application-modal-close"
+                id="closeApplicationModal"
+                aria-label="Close application"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- FORM -->
+
+        <form
+            id="jobApplicationForm"
+            enctype="multipart/form-data"
+        >
+
+
+            <!-- =================================================
+                 01 PERSONAL INFORMATION
+                 ================================================= -->
+
+            <section class="application-form-section">
+
+                <div class="application-section-heading">
+
+                    <span>
+                        01
+                    </span>
+
+                    <div>
+                        <small>PERSONAL INFORMATION</small>
+                        <h3>Tell us who you are.</h3>
+                    </div>
+
+                </div>
+
+
+                <div class="application-form-grid">
+
+
+                    <div class="application-input">
+
+                        <label for="applicationFirstName">
+                            First name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="applicationFirstName"
+                            name="firstName"
+                            autocomplete="given-name"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="application-input">
+
+                        <label for="applicationLastName">
+                            Last name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="applicationLastName"
+                            name="lastName"
+                            autocomplete="family-name"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="application-input">
+
+                        <label for="applicationEmail">
+                            Email address
+                        </label>
+
+                        <input
+                            type="email"
+                            id="applicationEmail"
+                            name="email"
+                            readonly
+                            required
+                        >
+
+                        <small>
+                            Connected to your Altrium account.
+                        </small>
+
+                    </div>
+
+
+                    <div class="application-input">
+
+                        <label for="applicationPhone">
+                            Phone number
+                        </label>
+
+                        <input
+                            type="tel"
+                            id="applicationPhone"
+                            name="phoneNumber"
+                            autocomplete="tel"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="application-input">
+
+                        <label for="applicationNic">
+                            NIC / National ID
+                        </label>
+
+                        <input
+                            type="text"
+                            id="applicationNic"
+                            name="nic"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="application-input">
+
+                        <label>
+                            Date of birth
+                        </label>
+
+
+                        <div
+                            class="application-date-picker"
+                            id="applicationDatePicker"
+                        >
+
+                            <!-- VISIBLE BUTTON -->
+
+                            <button
+                                type="button"
+                                class="application-date-trigger"
+                                id="applicationDateTrigger"
+                            >
+
+                                <span id="applicationDateText">
+                                    Select date of birth
+                                </span>
+
+                                <span class="application-date-icon">
+                                    ◫
+                                </span>
+
+                            </button>
+
+
+                            <!-- ACTUAL VALUE SENT TO BACKEND -->
+
+                            <input
+                                type="hidden"
+                                id="applicationDateOfBirth"
+                                name="dateOfBirth"
+                                required
+                            >
+
+
+                            <!-- CALENDAR -->
+
+                            <div
+                                class="application-calendar"
+                                id="applicationCalendar"
+                            >
+
+                                <div class="application-calendar-header">
+
+                                    <button
+                                        type="button"
+                                        id="applicationCalendarPrevYear"
+                                        aria-label="Previous year"
+                                    >
+                                        «
+                                    </button>
+
+
+                                    <button
+                                        type="button"
+                                        id="applicationCalendarPrev"
+                                        aria-label="Previous month"
+                                    >
+                                        ‹
+                                    </button>
+
+
+                                    <strong
+                                        id="applicationCalendarMonth"
+                                    >
+                                        August 2026
+                                    </strong>
+
+
+                                    <button
+                                        type="button"
+                                        id="applicationCalendarNext"
+                                        aria-label="Next month"
+                                    >
+                                        ›
+                                    </button>
+
+
+                                    <button
+                                        type="button"
+                                        id="applicationCalendarNextYear"
+                                        aria-label="Next year"
+                                    >
+                                        »
+                                    </button>
+
+                                </div>
+
+
+                                <div class="application-calendar-weekdays">
+
+                                    <span>Su</span>
+                                    <span>Mo</span>
+                                    <span>Tu</span>
+                                    <span>We</span>
+                                    <span>Th</span>
+                                    <span>Fr</span>
+                                    <span>Sa</span>
+
+                                </div>
+
+
+                                <div
+                                    class="application-calendar-days"
+                                    id="applicationCalendarDays"
+                                ></div>
+
+
+                                <div class="application-calendar-footer">
+
+                                    <button
+                                        type="button"
+                                        id="applicationCalendarClear"
+                                    >
+                                        Clear
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="application-input application-input-full">
+
+                        <label for="applicationCountry">
+                            Country
+                        </label>
+
+                        <input
+                            type="text"
+                            id="applicationCountry"
+                            name="country"
+                            placeholder="Sri Lanka"
+                            autocomplete="country-name"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 02 PROFESSIONAL INFORMATION
+                 ================================================= -->
+
+            <section class="application-form-section">
+
+                <div class="application-section-heading">
+
+                    <span>
+                        02
+                    </span>
+
+                    <div>
+                        <small>PROFESSIONAL INFORMATION</small>
+                        <h3>Show us what you bring.</h3>
+                    </div>
+
+                </div>
+
+
+                <div class="application-input">
+
+                    <label for="applicationEducation">
+                        Education
+                    </label>
+
+                    <textarea
+                        id="applicationEducation"
+                        name="education"
+                        placeholder="Your qualifications, institutions, courses and achievements..."
+                        required
+                    ></textarea>
+
+                </div>
+
+
+                <div class="application-input">
+
+                    <label for="applicationLinkedin">
+                        LinkedIn URL
+                    </label>
+
+                    <input
+                        type="url"
+                        id="applicationLinkedin"
+                        name="linkedinUrl"
+                        placeholder="https://www.linkedin.com/in/your-profile"
+                    >
+
+                    <small>
+                        Optional
+                    </small>
+
+                </div>
+
+
+                <div class="application-input">
+
+                    <label for="applicationSkills">
+                        Skills
+                    </label>
+
+                    <textarea
+                        id="applicationSkills"
+                        name="skills"
+                        placeholder="JavaScript, React, Figma, Communication..."
+                        required
+                    ></textarea>
+
+                    <small>
+                        Separate individual skills with commas.
+                    </small>
+
+                </div>
+
+
+                <div class="application-input">
+
+                    <label for="applicationWorkExperience">
+                        Work experience
+                    </label>
+
+                    <textarea
+                        id="applicationWorkExperience"
+                        name="workExperience"
+                        placeholder="Describe your previous roles, responsibilities and achievements..."
+                        required
+                    ></textarea>
+
+                </div>
+
+
+                <div class="application-input">
+
+                    <label for="applicationProjects">
+                        Projects
+                    </label>
+
+                    <textarea
+                        id="applicationProjects"
+                        name="projects"
+                        placeholder="Tell us about relevant personal, academic or professional projects..."
+                    ></textarea>
+
+                    <small>
+                        Optional
+                    </small>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 03 PREFERENCES
+                 ================================================= -->
+
+            <section class="application-form-section">
+
+                <div class="application-section-heading">
+
+                    <span>
+                        03
+                    </span>
+
+                    <div>
+                        <small>PREFERENCES</small>
+                        <h3>How do you prefer to work?</h3>
+                    </div>
+
+                </div>
+
+
+                <!-- LANGUAGES -->
+
+                <div class="application-input">
+
+                    <label>
+                        Languages you are comfortable working in
+                    </label>
+
+
+                    <div class="application-language-options">
+
+
+                        <label class="application-checkbox">
+
+                            <input
+                                type="checkbox"
+                                name="preferredLanguages"
+                                value="Sinhala"
+                            >
+
+                            <span class="application-checkbox-box"></span>
+
+                            Sinhala
+
+                        </label>
+
+
+                        <label class="application-checkbox">
+
+                            <input
+                                type="checkbox"
+                                name="preferredLanguages"
+                                value="Tamil"
+                            >
+
+                            <span class="application-checkbox-box"></span>
+
+                            Tamil
+
+                        </label>
+
+
+                        <label class="application-checkbox">
+
+                            <input
+                                type="checkbox"
+                                name="preferredLanguages"
+                                value="English"
+                            >
+
+                            <span class="application-checkbox-box"></span>
+
+                            English
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- JOB TYPE -->
+
+                <div class="application-input">
+
+                    <label>
+                        Preferred job type
+                    </label>
+
+
+                    <div
+                        class="altrium-dropdown application-job-type-dropdown"
+                        data-dropdown
+                    >
+
+                        <button
+                            type="button"
+                            class="altrium-dropdown-trigger"
+                            data-dropdown-trigger
+                        >
+
+                            <span data-dropdown-text>
+                                Select job type
+                            </span>
+
+                            <span class="altrium-dropdown-arrow">
+                                ↓
+                            </span>
+
+                        </button>
+
+
+                        <div class="altrium-dropdown-menu">
+
+
+                            <button
+                                type="button"
+                                class="altrium-dropdown-option"
+                                data-dropdown-option
+                                data-value="Full time"
+                            >
+                                Full time
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="altrium-dropdown-option"
+                                data-dropdown-option
+                                data-value="Part time"
+                            >
+                                Part time
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="altrium-dropdown-option"
+                                data-dropdown-option
+                                data-value="Internship"
+                            >
+                                Internship
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="altrium-dropdown-option"
+                                data-dropdown-option
+                                data-value="Contract"
+                            >
+                                Contract
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="altrium-dropdown-option"
+                                data-dropdown-option
+                                data-value="Remote"
+                            >
+                                Remote
+                            </button>
+
+                        </div>
+
+
+                        <input
+                            type="hidden"
+                            id="applicationPreferredJobType"
+                            name="preferredJobType"
+                            data-dropdown-value
+                        >
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 04 CV / RESUME
+                 ================================================= -->
+
+            <section class="application-form-section">
+
+                <div class="application-section-heading">
+
+                    <span>
+                        04
+                    </span>
+
+                    <div>
+                        <small>CV / RESUME</small>
+                        <h3>Attach your application document.</h3>
+                    </div>
+
+                </div>
+
+
+                <div class="application-cv-upload">
+
+                    <input
+                        type="file"
+                        id="applicationCv"
+                        name="cv"
+                        accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                        hidden
+                        required
+                    >
+
+
+                    <label
+                        for="applicationCv"
+                        class="application-cv-dropzone"
+                    >
+
+                        <div class="application-cv-icon">
+                            ↑
+                        </div>
+
+                        <strong>
+                            Upload your CV / Resume
+                        </strong>
+
+                        <p>
+                            PDF recommended
+                        </p>
+
+                        <small>
+                            PDF, JPG, JPEG or PNG · Maximum 5 MB
+                        </small>
+
+                    </label>
+
+
+                    <div
+                        class="application-file-selected"
+                        id="applicationFileSelected"
+                    >
+                        No file selected
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 05 CONFIRMATION
+                 ================================================= -->
+
+            <section class="application-form-section application-confirmation">
+
+                <label class="application-checkbox application-consent">
+
+                    <input
+                        type="checkbox"
+                        id="applicationConsent"
+                        required
+                    >
+
+                    <span class="application-checkbox-box"></span>
+
+
+                    <span>
+                        I confirm that the information provided is accurate
+                        and consent to Altrium processing my information
+                        for recruitment purposes.
+                    </span>
+
+                </label>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 ACTIONS
+                 ================================================= -->
+
+                    <div class="application-form-actions">
+
+                        <button
+                            type="button"
+                            class="application-cancel-button"
+                            id="cancelApplicationButton"
+                        >
+                            Cancel
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="application-review-button"
+                            id="reviewApplicationButton"
+                        >
+                            Review application
+                        </button>
+
+                    </div>
+
+                </form>
+
+                <!-- =========================================================
+                    APPLICATION REVIEW
+                    ========================================================= -->
+
+                <div
+                    class="application-review"
+                    id="applicationReview"
+                    hidden
+                >
+
+                    <div class="application-review-header">
+
+                        <div>
+
+                            <br>
+                            <span class="section-label">
+                                REVIEW APPLICATION
+                            </span>
+
+                            <h2>
+                                Check everything
+                                <em>before submitting.</em>
+                            </h2>
+
+                            <p>
+                                Make sure your information is correct.
+                                You can return and edit anything before submission.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PERSONAL -->
+
+                    <section class="application-review-section">
+
+                        <span class="application-review-number">
+                            01
+                        </span>
+
+                        <div class="application-review-content">
+
+                            <small>
+                                PERSONAL INFORMATION
+                            </small>
+
+                            <div class="application-review-grid">
+
+                                <div>
+                                    <span>Name</span>
+                                    <strong id="reviewName">—</strong>
+                                </div>
+
+                                <div>
+                                    <span>Email</span>
+                                    <strong id="reviewEmail">—</strong>
+                                </div>
+
+                                <div>
+                                    <span>Phone</span>
+                                    <strong id="reviewPhone">—</strong>
+                                </div>
+
+                                <div>
+                                    <span>NIC / National ID</span>
+                                    <strong id="reviewNic">—</strong>
+                                </div>
+
+                                <div>
+                                    <span>Date of birth</span>
+                                    <strong id="reviewDateOfBirth">—</strong>
+                                </div>
+
+                                <div>
+                                    <span>Country</span>
+                                    <strong id="reviewCountry">—</strong>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- PROFESSIONAL -->
+
+                    <section class="application-review-section">
+
+                        <span class="application-review-number">
+                            02
+                        </span>
+
+                        <div class="application-review-content">
+
+                            <small>
+                                PROFESSIONAL INFORMATION
+                            </small>
+
+                            <div class="application-review-long">
+
+                                <div>
+                                    <span>Education</span>
+                                    <p id="reviewEducation">—</p>
+                                </div>
+
+                                <div>
+                                    <span>LinkedIn</span>
+                                    <p id="reviewLinkedin">—</p>
+                                </div>
+
+                                <div>
+                                    <span>Skills</span>
+                                    <p id="reviewSkills">—</p>
+                                </div>
+
+                                <div>
+                                    <span>Work experience</span>
+                                    <p id="reviewWorkExperience">—</p>
+                                </div>
+
+                                <div>
+                                    <span>Projects</span>
+                                    <p id="reviewProjects">—</p>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- PREFERENCES -->
+
+                    <section class="application-review-section">
+
+                        <span class="application-review-number">
+                            03
+                        </span>
+
+                        <div class="application-review-content">
+
+                            <small>
+                                PREFERENCES
+                            </small>
+
+                            <div class="application-review-grid">
+
+                                <div>
+                                    <span>Languages</span>
+                                    <strong id="reviewLanguages">—</strong>
+                                </div>
+
+                                <div>
+                                    <span>Preferred job type</span>
+                                    <strong id="reviewJobType">—</strong>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- DOCUMENT -->
+
+                    <section class="application-review-section">
+
+                        <span class="application-review-number">
+                            04
+                        </span>
+
+                        <div class="application-review-content">
+
+                            <small>
+                                DOCUMENT
+                            </small>
+
+                            <div class="application-review-file">
+
+                                <span>CV / Resume</span>
+
+                                <strong id="reviewCvName">
+                                    —
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                            <!-- ACTIONS -->
+
+                            <div class="application-review-actions">
+
+    <button
+        type="button"
+        class="application-back-button"
+        id="backToApplicationButton"
+    >
+        Back to edit
+    </button>
+
+    <button
+        type="button"
+        class="application-submit-button"
+        id="submitApplicationButton"
+    >
+        Submit application
+    </button>
+
+</div>
+
+</div>
+<!-- END applicationReview -->
+
 
 <!-- =========================================================
-     JAVASCRIPT
+     APPLICATION SUCCESS
      ========================================================= -->
+
+<div
+    class="application-success"
+    id="applicationSuccess"
+    hidden
+>
+
+    <div class="application-success-icon">
+        ✓
+    </div>
+
+    <span class="section-label">
+        APPLICATION SUBMITTED
+    </span>
+
+    <h2>
+        You're officially
+        <em>in the running.</em>
+    </h2>
+
+    <p class="application-success-message">
+        Your application has been received successfully.
+        You can follow its progress from your candidate dashboard.
+    </p>
+
+    <div class="application-success-card">
+
+        <div>
+            <span>POSITION</span>
+
+            <strong id="applicationSuccessJobTitle">
+                —
+            </strong>
+        </div>
+
+        <div>
+            <span>
+                APPLICATION REFERENCE
+            </span>
+
+            <strong
+                class="application-success-reference"
+                id="applicationSuccessReference"
+            >
+                —
+            </strong>
+        </div>
+
+        <div>
+            <span>STATUS</span>
+
+            <strong class="application-success-status">
+                Submitted
+            </strong>
+        </div>
+
+    </div>
+
+    <div class="application-success-actions">
+
+        <button
+            type="button"
+            class="application-back-button"
+            id="applicationSuccessClose"
+        >
+            Close
+        </button>
+
+        <button
+            type="button"
+            class="application-submit-button"
+            id="applicationViewProgress"
+        >
+            View progress
+        </button>
+
+    </div>
+
+</div>
+<!-- END applicationSuccess -->
+
+
+</div>
+<!-- END application-modal-card -->
+
+
+</div>
+<!-- END applicationModal -->
+
 
 <script src="js/jobs.js?v=2"></script>
 <script src="js/navbar-auth.js?v=1"></script>

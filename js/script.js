@@ -217,7 +217,7 @@ async function updateNavbarAccount() {
         else {
 
             /* -----------------------------------------
-               No photo → create initials
+            create DP initials
             ----------------------------------------- */
 
             const firstInitial =

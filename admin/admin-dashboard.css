@@ -1968,6 +1968,2673 @@ body {
         rgba(126, 219, 141, 0.22);
 }
 
+/* =========================================================
+   ADMIN APPLICATIONS
+   ========================================================= */
+
+
+/* ================= TOOLBAR ================= */
+
+.applications-toolbar {
+    padding: 24px 26px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    border:
+        1px solid
+        var(--admin-border);
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.035),
+            rgba(255, 255, 255, 0.018)
+        );
+}
+
+
+.applications-toolbar-heading h2 {
+    color: #ffffff;
+
+    font-size: 22px;
+    font-weight: 700;
+}
+
+
+.applications-toolbar-heading p {
+    margin-top: 7px;
+
+    color:
+        rgba(255, 255, 255, 0.50);
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+
+.applications-total-count {
+    flex-shrink: 0;
+
+    padding:
+        8px
+        13px;
+
+    border:
+        1px solid
+        rgba(255, 132, 31, 0.20);
+
+    border-radius: 30px;
+
+    background:
+        rgba(255, 132, 31, 0.06);
+
+    color:
+        var(--orange);
+
+    font-size: 14px;
+    font-weight: 700;
+}
+
+
+
+/* ================= SEARCH ================= */
+
+.applications-search-row {
+    margin-top: 18px;
+}
+
+
+.applications-search {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding:
+        0
+        15px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.09);
+
+    border-radius: 14px;
+
+    background:
+        rgba(255, 255, 255, 0.025);
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.applications-search:focus-within {
+    border-color:
+        rgba(255, 132, 31, 0.45);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(255, 132, 31, 0.06);
+}
+
+
+.applications-search > span {
+    color:
+        var(--orange);
+
+    font-size: 18px;
+}
+
+
+.applications-search input {
+    width: 100%;
+
+    min-height: 48px;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    color:
+        #ffffff;
+
+    font-family: inherit;
+    font-size: 12px;
+}
+
+
+.applications-search input::placeholder {
+    color:
+        rgba(255, 255, 255, 0.30);
+}
+
+
+
+/* ================= STATUS FILTERS ================= */
+
+.applications-status-filters {
+    display: flex;
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+    margin-top: 15px;
+}
+
+
+.application-filter-button {
+    padding:
+        8px
+        13px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.08);
+
+    border-radius: 30px;
+
+    background:
+        rgba(255, 255, 255, 0.02);
+
+    color:
+        rgba(255, 255, 255, 0.856);
+
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        0.2s ease;
+}
+
+
+.application-filter-button:hover {
+    color:
+        #ffffff;
+
+    border-color:
+        rgba(255, 132, 31, 0.20);
+}
+
+
+.application-filter-button.active {
+    border-color:
+        rgba(255, 132, 31, 0.28);
+
+    background:
+        rgba(255, 132, 31, 0.08);
+
+    color:
+        var(--orange);
+}
+
+
+
+/* ================= LIST HEADING ================= */
+
+.applications-list-heading {
+    margin:
+        28px
+        0
+        12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+}
+
+
+.applications-list-heading span {
+    color:
+        rgba(255, 255, 255, 0.45);
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 1.8px;
+}
+
+
+.applications-list-heading strong {
+    color:
+        rgba(255, 255, 255, 0.50);
+
+    font-size: 11px;
+}
+
+
+
+/* ================= APPLICATION LIST ================= */
+
+.admin-applications-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 11px;
+}
+
+
+.applications-loading,
+.applications-empty {
+    padding: 28px;
+
+    border:
+        1px dashed
+        rgba(255, 255, 255, 0.08);
+
+    border-radius: 16px;
+
+    color:
+        rgba(255, 255, 255, 0.42);
+
+    font-size: 12px;
+
+    text-align: center;
+}
+
+
+
+/* ================= APPLICATION CARD ================= */
+
+.admin-application-card {
+    padding:
+        20px
+        22px;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1.5fr)
+        minmax(0, 1.2fr)
+        auto;
+
+    align-items: center;
+
+    gap: 24px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.08);
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.035),
+            rgba(255, 255, 255, 0.018)
+        );
+
+    transition:
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        background 0.2s ease;
+}
+
+
+.admin-application-card:hover {
+    transform:
+        translateY(-2px);
+
+    border-color:
+        rgba(255, 132, 31, 0.18);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 132, 31, 0.025),
+            rgba(255, 255, 255, 0.018)
+        );
+}
+
+
+
+/* ================= CANDIDATE ================= */
+
+.admin-application-reference {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color:
+        var(--orange);
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: 1px;
+}
+
+
+.admin-application-candidate h3 {
+    color:
+        #ffffff;
+
+    font-size: 17px;
+    font-weight: 700;
+}
+
+
+.admin-application-candidate p {
+    margin-top: 6px;
+
+    color:
+        rgba(255, 255, 255, 0.46);
+
+    font-size: 11px;
+}
+
+
+
+/* ================= JOB ================= */
+
+.admin-application-job > span {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color:
+        rgba(255, 255, 255, 0.589);
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 1.2px;
+}
+
+
+.admin-application-job strong {
+    display: block;
+
+    color:
+        rgba(255, 255, 255, 0.88);
+
+    font-size: 17px;
+}
+
+
+.admin-application-job p {
+    margin-top: 7px;
+
+    color:
+        rgba(255, 255, 255, 0.568);
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+
+/* ================= CARD ACTION SIDE ================= */
+
+.admin-application-actions {
+    display: flex;
+    align-items: flex-end;
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+
+.admin-application-date {
+    color:
+        rgba(255, 255, 255, 0.61);
+
+    font-size: 11px;
+
+    white-space: nowrap;
+}
+
+
+
+/* ================= STATUS ================= */
+
+.admin-application-status {
+    padding:
+        6px
+        10px;
+
+    border-radius: 30px;
+
+    border:
+        1px solid
+        rgba(255, 132, 31, 0.20);
+
+    background:
+        rgba(255, 132, 31, 0.06);
+
+    color:
+        var(--orange);
+
+    font-size: 9px;
+    font-weight: 800;
+
+    letter-spacing: 0.6px;
+
+    text-transform: uppercase;
+}
+
+
+.admin-application-status.screening {
+    color: #67b7ff;
+
+    border-color:
+        rgba(103, 183, 255, 0.20);
+
+    background:
+        rgba(103, 183, 255, 0.06);
+}
+
+
+.admin-application-status.shortlisted {
+    color: #e4c567;
+
+    border-color:
+        rgba(228, 197, 103, 0.20);
+
+    background:
+        rgba(228, 197, 103, 0.06);
+}
+
+
+.admin-application-status.interview {
+    color: #be8cff;
+
+    border-color:
+        rgba(190, 140, 255, 0.20);
+
+    background:
+        rgba(190, 140, 255, 0.06);
+}
+
+
+.admin-application-status.offer {
+    color: #6fdbb2;
+
+    border-color:
+        rgba(111, 219, 178, 0.20);
+
+    background:
+        rgba(111, 219, 178, 0.06);
+}
+
+
+.admin-application-status.hired {
+    color: #7edb8d;
+
+    border-color:
+        rgba(126, 219, 141, 0.20);
+
+    background:
+        rgba(126, 219, 141, 0.06);
+}
+
+
+.admin-application-status.rejected {
+    color: #ff7474;
+
+    border-color:
+        rgba(255, 116, 116, 0.20);
+
+    background:
+        rgba(255, 116, 116, 0.06);
+}
+
+
+.admin-application-status.withdrawn {
+    color:
+        rgba(255, 255, 255, 0.48);
+
+    border-color:
+        rgba(255, 255, 255, 0.12);
+
+    background:
+        rgba(255, 255, 255, 0.03);
+}
+
+
+
+/* ================= VIEW BUTTON ================= */
+
+.admin-view-application-button {
+    padding:
+        10px
+        15px;
+
+    border:
+        1px solid
+        rgba(255, 132, 31, 0.24);
+
+    border-radius: 30px;
+
+    background:
+        rgba(255, 132, 31, 0.06);
+
+    color:
+        var(--orange);
+
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition:
+        0.2s ease;
+}
+
+
+.admin-view-application-button:hover {
+    transform:
+        translateY(-1px);
+
+    background:
+        rgba(255, 132, 31, 0.12);
+}
+
+/* =========================================================
+   APPLICATION REVIEW MODAL
+   ========================================================= */
+
+.application-review-modal-card {
+    position: relative;
+
+    width: min(1000px, 100%);
+
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    padding: 32px;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.10);
+
+    border-radius: 24px;
+
+    background: #101010;
+
+    box-shadow:
+        0 35px 100px
+        rgba(0,0,0,0.72);
+
+    z-index: 1;
+
+    scrollbar-width: thin;
+
+    scrollbar-color:
+        rgba(255,132,31,0.55)
+        transparent;
+}
+
+
+.application-review-modal-card::-webkit-scrollbar {
+    width: 5px;
+}
+
+
+.application-review-modal-card::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+.application-review-modal-card::-webkit-scrollbar-thumb {
+    background:
+        rgba(255,132,31,0.55);
+
+    border-radius: 20px;
+}
+
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.application-review-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 24px;
+
+    padding-bottom: 25px;
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,0.07);
+}
+
+
+.application-review-header h2 {
+    margin-top: 9px;
+
+    color: #ffffff;
+
+    font-size: 32px;
+    font-weight: 800;
+
+    letter-spacing: -1.2px;
+}
+
+
+.application-review-header p {
+    margin-top: 7px;
+
+    color:
+        rgba(255,255,255,0.70);
+
+    font-size: 14px;
+}
+
+
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.application-review-loading {
+    padding: 60px 20px;
+
+    color:
+        rgba(255,255,255,0.68);
+
+    font-size: 14px;
+
+    text-align: center;
+}
+
+
+.application-review-content[hidden],
+.application-review-loading[hidden] {
+    display: none !important;
+}
+
+
+
+/* =========================================================
+   SUMMARY
+   ========================================================= */
+
+.application-review-summary {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 14px;
+
+    margin-top: 25px;
+}
+
+
+.application-review-summary > div {
+    padding: 18px;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.07);
+
+    border-radius: 15px;
+
+    background:
+        rgba(255,255,255,0.025);
+}
+
+
+.application-review-summary span {
+    display: block;
+
+    margin-bottom: 9px;
+
+    color:
+        rgba(255,255,255,0.55);
+
+    font-size: 12px;
+    font-weight: 700;
+
+    letter-spacing: 1px;
+}
+
+
+.application-review-summary strong {
+    display: block;
+
+    color: #ffffff;
+
+    font-size: 15px;
+    font-weight: 700;
+}
+
+
+.application-review-summary
+.application-review-status {
+    color: #ff841f;
+
+    text-transform: capitalize;
+}
+
+
+
+/* =========================================================
+   SECTIONS
+   ========================================================= */
+
+.application-review-section {
+    margin-top: 34px;
+
+    padding-top: 30px;
+
+    border-top:
+        1px solid
+        rgba(255,255,255,0.07);
+}
+
+
+.application-review-section-heading span {
+    color:
+        rgba(255,255,255,0.52);
+
+    font-size: 12px;
+    font-weight: 700;
+
+    letter-spacing: 1.5px;
+}
+
+
+.application-review-section-heading h3 {
+    margin-top: 7px;
+
+    color: #ffffff;
+
+    font-size: 22px;
+    font-weight: 750;
+}
+
+
+
+/* =========================================================
+   DETAIL GRID
+   ========================================================= */
+
+.application-review-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 14px;
+
+    margin-top: 20px;
+}
+
+
+.application-review-field {
+    min-width: 0;
+
+    padding: 17px;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.065);
+
+    border-radius: 14px;
+
+    background:
+        rgba(255,255,255,0.022);
+}
+
+
+.application-review-field-full {
+    grid-column:
+        1 / -1;
+}
+
+
+.application-review-field > span {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color:
+        rgba(255,255,255,0.55);
+
+    font-size: 12px;
+    font-weight: 650;
+}
+
+
+.application-review-field strong,
+.application-review-field p {
+    color:
+        rgba(255,255,255,0.88);
+
+    font-size: 14px;
+
+    line-height: 1.7;
+
+    overflow-wrap: anywhere;
+}
+
+
+.application-review-field p {
+    white-space: pre-line;
+}
+
+
+.application-review-field a {
+    color: #ff841f;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+
+.application-review-field a:hover {
+    text-decoration: underline;
+}
+
+
+
+/* =========================================================
+   CV
+   ========================================================= */
+
+.application-review-cv {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 25px;
+
+    margin-top: 20px;
+
+    padding: 20px;
+
+    border:
+        1px solid
+        rgba(255,132,31,0.16);
+
+    border-radius: 16px;
+
+    background:
+        rgba(255,132,31,0.035);
+}
+
+
+.application-review-cv strong {
+    color: #ffffff;
+
+    font-size: 15px;
+}
+
+
+.application-review-cv p {
+    margin-top: 6px;
+
+    color:
+        rgba(255,255,255,0.62);
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+
+.application-review-cv-button {
+    flex-shrink: 0;
+
+    padding:
+        11px
+        18px;
+
+    border:
+        1px solid
+        rgba(255,132,31,0.28);
+
+    border-radius: 30px;
+
+    background:
+        rgba(255,132,31,0.08);
+
+    color: #ff841f;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    text-decoration: none;
+}
+
+
+.application-review-cv-button:hover {
+    background:
+        rgba(255,132,31,0.14);
+}
+
+
+
+/* =========================================================
+   HISTORY
+   ========================================================= */
+
+.application-review-history {
+    display: flex;
+    flex-direction: column;
+
+    gap: 12px;
+
+    margin-top: 20px;
+}
+
+
+.application-review-history-item {
+    display: grid;
+
+    grid-template-columns:
+        10px
+        minmax(0, 1fr);
+
+    gap: 14px;
+
+    padding: 15px;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.06);
+
+    border-radius: 13px;
+
+    background:
+        rgba(255,255,255,0.02);
+}
+
+
+.application-review-history-dot {
+    width: 8px;
+    height: 8px;
+
+    margin-top: 7px;
+
+    border-radius: 50%;
+
+    background: #ff841f;
+}
+
+
+.application-review-history-item strong {
+    color: #ffffff;
+
+    font-size: 14px;
+
+    text-transform: capitalize;
+}
+
+
+.application-review-history-item p {
+    margin-top: 5px;
+
+    color:
+        rgba(255,255,255,0.68);
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+
+.application-review-history-item small {
+    display: block;
+
+    margin-top: 7px;
+
+    color:
+        rgba(255,255,255,0.54);
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   APPLICATION STATUS MANAGEMENT
+   ========================================================= */
+
+.application-status-manager {
+    margin-top: 25px;
+
+    padding: 22px;
+
+    border:
+        1px solid
+        rgba(255, 132, 31, 0.14);
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 132, 31, 0.035),
+            rgba(255, 255, 255, 0.018)
+        );
+}
+
+
+.application-status-manager-heading span {
+    color:
+        rgba(255, 255, 255, 0.58);
+
+    font-size: 12px;
+    font-weight: 700;
+
+    letter-spacing: 1.4px;
+}
+
+
+.application-status-manager-heading h3 {
+    margin-top: 7px;
+
+    color: #ffffff;
+
+    font-size: 21px;
+    font-weight: 750;
+}
+
+
+.application-status-manager-body {
+    margin-top: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 25px;
+}
+
+
+.application-current-stage span {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color:
+        rgba(255, 255, 255, 0.55);
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.application-current-stage strong {
+    display: block;
+
+    color: #ff841f;
+
+    font-size: 20px;
+    font-weight: 800;
+
+    text-transform: capitalize;
+}
+
+
+.application-status-actions {
+    display: flex;
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+}
+
+
+
+/* =========================================================
+   PRIMARY STATUS ACTION
+   ========================================================= */
+
+.application-next-status-button {
+    min-height: 44px;
+
+    padding:
+        0
+        19px;
+
+    border: none;
+
+    border-radius: 30px;
+
+    background:
+        linear-gradient(
+            100deg,
+            var(--orange),
+            var(--yellow)
+        );
+
+    color: #111111;
+
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.application-next-status-button:hover {
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 10px 26px
+        rgba(255, 132, 31, 0.18);
+}
+
+
+.application-next-status-button:disabled {
+    opacity: 0.55;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+
+
+/* =========================================================
+   REJECT ACTION
+   ========================================================= */
+
+.application-reject-button {
+    min-height: 44px;
+
+    padding:
+        0
+        19px;
+
+    border:
+        1px solid
+        rgba(255, 105, 105, 0.25);
+
+    border-radius: 30px;
+
+    background:
+        rgba(255, 105, 105, 0.06);
+
+    color: #ff8585;
+
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 750;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+
+.application-reject-button:hover {
+    background:
+        rgba(255, 105, 105, 0.11);
+
+    border-color:
+        rgba(255, 105, 105, 0.38);
+}
+
+
+.application-reject-button:disabled {
+    opacity: 0.55;
+
+    cursor: not-allowed;
+}
+
+
+
+/* =========================================================
+   TERMINAL STATUS
+   ========================================================= */
+
+.application-status-complete {
+    padding:
+        11px
+        15px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.08);
+
+    border-radius: 12px;
+
+    background:
+        rgba(255, 255, 255, 0.025);
+
+    color:
+        rgba(255, 255, 255, 0.68);
+
+    font-size: 13px;
+}
+
+
+
+/* =========================================================
+   STATUS MESSAGE
+   ========================================================= */
+
+.application-status-message {
+    margin-top: 16px;
+
+    padding:
+        12px
+        14px;
+
+    border-radius: 12px;
+
+    background:
+        rgba(126, 219, 141, 0.07);
+
+    color: #8ee69b;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+.application-status-message.error {
+    background:
+        rgba(255, 105, 105, 0.07);
+
+    color: #ff8585;
+}
+
+
+/* =========================================================
+   INTERVIEWS
+   ========================================================= */
+
+.interview-toolbar {
+    padding: 24px 26px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    border:
+        1px solid
+        var(--admin-border);
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.035),
+            rgba(255,255,255,0.018)
+        );
+}
+
+
+.interview-toolbar h2 {
+    color: #ffffff;
+
+    font-size: 23px;
+    font-weight: 700;
+}
+
+
+.interview-toolbar p {
+    margin-top: 7px;
+
+    color:
+        rgba(255,255,255,0.65);
+
+    font-size: 14px;
+
+    line-height: 1.6;
+}
+
+
+.create-interview-session-button {
+    min-height: 46px;
+
+    padding:
+        0
+        18px;
+
+    display: inline-flex;
+    align-items: center;
+
+    gap: 10px;
+
+    border: none;
+
+    border-radius: 30px;
+
+    background:
+        linear-gradient(
+            100deg,
+            var(--orange),
+            var(--yellow)
+        );
+
+    color: #111111;
+
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+
+.create-interview-session-button span {
+    font-size: 20px;
+    line-height: 1;
+}
+
+
+.interview-session-heading {
+    margin:
+        28px
+        0
+        12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+}
+
+
+.interview-session-heading span {
+    color:
+        rgba(255,255,255,0.58);
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 1.5px;
+}
+
+
+.interview-session-heading strong {
+    color:
+        rgba(255,255,255,0.68);
+
+    font-size: 12px;
+}
+
+
+.interview-session-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 12px;
+}
+
+
+.interview-session-empty {
+    padding: 28px;
+
+    border:
+        1px dashed
+        rgba(255,255,255,0.09);
+
+    border-radius: 16px;
+
+    color:
+        rgba(255,255,255,0.55);
+
+    font-size: 13px;
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   CREATE INTERVIEW SESSION
+   ========================================================= */
+
+.interview-create-modal-card {
+    position: relative;
+
+    width: min(920px, 100%);
+
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    padding: 32px;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.10);
+
+    border-radius: 24px;
+
+    background: #111111;
+
+    box-shadow:
+        0 35px 100px
+        rgba(0,0,0,0.70);
+
+    z-index: 1;
+
+    scrollbar-width: none;
+}
+
+
+.interview-create-modal-card::-webkit-scrollbar {
+    display: none;
+}
+
+
+
+/* =========================================================
+   SECTIONS
+   ========================================================= */
+
+.interview-form-section {
+    margin-top: 28px;
+
+    padding-bottom: 28px;
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,0.07);
+}
+
+
+.interview-form-heading {
+    margin-bottom: 20px;
+}
+
+
+.interview-form-heading > span {
+    color:
+        rgba(255,255,255,0.56);
+
+    font-size: 12px;
+    font-weight: 700;
+
+    letter-spacing: 1.4px;
+}
+
+
+.interview-form-heading h3 {
+    margin-top: 7px;
+
+    color: #ffffff;
+
+    font-size: 21px;
+    font-weight: 750;
+}
+
+
+
+/* =========================================================
+   SELECTED JOB
+   ========================================================= */
+
+.interview-selected-job {
+    margin-top: 8px;
+
+    padding: 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    border:
+        1px solid
+        rgba(255,132,31,0.16);
+
+    border-radius: 15px;
+
+    background:
+        rgba(255,132,31,0.035);
+}
+
+
+.interview-selected-job[hidden] {
+    display: none !important;
+}
+
+
+.interview-selected-job span {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color:
+        rgba(255,255,255,0.58);
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.interview-selected-job strong {
+    color: #ff841f;
+
+    font-size: 25px;
+}
+
+
+.interview-selected-job p {
+    color:
+        rgba(255,255,255,0.72);
+
+    font-size: 13px;
+
+    text-align: right;
+}
+
+
+
+/* =========================================================
+   PREVIEW
+   ========================================================= */
+
+.interview-schedule-preview {
+    margin:
+        28px
+        0;
+
+    padding: 22px;
+
+    border:
+        1px solid
+        rgba(255,132,31,0.13);
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,132,31,0.03),
+            rgba(255,255,255,0.018)
+        );
+}
+
+
+.interview-preview-stats {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 10px;
+}
+
+
+.interview-preview-stats > div {
+    padding: 15px;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.07);
+
+    border-radius: 13px;
+
+    background:
+        rgba(255,255,255,0.025);
+}
+
+
+.interview-preview-stats span {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color:
+        rgba(255,255,255,0.58);
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+
+.interview-preview-stats strong {
+    color: #ff841f;
+
+    font-size: 24px;
+}
+
+
+
+/* =========================================================
+   SLOT PREVIEW
+   ========================================================= */
+
+.interview-slot-preview {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 10px;
+
+    margin-top: 18px;
+}
+
+
+.interview-preview-slot {
+    padding:
+        13px
+        14px;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.07);
+
+    border-radius: 12px;
+
+    background:
+        rgba(255,255,255,0.025);
+}
+
+
+.interview-preview-slot span {
+    display: block;
+
+    color:
+        rgba(255,255,255,0.52);
+
+    font-size: 11px;
+}
+
+
+.interview-preview-slot strong {
+    display: block;
+
+    margin-top: 5px;
+
+    color: #ffffff;
+
+    font-size: 14px;
+}
+
+
+
+/* =========================================================
+   CAPACITY WARNING
+   ========================================================= */
+
+.interview-capacity-warning {
+    margin-top: 16px;
+
+    padding:
+        13px
+        15px;
+
+    border:
+        1px solid
+        rgba(255,184,77,0.20);
+
+    border-radius: 12px;
+
+    background:
+        rgba(255,184,77,0.06);
+
+    color: #ffc066;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+
+.interview-capacity-warning[hidden] {
+    display: none !important;
+}
+
+
+
+/* =========================================================
+   SELECT INPUTS
+   ========================================================= */
+
+.interview-create-modal-card
+.admin-input select {
+    min-height: 48px;
+
+    appearance: none;
+
+    cursor: pointer;
+}
+
+.interview-time-menu {
+    max-height: 260px;
+
+    overflow-y: auto;
+
+    scrollbar-width: none;
+}
+
+
+.interview-time-menu::-webkit-scrollbar {
+    display: none;
+}
+
+
+/* =========================================================
+   INTERVIEW FORM LAYOUT CLEANUP
+   ========================================================= */
+
+.interview-form-section
+.admin-form-grid {
+    gap:
+        18px
+        20px;
+}
+
+
+.interview-form-section
+.admin-form-grid
+.admin-input {
+    margin-bottom: 0;
+}
+
+
+.interview-form-section
+.admin-input-full {
+    margin-top: 18px;
+}
+
+
+.interview-form-section
+.admin-custom-select-trigger,
+.interview-form-section
+.admin-date-trigger {
+    min-height: 48px;
+}
+
+
+/* =========================================================
+   INTERVIEW SESSION CARDS
+   ========================================================= */
+
+.interview-session-card {
+    padding: 22px 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 26px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.08);
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.035),
+            rgba(255, 255, 255, 0.018)
+        );
+
+    transition:
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        background 0.2s ease;
+}
+
+
+.interview-session-card:hover {
+    transform: translateY(-2px);
+
+    border-color:
+        rgba(255, 132, 31, 0.20);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 132, 31, 0.028),
+            rgba(255, 255, 255, 0.018)
+        );
+}
+
+
+.interview-session-card-main {
+    min-width: 0;
+}
+
+
+.interview-session-card-main h3 {
+    margin-top: 8px;
+
+    color: #ffffff;
+
+    font-size: 19px;
+    font-weight: 750;
+}
+
+
+.interview-session-card-main p {
+    margin-top: 6px;
+
+    color:
+        rgba(255, 255, 255, 0.70);
+
+    font-size: 13px;
+
+    line-height: 1.5;
+}
+
+
+.interview-session-card-right {
+    display: flex;
+    align-items: center;
+
+    gap: 22px;
+
+    flex-shrink: 0;
+}
+
+
+.interview-session-card-slots {
+    display: grid;
+
+    grid-template-columns:
+        auto auto;
+
+    align-items: baseline;
+
+    gap:
+        4px
+        6px;
+
+    white-space: nowrap;
+}
+
+
+.interview-session-card-slots strong {
+    color: #ffffff;
+
+    font-size: 15px;
+}
+
+
+.interview-session-card-slots span {
+    color:
+        rgba(255, 255, 255, 0.58);
+
+    font-size: 12px;
+}
+
+
+.interview-review-session-button {
+    min-height: 42px;
+
+    padding:
+        0
+        18px;
+
+    border:
+        1px solid
+        rgba(255, 132, 31, 0.25);
+
+    border-radius: 30px;
+
+    background:
+        rgba(255, 132, 31, 0.07);
+
+    color: #ff841f;
+
+    font-family: inherit;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.interview-review-session-button:hover {
+    transform: translateY(-1px);
+
+    background:
+        rgba(255, 132, 31, 0.13);
+}
+
+
+
+/* =========================================================
+   INTERVIEW SESSION REVIEW MODAL
+   ========================================================= */
+
+.interview-review-modal-card {
+    position: relative;
+
+    width: min(1000px, 100%);
+
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    padding: 32px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.10);
+
+    border-radius: 24px;
+
+    background: #101010;
+
+    box-shadow:
+        0 35px 100px
+        rgba(0, 0, 0, 0.72);
+
+    z-index: 1;
+
+    scrollbar-width: none;
+}
+
+
+.interview-review-modal-card::-webkit-scrollbar {
+    display: none;
+}
+
+
+.interview-review-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 24px;
+
+    padding-bottom: 25px;
+
+    border-bottom:
+        1px solid
+        rgba(255, 255, 255, 0.07);
+}
+
+
+.interview-review-header h2 {
+    margin-top: 8px;
+
+    color: #ffffff;
+
+    font-size: 31px;
+    font-weight: 800;
+
+    letter-spacing: -1px;
+}
+
+
+.interview-review-header p {
+    margin-top: 8px;
+
+    color:
+        rgba(255, 255, 255, 0.66);
+
+    font-size: 14px;
+
+    line-height: 1.6;
+}
+
+
+.interview-review-loading {
+    padding:
+        60px
+        20px;
+
+    color:
+        rgba(255, 255, 255, 0.68);
+
+    font-size: 14px;
+
+    text-align: center;
+}
+
+
+.interview-review-loading[hidden],
+#interviewReviewContent[hidden] {
+    display: none !important;
+}
+
+
+
+/* ================= SUMMARY ================= */
+
+.interview-review-summary {
+    margin-top: 25px;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 12px;
+}
+
+
+.interview-review-summary > div {
+    padding: 17px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.07);
+
+    border-radius: 14px;
+
+    background:
+        rgba(255, 255, 255, 0.025);
+}
+
+
+.interview-review-summary span {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color:
+        rgba(255, 255, 255, 0.55);
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 1.1px;
+}
+
+
+.interview-review-summary strong {
+    color: #ffffff;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+
+.interview-review-status {
+    color: #ff841f !important;
+
+    text-transform: capitalize;
+}
+
+
+
+/* ================= SECTIONS ================= */
+
+.interview-review-section {
+    margin-top: 32px;
+
+    padding-top: 28px;
+
+    border-top:
+        1px solid
+        rgba(255, 255, 255, 0.07);
+}
+
+
+.interview-review-section-heading > span {
+    color:
+        rgba(255, 255, 255, 0.54);
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 1.5px;
+}
+
+
+.interview-review-section-heading h3 {
+    margin-top: 7px;
+
+    color: #ffffff;
+
+    font-size: 21px;
+    font-weight: 750;
+}
+
+
+
+/* ================= SESSION DETAILS ================= */
+
+.interview-review-details {
+    margin-top: 18px;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+}
+
+
+.interview-review-details > div {
+    padding: 16px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.065);
+
+    border-radius: 13px;
+
+    background:
+        rgba(255, 255, 255, 0.022);
+}
+
+
+.interview-review-details span {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color:
+        rgba(255, 255, 255, 0.56);
+
+    font-size: 12px;
+}
+
+
+.interview-review-details strong {
+    color:
+        rgba(255, 255, 255, 0.90);
+
+    font-size: 14px;
+}
+
+
+.interview-review-instructions {
+    margin-top: 12px;
+
+    padding: 17px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.065);
+
+    border-radius: 13px;
+
+    background:
+        rgba(255, 255, 255, 0.022);
+}
+
+
+.interview-review-instructions > span {
+    color:
+        rgba(255, 255, 255, 0.56);
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 1.3px;
+}
+
+
+.interview-review-instructions p {
+    margin-top: 9px;
+
+    color:
+        rgba(255, 255, 255, 0.82);
+
+    font-size: 14px;
+
+    line-height: 1.7;
+
+    white-space: pre-line;
+}
+
+
+
+/* ================= SLOT LIST ================= */
+
+.interview-review-slots {
+    margin-top: 18px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+
+.interview-review-slot {
+    padding: 18px;
+
+    display: grid;
+
+    grid-template-columns:
+        175px
+        minmax(0, 1fr)
+        auto;
+
+    align-items: center;
+
+    gap: 28px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.07);
+
+    border-radius: 15px;
+
+    background:
+        rgba(255, 255, 255, 0.023);
+}
+
+
+.interview-review-slot-number {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color:
+        rgba(255, 255, 255, 0.48);
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 1.2px;
+}
+
+
+.interview-review-slot-time {
+    color: #ff841f;
+
+    font-size: 15px;
+    font-weight: 800;
+    
+    display: block;
+
+    white-space: nowrap;
+}
+
+
+.interview-review-candidate strong {
+    display: block;
+
+    color: #ffffff;
+
+    font-size: 16px;
+    font-weight: 750;
+}
+
+
+.interview-review-candidate p {
+    margin-top: 5px;
+
+    color:
+        rgba(255, 255, 255, 0.64);
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+.interview-review-empty-candidate {
+    color:
+        rgba(255, 255, 255, 0.46) !important;
+}
+
+
+.interview-review-application-button {
+    min-height: 40px;
+
+    padding:
+        0
+        16px;
+
+    border:
+        1px solid
+        rgba(255, 132, 31, 0.24);
+
+    border-radius: 30px;
+
+    background:
+        rgba(255, 132, 31, 0.07);
+
+    color: #ff841f;
+
+    font-family: inherit;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+
+.interview-review-application-button:hover {
+    background:
+        rgba(255, 132, 31, 0.13);
+}
+
+
+.interview-review-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 12px;
+}
+
+.interview-confirm-session-button {
+    min-height: 44px;
+
+    padding: 0 21px;
+
+    border: none;
+    border-radius: 30px;
+
+    background:
+        linear-gradient(
+            100deg,
+            var(--orange),
+            var(--yellow)
+        );
+
+    color: #111111;
+
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        opacity 0.2s ease;
+}
+
+
+.interview-confirm-session-button:hover {
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 10px 26px
+        rgba(255, 132, 31, 0.20);
+}
+
+
+.interview-confirm-session-button:disabled {
+    opacity: 0.55;
+
+    cursor: not-allowed;
+
+    transform: none;
+
+    box-shadow: none;
+}
+
+#interviewSessionReviewModal
+.interview-review-actions {
+    margin-top: 28px !important;
+}
+
+.interview-confirm-session-button[hidden] {
+    display: none !important;
+}
+
+
+/* Application modal must appear ABOVE interview review */
+#interviewSessionReviewModal {
+    z-index: 5000;
+}
+
+
+#applicationReviewModal {
+    z-index: 6500;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 760px) {
+
+    .interview-session-card {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .interview-session-card-right {
+        width: 100%;
+
+        justify-content: space-between;
+    }
+
+
+    .interview-review-summary {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+
+    .interview-review-details {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .interview-review-slot {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .interview-review-application-button {
+        width: 100%;
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .interview-form-section
+    .admin-form-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .interview-create-modal-card {
+        padding: 22px;
+    }
+
+
+    .interview-preview-stats {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+
+    .interview-slot-preview {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .interview-selected-job {
+        align-items:
+            flex-start;
+
+        flex-direction:
+            column;
+    }
+
+
+    .interview-selected-job p {
+        text-align: left;
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .interview-toolbar {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .create-interview-session-button {
+        width: 100%;
+
+        justify-content: center;
+    }
+
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .application-status-manager-body {
+        align-items:
+            flex-start;
+
+        flex-direction:
+            column;
+    }
+
+
+    .application-status-actions {
+        width: 100%;
+
+        justify-content:
+            flex-start;
+    }
+
+
+    .application-next-status-button,
+    .application-reject-button {
+        width: 100%;
+    }
+
+}
+
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .application-review-modal-card {
+        padding: 22px;
+    }
+
+
+    .application-review-summary {
+        grid-template-columns: 1fr;
+    }
+
+
+    .application-review-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .application-review-field-full {
+        grid-column: auto;
+    }
+
+
+    .application-review-cv {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+}
+
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 850px) {
+
+    .admin-application-card {
+        grid-template-columns:
+            1fr;
+
+        gap: 18px;
+    }
+
+
+    .admin-application-actions {
+        align-items:
+            flex-start;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .applications-toolbar {
+        align-items:
+            flex-start;
+
+        flex-direction:
+            column;
+    }
+
+}
+
+
 /* ================= MOBILE ================= */
 
 @media (max-width: 700px) {

@@ -2,6 +2,11 @@
     display: none;
 }
 
+
+/* =========================================================
+   ROOT VARIABLES
+   ========================================================= */
+
 :root {
     --black: #050505;
     --black-soft: #0b0b0b;
@@ -22,31 +27,43 @@
 }
 
 
-/* ================= RESET ================= */
+/* =========================================================
+   RESET
+   ========================================================= */
 
 * {
     margin: 0;
     padding: 0;
+
     box-sizing: border-box;
 }
+
 
 html {
     scroll-behavior: smooth;
 }
 
+
 body {
     background: var(--black);
+
     color: var(--white);
+
     font-family: "Inter", sans-serif;
+
     overflow-x: hidden;
 }
 
 
-/* ================= BACKGROUND ================= */
+/* =========================================================
+   BACKGROUND
+   ========================================================= */
 
 body::before {
     content: "";
+
     position: fixed;
+
     inset: 0;
 
     pointer-events: none;
@@ -84,12 +101,14 @@ body::before {
     z-index: -2;
 }
 
+
 .glow-one {
     background: var(--orange);
 
     right: -200px;
     top: -200px;
 }
+
 
 .glow-two {
     background: var(--yellow);
@@ -99,12 +118,15 @@ body::before {
 }
 
 
-/* ================= NAVBAR ================= */
+/* =========================================================
+   NAVBAR
+   ========================================================= */
 
 .navbar {
     height: 82px;
 
     position: sticky;
+
     top: 0;
 
     z-index: 100;
@@ -114,20 +136,26 @@ body::before {
 
     padding: 0 6%;
 
-    background: rgba(5, 5, 5, 0.72);
+    background:
+        rgba(5, 5, 5, 0.72);
 
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
 
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom:
+        1px solid
+        rgba(255, 255, 255, 0.06);
 }
 
 
-/* LOGO */
+/* =========================================================
+   LOGO
+   ========================================================= */
 
 .logo {
     display: flex;
     align-items: center;
+
     gap: 11px;
 
     text-decoration: none;
@@ -148,18 +176,23 @@ body::before {
     display: grid;
     place-items: center;
 
-    border: 1px solid var(--orange);
+    border:
+        1px solid
+        var(--orange);
 
     border-radius: 9px;
 
     color: var(--orange);
 
     box-shadow:
-        0 0 20px rgba(255, 132, 31, 0.18);
+        0 0 20px
+        rgba(255, 132, 31, 0.18);
 }
 
 
-/* NAV LINKS */
+/* =========================================================
+   NAV LINKS
+   ========================================================= */
 
 .nav-links {
     display: flex;
@@ -169,22 +202,28 @@ body::before {
     margin-left: 70px;
 }
 
+
 .nav-links a {
     position: relative;
 
-    color: #85827d;
+    color:
+        rgba(255, 255, 255, 0.72);
 
     text-decoration: none;
 
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: 500;
 
-    transition: 0.25s ease;
+    transition:
+        color 0.25s ease;
 }
+
 
 .nav-links a:hover,
 .nav-links a.active {
-    color: white;
+    color: #ffffff;
 }
+
 
 .nav-links a.active::after {
     content: "";
@@ -199,60 +238,81 @@ body::before {
     background: var(--orange);
 
     left: 50%;
-    transform: translateX(-50%);
+
+    transform:
+        translateX(-50%);
 
     bottom: -12px;
 
-    box-shadow: 0 0 12px var(--orange);
+    box-shadow:
+        0 0 12px
+        var(--orange);
 }
 
 
-/* NAV RIGHT */
+/* =========================================================
+   NAV RIGHT
+   ========================================================= */
 
 .nav-right {
     margin-left: auto;
 
     display: flex;
-
     align-items: center;
 
     gap: 12px;
 }
 
 
-/* SEARCH */
+/* =========================================================
+   OLD NAVBAR SEARCH
+   ========================================================= */
 
 .search-trigger {
     display: flex;
     align-items: center;
+
     gap: 9px;
 
-    padding: 11px 68px;
+    padding:
+        11px
+        68px;
 
-    color: #85827d;
+    color:
+        rgba(255, 255, 255, 0.62);
 
     background: var(--glass);
 
-    border: 1px solid var(--orange-border);
+    border:
+        1px solid
+        var(--orange-border);
 
     border-radius: 30px;
 
     cursor: pointer;
 
     font-family: inherit;
-    font-size: 11px;
 
-    transition: 0.3s;
+    font-size: 12px;
+
+    transition:
+        color 0.3s ease,
+        background 0.3s ease,
+        box-shadow 0.3s ease;
 }
+
 
 .search-trigger:hover {
-    color: white;
+    color: #ffffff;
 
-    background: rgba(255, 132, 31, 0.07);
+    background:
+        rgba(255, 132, 31, 0.07);
 
     box-shadow:
-        0 0 25px rgba(255, 132, 31, 0.08);
+        0 0 25px
+        rgba(255, 132, 31, 0.08);
 }
+
 
 .search-symbol {
     color: var(--orange);
@@ -261,32 +321,70 @@ body::before {
 }
 
 
-/* SIGN IN */
+/* =========================================================
+   SIGN IN
+   ========================================================= */
 
 .signin-btn {
-    padding: 11px 18px;
+    padding:
+        11px
+        18px;
 
     border-radius: 30px;
 
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.12);
 
-    color: #ddd;
+    color: #dddddd;
 
     text-decoration: none;
 
     font-size: 11px;
 
-    transition: 0.3s;
+    transition:
+        color 0.3s ease,
+        border-color 0.3s ease;
 }
 
+
 .signin-btn:hover {
-    border-color: var(--orange-border);
+    border-color:
+        var(--orange-border);
 
     color: var(--orange);
 }
 
 
-/* ================= EXPANDED SEARCH ================= */
+#signInLink {
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    transition:
+        color 0.2s ease,
+        opacity 0.2s ease;
+}
+
+
+#signInLink:visited {
+    color: #ffffff;
+}
+
+
+#signInLink:hover {
+    color: #ff8a00;
+
+    text-decoration: none;
+}
+
+
+/* =========================================================
+   EXPANDED SEARCH
+   ========================================================= */
 
 .expanded-search {
     display: none;
@@ -298,11 +396,13 @@ body::before {
     gap: 10px;
 }
 
+
 .search-mode .logo,
 .search-mode .nav-links,
 .search-mode .nav-right {
     display: none;
 }
+
 
 .search-mode .expanded-search {
     display: flex;
@@ -326,26 +426,31 @@ body::before {
 
     background: transparent;
 
-    color: white;
+    color: #ffffff;
 
     font-family: inherit;
 
     font-size: 14px;
 }
 
+
 .expanded-search input::placeholder {
-    color: #666;
+    color: #666666;
 }
 
 
-/* FILTER BUTTON */
+/* =========================================================
+   FILTER BUTTON
+   ========================================================= */
 
 .filter-btn,
 .search-btn,
 .close-search {
     border-radius: 30px;
 
-    padding: 10px 15px;
+    padding:
+        10px
+        15px;
 
     font-family: inherit;
 
@@ -357,24 +462,30 @@ body::before {
 
 .filter-btn {
     display: flex;
-    gap: 10px;
     align-items: center;
+
+    gap: 10px;
 
     background: var(--glass);
 
-    border: 1px solid var(--orange-border);
+    border:
+        1px solid
+        var(--orange-border);
 
-    color: #ccc;
+    color: #cccccc;
 
     font-size: 10px;
 }
+
 
 .filter-btn span {
     color: var(--orange);
 }
 
 
-/* SEARCH BUTTON */
+/* =========================================================
+   SEARCH BUTTON
+   ========================================================= */
 
 .search-btn {
     background:
@@ -386,10 +497,9 @@ body::before {
 
     border: none;
 
-    color: #111;
+    color: #111111;
 
     font-size: 10px;
-
     font-weight: 800;
 
     text-transform: uppercase;
@@ -398,27 +508,33 @@ body::before {
 }
 
 
-/* CLOSE */
+/* =========================================================
+   CLOSE SEARCH
+   ========================================================= */
 
 .close-search {
-    background: transparent;
-
-    border: 1px solid rgba(255, 255, 255, 0.12);
-
-    color: white;
-
-    font-size: 20px;
-
-    line-height: 1;
-
     width: 38px;
     height: 38px;
 
     padding: 0;
+
+    background: transparent;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.12);
+
+    color: #ffffff;
+
+    font-size: 20px;
+
+    line-height: 1;
 }
 
 
-/* FILTER DROPDOWN */
+/* =========================================================
+   FILTER DROPDOWN
+   ========================================================= */
 
 .filter-dropdown {
     display: none;
@@ -434,60 +550,48 @@ body::before {
 
     border-radius: 14px;
 
-    background: rgba(15, 14, 13, 0.97);
+    background:
+        rgba(15, 14, 13, 0.97);
 
-    border: 1px solid var(--orange-border);
+    border:
+        1px solid
+        var(--orange-border);
 
     box-shadow:
-        0 25px 70px rgba(0, 0, 0, 0.6);
+        0 25px 70px
+        rgba(0, 0, 0, 0.6);
 }
+
 
 .filter-dropdown.show {
     display: block;
 }
+
 
 .filter-option {
     padding: 11px;
 
     border-radius: 8px;
 
-    color: #999;
+    color: #999999;
 
     font-size: 11px;
 
     cursor: pointer;
 }
 
-.filter-option:hover {
-    background: rgba(255, 132, 31, 0.1);
 
-    color: white;
+.filter-option:hover {
+    background:
+        rgba(255, 132, 31, 0.10);
+
+    color: #ffffff;
 }
+
 
 /* =========================================================
    NAVBAR PROFILE
    ========================================================= */
-
-#signInLink {
-    color: #ffffff;
-    text-decoration: none;
-
-    font-size: 14px;
-    font-weight: 500;
-
-    transition:
-        color 0.2s ease,
-        opacity 0.2s ease;
-}
-
-#signInLink:visited {
-    color: #ffffff;
-}
-
-#signInLink:hover {
-    color: #ff8a00;
-    text-decoration: none;
-}
 
 .profile-nav-icon {
     display: none;
@@ -501,7 +605,9 @@ body::before {
     align-items: center;
     justify-content: center;
 
-    background: transparent !important;
+    background:
+        transparent !important;
+
     border: none;
 
     border-radius: 50%;
@@ -512,7 +618,9 @@ body::before {
 }
 
 
-/* Logged-in navbar state */
+/* =========================================================
+   LOGGED-IN NAVBAR STATE
+   ========================================================= */
 
 body.logged-in #signInLink {
     display: none;
@@ -524,7 +632,9 @@ body.logged-in .profile-nav-icon {
 }
 
 
-/* Actual uploaded profile photo */
+/* =========================================================
+   NAV PROFILE PHOTO
+   ========================================================= */
 
 .nav-profile-avatar {
     width: 40px;
@@ -542,7 +652,9 @@ body.logged-in .profile-nav-icon {
 }
 
 
-/* Initials fallback */
+/* =========================================================
+   NAV PROFILE INITIALS
+   ========================================================= */
 
 .nav-profile-initials {
     width: 40px;
@@ -571,44 +683,35 @@ body.logged-in .profile-nav-icon {
 }
 
 
-/* No square hover background */
-
 .profile-nav-icon:hover {
-    background: transparent !important;
+    background:
+        transparent !important;
 }
 
 
-/* Photo hover */
-
-.profile-nav-icon:hover .nav-profile-avatar {
-    transform: scale(1.08);
+.profile-nav-icon:hover
+.nav-profile-avatar {
+    transform:
+        scale(1.08);
 
     filter:
         drop-shadow(
-            0 0 7px rgba(255, 138, 0, 0.5)
+            0 0 7px
+            rgba(255, 138, 0, 0.5)
         );
 }
 
 
-/* Initials hover */
-
-.profile-nav-icon:hover .nav-profile-initials {
-    transform: scale(1.08);
+.profile-nav-icon:hover
+.nav-profile-initials {
+    transform:
+        scale(1.08);
 
     box-shadow:
-        0 0 10px rgba(255, 138, 0, 0.45);
+        0 0 10px
+        rgba(255, 138, 0, 0.45);
 }
 
-
-/* LOGGED-IN STATE */
-
-body.logged-in #signInLink {
-    display: none;
-}
-
-body.logged-in .profile-nav-icon {
-    display: inline-flex;
-}
 
 /* =========================================================
    NAVBAR NOTIFICATIONS
@@ -621,15 +724,15 @@ body.logged-in .profile-nav-icon {
 }
 
 
-/* Only logged-in users see notifications */
-
 body.logged-in
 .notification-nav {
     display: block;
 }
 
 
-/* BELL BUTTON */
+/* =========================================================
+   NOTIFICATION BELL
+   ========================================================= */
 
 .notification-trigger {
     position: relative;
@@ -691,7 +794,9 @@ body.logged-in
 }
 
 
-/* UNREAD STATE */
+/* =========================================================
+   UNREAD NOTIFICATION STATE
+   ========================================================= */
 
 .notification-trigger.has-unread {
     color: var(--orange);
@@ -739,7 +844,9 @@ body.logged-in
 .notification-panel {
     position: absolute;
 
-    top: calc(100% + 12px);
+    top:
+        calc(100% + 12px);
+
     right: 0;
 
     width: 360px;
@@ -784,7 +891,9 @@ body.logged-in
 }
 
 
-/* PANEL HEADER */
+/* =========================================================
+   NOTIFICATION PANEL HEADER
+   ========================================================= */
 
 .notification-panel-header {
     padding:
@@ -804,7 +913,8 @@ body.logged-in
 }
 
 
-.notification-panel-header span:first-child {
+.notification-panel-header
+span:first-child {
     color:
         rgba(255, 255, 255, 0.45);
 
@@ -832,16 +942,86 @@ body.logged-in
 }
 
 
-/* NOTIFICATION LIST */
+/* =========================================================
+   NOTIFICATION LIST
+   ========================================================= */
 
 .notification-list {
     max-height: 390px;
 
     overflow-y: auto;
+
+    /* Firefox */
+    scrollbar-width: none;
+
+    /* Old Edge / IE */
+    -ms-overflow-style: none;
+
+    /* Prevent scroll chaining outside the panel */
+    overscroll-behavior: contain;
 }
 
 
-/* EMPTY STATE */
+/* Chrome / Edge / Safari */
+
+.notification-list::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+}
+
+
+
+.notification-item {
+    position: relative;
+
+    padding: 16px 18px 16px 20px;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+
+.notification-item.application-notification {
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255, 132, 31, 0.10) 0%,
+            rgba(255, 132, 31, 0.04) 18%,
+            rgba(255, 132, 31, 0.00) 48%
+        );
+
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 132, 31, 0.06);
+}
+
+.notification-item.application-notification::before {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    top: 12px;
+    bottom: 12px;
+
+    width: 3px;
+
+    border-radius: 999px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #ff8a1f 0%,
+            #ffb44d 100%
+        );
+
+    box-shadow:
+        0 0 10px rgba(255, 132, 31, 0.35);
+}
+
+
+/* =========================================================
+   NOTIFICATION EMPTY STATE
+   ========================================================= */
 
 .notification-empty {
     padding:
@@ -870,7 +1050,188 @@ body.logged-in
     line-height: 1.6;
 }
 
-/* ================= HERO ================= */
+
+/* =========================================================
+   NOTIFICATION ITEMS
+   ========================================================= */
+
+.notification-item {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: 8px 1fr;
+
+    gap: 12px;
+
+    padding: 16px;
+
+    border: 0;
+    border-bottom:
+        1px solid
+        rgba(255,255,255,0.06);
+
+    background: transparent;
+
+    color: white;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    font-family: inherit;
+
+    transition:
+        background 0.2s ease;
+}
+
+
+.notification-item:hover {
+    background:
+        rgba(255,255,255,0.035);
+}
+
+
+.notification-item-indicator {
+    width: 6px;
+    height: 6px;
+
+    margin-top: 7px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255,255,255,0.16);
+}
+
+
+.notification-item.unread
+.notification-item-indicator {
+    background:
+        #ff841f;
+
+    box-shadow:
+        0 0 12px
+        rgba(255,132,31,0.55);
+}
+
+
+.notification-item-content {
+    min-width: 0;
+}
+
+
+.notification-item-top {
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    gap: 12px;
+
+    margin-bottom: 5px;
+}
+
+
+.notification-item-top strong {
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.notification-item-top span {
+    flex-shrink: 0;
+
+    color:
+        rgba(255,255,255,0.38);
+
+    font-size: 10px;
+}
+
+
+.notification-item-content p {
+    margin: 0;
+
+    color:
+        rgba(255,255,255,0.60);
+
+    font-size: 11px;
+
+    line-height: 1.55;
+}
+
+
+.notification-item-action {
+    display: inline-block;
+
+    margin-top: 9px;
+
+    color: #ff841f;
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   PROFILE PAGE ONLY - SIGN OUT
+   ========================================================= */
+
+.profile-page-signout {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-height: 40px;
+
+    padding:
+        0
+        18px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.14);
+
+    border-radius: 30px;
+
+    background: transparent;
+
+    color: #ffffff;
+
+    font-family: inherit;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    line-height: 1;
+
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    transition:
+        color 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+
+.profile-page-signout:hover {
+    color: var(--orange);
+
+    border-color:
+        rgba(255, 132, 31, 0.38);
+
+    background:
+        rgba(255, 132, 31, 0.06);
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
 
 .hero {
     min-height: 720px;
@@ -891,7 +1252,9 @@ body.logged-in
 }
 
 
-/* EYEBROW */
+/* =========================================================
+   EYEBROW
+   ========================================================= */
 
 .eyebrow {
     display: flex;
@@ -899,14 +1262,16 @@ body.logged-in
 
     gap: 9px;
 
-    color: #85827d;
+    color:
+        rgba(255, 255, 255, 0.65);
 
-    font-size: 10px;
+    font-size: 11px;
 
     letter-spacing: 2.5px;
 
     font-weight: 700;
 }
+
 
 .eyebrow span {
     width: 7px;
@@ -917,16 +1282,21 @@ body.logged-in
     background: var(--orange);
 
     box-shadow:
-        0 0 15px var(--orange);
+        0 0 15px
+        var(--orange);
 }
 
 
-/* HERO TITLE */
+/* =========================================================
+   HERO TITLE
+   ========================================================= */
 
 .hero h1 {
     max-width: 760px;
 
-    margin: 24px 0;
+    margin:
+        24px
+        0;
 
     font-size:
         clamp(
@@ -939,6 +1309,7 @@ body.logged-in
 
     letter-spacing: -5px;
 }
+
 
 .hero h1 em,
 h2 em {
@@ -960,27 +1331,35 @@ h2 em {
 }
 
 
-/* DESCRIPTION */
+/* =========================================================
+   HERO DESCRIPTION
+   ========================================================= */
 
 .hero-description {
     max-width: 550px;
 
-    color: var(--muted);
+    color:
+        rgba(255, 255, 255, 0.72);
 
-    font-size: 14px;
+    font-size: 16px;
 
-    line-height: 1.9;
+    line-height: 1.8;
 }
 
 
-/* BUTTONS */
+/* =========================================================
+   HERO BUTTONS
+   ========================================================= */
 
 .hero-actions {
     display: flex;
 
     gap: 12px;
 
-    margin: 32px 0 50px;
+    margin:
+        32px
+        0
+        50px;
 }
 
 
@@ -992,19 +1371,22 @@ h2 em {
 
     gap: 18px;
 
-    padding: 14px 20px;
+    padding:
+        14px
+        20px;
 
     border-radius: 30px;
 
     text-decoration: none;
 
-    font-size: 11px;
+    font-size: 12px;
 
     font-weight: 700;
 }
 
+
 .primary-btn {
-    color: #111;
+    color: #111111;
 
     background:
         linear-gradient(
@@ -1018,30 +1400,41 @@ h2 em {
         rgba(255, 132, 31, 0.15);
 }
 
-.secondary-btn {
-    color: #ccc;
 
-    border: 1px solid rgba(255, 255, 255, 0.12);
+.secondary-btn {
+    color:
+        rgba(255, 255, 255, 0.85);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.12);
 
     background: var(--glass);
 }
 
+
 .primary-btn:hover {
-    transform: translateY(-2px);
+    transform:
+        translateY(-2px);
 }
+
 
 .secondary-btn:hover {
-    border-color: var(--orange-border);
+    border-color:
+        var(--orange-border);
 }
 
 
-/* HERO STATS */
+/* =========================================================
+   HERO STATS
+   ========================================================= */
 
 .hero-stats {
     display: flex;
 
     gap: 55px;
 }
+
 
 .hero-stats div {
     display: flex;
@@ -1051,14 +1444,20 @@ h2 em {
     gap: 6px;
 }
 
+
 .hero-stats strong {
-    font-size: 22px;
+    color: #ffffff;
+
+    font-size: 24px;
 }
 
-.hero-stats span {
-    color: #62605c;
 
-    font-size: 9px;
+.hero-stats span {
+    color:
+        rgba(255, 255, 255, 0.55);
+
+    font-size: 10px;
+    font-weight: 500;
 
     letter-spacing: 1.5px;
 
@@ -1066,28 +1465,36 @@ h2 em {
 }
 
 
-/* ================= GLASS ================= */
+/* =========================================================
+   GLASS
+   ========================================================= */
 
 .glass {
     background:
         linear-gradient(
             145deg,
-            rgba(255,255,255,0.075),
-            rgba(255,255,255,0.025)
+            rgba(255, 255, 255, 0.075),
+            rgba(255, 255, 255, 0.025)
         );
 
-    border: 1px solid var(--border);
+    border:
+        1px solid
+        var(--border);
 
     backdrop-filter: blur(22px);
     -webkit-backdrop-filter: blur(22px);
 
     box-shadow:
-        inset 0 1px rgba(255,255,255,0.05),
-        0 30px 90px rgba(0,0,0,0.3);
+        inset 0 1px
+        rgba(255, 255, 255, 0.05),
+        0 30px 90px
+        rgba(0, 0, 0, 0.3);
 }
 
 
-/* ================= DASHBOARD ================= */
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
 
 .dashboard-card {
     position: relative;
@@ -1098,6 +1505,7 @@ h2 em {
 
     overflow: hidden;
 }
+
 
 .dashboard-card::before {
     content: "";
@@ -1126,22 +1534,28 @@ h2 em {
     align-items: flex-start;
 }
 
+
 .card-label,
 .section-label {
-    color: #77736d;
+    color:
+        rgba(255, 255, 255, 0.55);
 
-    font-size: 9px;
+    font-size: 10px;
 
     font-weight: 700;
 
     letter-spacing: 2px;
 }
 
+
 .dashboard-header h3 {
     margin-top: 9px;
 
-    font-size: 24px;
+    color: #ffffff;
+
+    font-size: 26px;
 }
+
 
 .dashboard-header h3 span {
     color: var(--orange);
@@ -1157,8 +1571,9 @@ h2 em {
 
     color: #78bf89;
 
-    font-size: 9px;
+    font-size: 10px;
 }
+
 
 .online i {
     width: 6px;
@@ -1169,15 +1584,19 @@ h2 em {
     background: #78bf89;
 
     box-shadow:
-        0 0 10px #78bf89;
+        0 0 10px
+        #78bf89;
 }
 
 
-/* PROFILE PROGRESS */
+/* =========================================================
+   PROFILE PROGRESS
+   ========================================================= */
 
 .profile-progress {
     margin-top: 30px;
 }
+
 
 .progress-top {
     display: flex;
@@ -1186,24 +1605,27 @@ h2 em {
 
     margin-bottom: 9px;
 
-    color: #777;
+    color: #777777;
 
     font-size: 10px;
 }
+
 
 .progress-top strong {
     color: var(--orange);
 }
 
+
 .progress-bar {
     height: 5px;
 
-    background: #222;
+    background: #222222;
 
     border-radius: 10px;
 
     overflow: hidden;
 }
+
 
 .progress-bar span {
     display: block;
@@ -1222,26 +1644,34 @@ h2 em {
 }
 
 
-/* DASHBOARD TILES */
+/* =========================================================
+   DASHBOARD TILES
+   ========================================================= */
 
 .dashboard-grid {
     display: grid;
 
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns:
+        1fr
+        1fr;
 
     gap: 10px;
 
     margin-top: 12px;
 }
 
+
 .dashboard-tile {
     padding: 20px;
 
     border-radius: 16px;
 
-    background: rgba(0,0,0,0.2);
+    background:
+        rgba(0, 0, 0, 0.2);
 
-    border: 1px solid rgba(255,255,255,0.07);
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.07);
 
     display: flex;
 
@@ -1250,19 +1680,33 @@ h2 em {
     gap: 9px;
 }
 
-.dashboard-tile span,
-.dashboard-tile small {
-    color: #686661;
 
-    font-size: 9px;
+.dashboard-tile span {
+    color:
+        rgba(255, 255, 255, 0.58);
+
+    font-size: 10px;
 }
+
 
 .dashboard-tile strong {
-    font-size: 28px;
+    color: #ffffff;
+
+    font-size: 30px;
 }
 
 
-/* TIP */
+.dashboard-tile small {
+    color:
+        rgba(255, 255, 255, 0.46);
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   TIP
+   ========================================================= */
 
 .tip-box {
     display: flex;
@@ -1279,8 +1723,10 @@ h2 em {
         rgba(255, 132, 31, 0.06);
 
     border:
-        1px solid rgba(255, 132, 31, 0.12);
+        1px solid
+        rgba(255, 132, 31, 0.12);
 }
+
 
 .tip-icon {
     color: var(--orange);
@@ -1288,29 +1734,37 @@ h2 em {
     font-size: 16px;
 }
 
+
 .tip-box b {
-    font-size: 10px;
+    color: #ffffff;
+
+    font-size: 11px;
 }
+
 
 .tip-box p {
     margin-top: 5px;
 
-    color: #777;
+    color:
+        rgba(255, 255, 255, 0.58);
 
-    font-size: 10px;
+    font-size: 11px;
 
     line-height: 1.7;
 }
 
 
-/* ================= SECTIONS ================= */
+/* =========================================================
+   SECTIONS
+   ========================================================= */
 
 .opportunities,
 .latest-jobs,
 .about,
 .contact {
     padding:
-        100px 8%;
+        100px
+        8%;
 }
 
 
@@ -1324,9 +1778,12 @@ h2 em {
     margin-bottom: 35px;
 }
 
+
 .section-heading h2,
 .about h2 {
     margin-top: 10px;
+
+    color: #ffffff;
 
     font-size: 48px;
 
@@ -1334,6 +1791,7 @@ h2 em {
 
     letter-spacing: -2.5px;
 }
+
 
 .view-link {
     color: var(--orange);
@@ -1344,7 +1802,9 @@ h2 em {
 }
 
 
-/* ================= MAIN GRID ================= */
+/* =========================================================
+   MAIN GRID
+   ========================================================= */
 
 .main-grid {
     display: grid;
@@ -1357,14 +1817,18 @@ h2 em {
 }
 
 
-/* ================= CAREER CARD ================= */
+/* =========================================================
+   CAREER CARD
+   ========================================================= */
 
 .career-card {
     min-height: 410px;
 
     display: grid;
 
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns:
+        1fr
+        1fr;
 
     overflow: hidden;
 
@@ -1372,7 +1836,9 @@ h2 em {
 }
 
 
-/* IMAGE */
+/* =========================================================
+   CAREER IMAGE
+   ========================================================= */
 
 .career-image {
     position: relative;
@@ -1395,6 +1861,7 @@ h2 em {
     overflow: hidden;
 }
 
+
 .career-image::after {
     content: "";
 
@@ -1408,11 +1875,15 @@ h2 em {
 
     border-radius: 50%;
 
-    border: 1px solid rgba(255, 178, 73, 0.22);
+    border:
+        1px solid
+        rgba(255, 178, 73, 0.22);
 
     box-shadow:
-        0 0 70px rgba(255, 132, 31, 0.12);
+        0 0 70px
+        rgba(255, 132, 31, 0.12);
 }
+
 
 .slide-number {
     position: absolute;
@@ -1420,10 +1891,12 @@ h2 em {
     top: 22px;
     left: 22px;
 
-    color: #999;
+    color:
+        rgba(255, 255, 255, 0.60);
 
-    font-size: 9px;
+    font-size: 10px;
 }
+
 
 .career-tag {
     position: absolute;
@@ -1431,19 +1904,28 @@ h2 em {
     bottom: 22px;
     left: 22px;
 
-    padding: 7px 10px;
+    padding:
+        7px
+        10px;
 
     border-radius: 20px;
 
-    border: 1px solid rgba(255,255,255,0.15);
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.15);
 
-    font-size: 8px;
+    color:
+        rgba(255, 255, 255, 0.80);
+
+    font-size: 9px;
 
     letter-spacing: 1px;
 }
 
 
-/* CONTENT */
+/* =========================================================
+   CAREER CONTENT
+   ========================================================= */
 
 .career-content {
     padding: 42px;
@@ -1453,8 +1935,12 @@ h2 em {
     flex-direction: column;
 }
 
+
 .career-content h3 {
-    margin: 18px 0 14px;
+    margin:
+        18px
+        0
+        14px;
 
     font-size: 34px;
 
@@ -1463,16 +1949,20 @@ h2 em {
     letter-spacing: -1.5px;
 }
 
-.career-content p {
-    color: #88847e;
 
-    font-size: 11px;
+.career-content p {
+    color:
+        rgba(255, 255, 255, 0.66);
+
+    font-size: 13px;
 
     line-height: 1.8;
 }
 
 
-/* SLIDER */
+/* =========================================================
+   SLIDER
+   ========================================================= */
 
 .slider-controls {
     margin-top: auto;
@@ -1484,26 +1974,32 @@ h2 em {
     align-items: center;
 }
 
+
 .slider-controls button {
     width: 38px;
     height: 38px;
 
     border-radius: 50%;
 
-    border: 1px solid rgba(255,255,255,0.12);
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.12);
 
     background: transparent;
 
-    color: white;
+    color: #ffffff;
 
     cursor: pointer;
 }
 
+
 .slider-controls button:hover {
-    border-color: var(--orange);
+    border-color:
+        var(--orange);
 
     color: var(--orange);
 }
+
 
 .slider-bars {
     display: flex;
@@ -1511,25 +2007,30 @@ h2 em {
     gap: 5px;
 }
 
+
 .slider-bars i {
     width: 18px;
     height: 2px;
 
-    background: #333;
+    background: #333333;
 }
+
 
 .slider-bars i.active {
     background: var(--orange);
 }
 
 
-/* ================= CALENDAR ================= */
+/* =========================================================
+   CALENDAR
+   ========================================================= */
 
 .calendar-card {
     padding: 28px;
 
     border-radius: 24px;
 }
+
 
 .calendar-header {
     display: flex;
@@ -1539,11 +2040,13 @@ h2 em {
     align-items: flex-start;
 }
 
+
 .calendar-header h3 {
     margin-top: 9px;
 
     font-size: 20px;
 }
+
 
 .calendar-connect {
     width: 36px;
@@ -1551,9 +2054,12 @@ h2 em {
 
     border-radius: 50%;
 
-    border: 1px solid var(--orange-border);
+    border:
+        1px solid
+        var(--orange-border);
 
-    background: rgba(255,132,31,0.06);
+    background:
+        rgba(255, 132, 31, 0.06);
 
     color: var(--orange);
 
@@ -1561,7 +2067,9 @@ h2 em {
 }
 
 
-/* WEEK */
+/* =========================================================
+   CALENDAR WEEK
+   ========================================================= */
 
 .calendar-weekdays,
 .calendar-days {
@@ -1575,17 +2083,21 @@ h2 em {
     gap: 5px;
 }
 
+
 .calendar-weekdays {
     margin-top: 28px;
 
-    color: #555;
+    color:
+        rgba(255, 255, 255, 0.50);
 
-    font-size: 8px;
+    font-size: 9px;
 }
+
 
 .calendar-days {
     margin-top: 10px;
 }
+
 
 .calendar-days span {
     height: 30px;
@@ -1596,25 +2108,29 @@ h2 em {
 
     border-radius: 50%;
 
-    color: #999;
+    color:
+        rgba(255, 255, 255, 0.72);
 
-    font-size: 9px;
+    font-size: 10px;
 }
+
 
 .calendar-days span.today {
     background: var(--orange);
 
-    color: #111;
+    color: #111111;
 
     font-weight: 800;
 
     box-shadow:
         0 0 20px
-        rgba(255,132,31,0.25);
+        rgba(255, 132, 31, 0.25);
 }
 
 
-/* EVENTS */
+/* =========================================================
+   EVENTS
+   ========================================================= */
 
 .events {
     margin-top: 20px;
@@ -1622,24 +2138,29 @@ h2 em {
     padding-top: 18px;
 
     border-top:
-        1px solid rgba(255,255,255,0.08);
+        1px solid
+        rgba(255, 255, 255, 0.08);
 }
+
 
 .events-header {
     display: flex;
 
     justify-content: space-between;
 
-    font-size: 8px;
+    color:
+        rgba(255, 255, 255, 0.50);
 
-    color: #666;
+    font-size: 9px;
 }
+
 
 .events-header a {
     color: var(--orange);
 
     text-decoration: none;
 }
+
 
 .event {
     display: flex;
@@ -1649,6 +2170,7 @@ h2 em {
     margin-top: 15px;
 }
 
+
 .event-line {
     width: 3px;
 
@@ -1657,24 +2179,31 @@ h2 em {
     background: var(--orange);
 }
 
+
 .event strong {
     display: block;
 
-    font-size: 10px;
+    color: #ffffff;
+
+    font-size: 11px;
 }
+
 
 .event small {
     display: block;
 
     margin-top: 4px;
 
-    color: #666;
+    color:
+        rgba(255, 255, 255, 0.55);
 
-    font-size: 8px;
+    font-size: 9px;
 }
 
 
-/* ================= JOB CARDS ================= */
+/* =========================================================
+   HOMEPAGE JOB CARDS
+   ========================================================= */
 
 .job-grid {
     display: grid;
@@ -1684,6 +2213,7 @@ h2 em {
 
     gap: 15px;
 }
+
 
 .job-card {
     padding: 25px;
@@ -1695,12 +2225,15 @@ h2 em {
         border-color 0.3s ease;
 }
 
+
 .job-card:hover {
-    transform: translateY(-6px);
+    transform:
+        translateY(-6px);
 
     border-color:
-        rgba(255,132,31,0.3);
+        rgba(255, 132, 31, 0.30);
 }
+
 
 .job-top,
 .job-bottom {
@@ -1711,18 +2244,24 @@ h2 em {
     align-items: center;
 }
 
+
 .job-top {
-    color: #555;
+    color: #555555;
 
     font-size: 13px;
 }
 
+
 .job-type {
-    padding: 6px 8px;
+    padding:
+        6px
+        8px;
 
     border-radius: 20px;
 
-    border: 1px solid rgba(255,132,31,0.2);
+    border:
+        1px solid
+        rgba(255, 132, 31, 0.20);
 
     color: var(--orange);
 
@@ -1731,17 +2270,24 @@ h2 em {
     letter-spacing: 1.4px;
 }
 
+
 .job-card h3 {
-    margin: 28px 0 8px;
+    margin:
+        28px
+        0
+        8px;
 
     font-size: 20px;
 }
 
-.job-card p {
-    color: #777;
 
-    font-size: 10px;
+.job-card p {
+    color:
+        rgba(255, 255, 255, 0.66);
+
+    font-size: 12px;
 }
+
 
 .job-bottom {
     margin-top: 28px;
@@ -1749,15 +2295,19 @@ h2 em {
     padding-top: 15px;
 
     border-top:
-        1px solid rgba(255,255,255,0.07);
+        1px solid
+        rgba(255, 255, 255, 0.07);
 
-    color: #555;
+    color:
+        rgba(255, 255, 255, 0.50);
 
-    font-size: 9px;
+    font-size: 10px;
 }
 
 
-/* ================= ABOUT ================= */
+/* =========================================================
+   ABOUT
+   ========================================================= */
 
 .about {
     display: grid;
@@ -1771,27 +2321,34 @@ h2 em {
     align-items: end;
 }
 
+
 .about-text p {
     max-width: 570px;
 
     margin-bottom: 25px;
 
-    color: #89857f;
+    color:
+        rgba(255, 255, 255, 0.70);
 
-    font-size: 14px;
+    font-size: 15px;
 
     line-height: 1.9;
 }
 
 
-/* ================= CONTACT ================= */
+/* =========================================================
+   CONTACT
+   ========================================================= */
 
 .contact {
     padding-top: 30px;
 }
 
+
 .contact-card {
-    padding: 75px 30px;
+    padding:
+        75px
+        30px;
 
     border-radius: 30px;
 
@@ -1800,14 +2357,17 @@ h2 em {
     background:
         radial-gradient(
             circle at 50% 0%,
-            rgba(255,132,31,0.13),
+            rgba(255, 132, 31, 0.13),
             transparent 42%
         ),
-        rgba(255,255,255,0.035);
+        rgba(255, 255, 255, 0.035);
 }
 
+
 .contact-card h2 {
-    margin: 16px 0;
+    margin:
+        16px
+        0;
 
     font-size: 58px;
 
@@ -1816,322 +2376,89 @@ h2 em {
     letter-spacing: -3px;
 }
 
+
 .contact-card h2 em {
     display: inline;
 }
+
 
 .contact-card p {
     max-width: 530px;
 
     margin:
-        20px auto
+        20px
+        auto
         30px;
 
-    color: #85817b;
+    color:
+        rgba(255, 255, 255, 0.68);
 
-    font-size: 12px;
+    font-size: 14px;
 
     line-height: 1.8;
 }
 
 
-/* ================= FOOTER ================= */
+/* =========================================================
+   FOOTER
+   ========================================================= */
 
 footer {
     display: flex;
 
     justify-content: space-between;
 
-    padding: 30px 8%;
+    padding:
+        30px
+        8%;
 
     border-top:
-        1px solid rgba(255,255,255,0.06);
+        1px solid
+        rgba(255, 255, 255, 0.06);
 
-    color: #4f4d49;
+    color:
+        rgba(255, 255, 255, 0.48);
 
-    font-size: 9px;
+    font-size: 10px;
 
     letter-spacing: 1px;
 }
 
 
 /* =========================================================
-   HOMEPAGE TEXT VISIBILITY OVERRIDES
+   RESPONSIVE - TABLET
    ========================================================= */
-
-
-/* ================= NAVBAR ================= */
-
-.nav-links a {
-    color: rgba(255, 255, 255, 0.72);
-    font-size: 13px;
-    font-weight: 500;
-}
-
-.nav-links a:hover,
-.nav-links a.active {
-    color: #ffffff;
-}
-
-
-/* Search text */
-
-.search-trigger {
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 12px;
-}
-
-
-/* Sign in */
-
-#signInLink {
-    color: #ffffff;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-
-/* ================= HERO ================= */
-
-/* Small ALTRIUM CAREER PORTAL label */
-
-.eyebrow {
-    color: rgba(255, 255, 255, 0.65);
-    font-size: 11px;
-    font-weight: 700;
-}
-
-
-/* Hero paragraph */
-
-.hero-description {
-    color: rgba(255, 255, 255, 0.72);
-    font-size: 16px;
-    line-height: 1.8;
-}
-
-
-/* Hero buttons */
-
-.primary-btn,
-.secondary-btn {
-    font-size: 12px;
-}
-
-.secondary-btn {
-    color: rgba(255, 255, 255, 0.85);
-}
-
-
-/* Hero stats numbers */
-
-.hero-stats strong {
-    color: #ffffff;
-    font-size: 24px;
-}
-
-
-/* Hero stats labels */
-
-.hero-stats span {
-    color: rgba(255, 255, 255, 0.55);
-    font-size: 10px;
-    font-weight: 500;
-}
-
-
-/* ================= DASHBOARD ================= */
-
-/* "YOUR CAREER DASHBOARD" */
-
-.card-label,
-.section-label {
-    color: rgba(255, 255, 255, 0.55);
-    font-size: 10px;
-}
-
-
-/* Dashboard heading */
-
-.dashboard-header h3 {
-    color: #ffffff;
-    font-size: 26px;
-}
-
-
-/* Online status */
-
-.online {
-    font-size: 10px;
-}
-
-
-/* Application / saved-job labels */
-
-.dashboard-tile span {
-    color: rgba(255, 255, 255, 0.58);
-    font-size: 10px;
-}
-
-
-/* Dashboard numbers */
-
-.dashboard-tile strong {
-    color: #ffffff;
-    font-size: 30px;
-}
-
-
-/* Dashboard small status text */
-
-.dashboard-tile small {
-    color: rgba(255, 255, 255, 0.46);
-    font-size: 10px;
-}
-
-
-/* Today's tip heading */
-
-.tip-box b {
-    color: #ffffff;
-    font-size: 11px;
-}
-
-
-/* Today's tip description */
-
-.tip-box p {
-    color: rgba(255, 255, 255, 0.58);
-    font-size: 11px;
-    line-height: 1.7;
-}
-
-
-/* ================= GENERAL SECTION LABELS ================= */
-
-.section-label {
-    color: rgba(255, 255, 255, 0.55);
-}
-
-
-/* Section headings */
-
-.section-heading h2,
-.about h2 {
-    color: #ffffff;
-}
-
-
-/* ================= CAREER CARD ================= */
-
-.career-content p {
-    color: rgba(255, 255, 255, 0.66);
-    font-size: 13px;
-    line-height: 1.8;
-}
-
-.slide-number {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 10px;
-}
-
-.career-tag {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 9px;
-}
-
-
-/* ================= CALENDAR ================= */
-
-.calendar-weekdays {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 9px;
-}
-
-.calendar-days span {
-    color: rgba(255, 255, 255, 0.72);
-    font-size: 10px;
-}
-
-.events-header {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 9px;
-}
-
-.event strong {
-    color: #ffffff;
-    font-size: 11px;
-}
-
-.event small {
-    color: rgba(255, 255, 255, 0.55);
-    font-size: 9px;
-}
-
-
-/* ================= JOB CARDS ================= */
-
-.job-card p {
-    color: rgba(255, 255, 255, 0.66);
-    font-size: 12px;
-}
-
-.job-bottom {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 10px;
-}
-
-
-/* ================= ABOUT ================= */
-
-.about-text p {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 15px;
-}
-
-
-/* ================= CONTACT ================= */
-
-.contact-card p {
-    color: rgba(255, 255, 255, 0.68);
-    font-size: 14px;
-}
-
-
-/* ================= FOOTER ================= */
-
-footer {
-    color: rgba(255, 255, 255, 0.48);
-    font-size: 10px;
-}
-
-
-
-
-/* ================= RESPONSIVE ================= */
 
 @media (max-width: 1000px) {
 
     .hero {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
 
         padding-top: 80px;
     }
+
 
     .dashboard-card {
         margin-top: 20px;
     }
 
+
     .main-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
     }
+
 
     .job-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
     }
 
+
     .about {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
 
         gap: 40px;
     }
@@ -2139,24 +2466,44 @@ footer {
 }
 
 
+/* =========================================================
+   RESPONSIVE - MOBILE
+   ========================================================= */
+
 @media (max-width: 700px) {
 
     .navbar {
-        padding: 0 5%;
+        padding:
+            0
+            5%;
     }
+
 
     .nav-links {
         display: none;
     }
 
+
     .signin-btn {
         display: none;
     }
 
+
+    .profile-page-signout {
+        padding:
+            0
+            14px;
+
+        font-size: 12px;
+    }
+
+
     .hero {
         padding:
-            70px 6%;
+            70px
+            6%;
     }
+
 
     .hero h1 {
         font-size: 57px;
@@ -2164,21 +2511,27 @@ footer {
         letter-spacing: -3px;
     }
 
+
     .hero-stats {
         gap: 25px;
     }
+
 
     .hero-actions {
         flex-wrap: wrap;
     }
 
+
     .career-card {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
     }
+
 
     .career-image {
         min-height: 250px;
     }
+
 
     .section-heading {
         align-items: flex-start;
@@ -2188,51 +2541,77 @@ footer {
         flex-direction: column;
     }
 
+
     .section-heading h2,
     .about h2 {
         font-size: 38px;
     }
+
 
     .opportunities,
     .latest-jobs,
     .about,
     .contact {
         padding:
-            75px 6%;
+            75px
+            6%;
     }
+
 
     .contact-card h2 {
         font-size: 42px;
     }
 
-    .expanded-search .filter-btn {
+
+    .expanded-search
+    .filter-btn {
         display: none;
     }
 
+
     .search-btn {
-        padding: 10px 12px;
+        padding:
+            10px
+            12px;
     }
 
 }
 
 
+/* =========================================================
+   RESPONSIVE - SMALL MOBILE
+   ========================================================= */
+
 @media (max-width: 450px) {
 
     .dashboard-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
     }
+
 
     .hero h1 {
         font-size: 50px;
     }
 
+
     .expanded-search input {
         font-size: 12px;
     }
 
+
     .close-search {
         width: 34px;
         height: 34px;
+    }
+
+
+    .profile-page-signout {
+        padding:
+            0
+            11px;
+
+        font-size: 11px;
     }
 
 }

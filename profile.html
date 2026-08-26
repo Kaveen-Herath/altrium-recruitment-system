@@ -4,76 +4,269 @@
 <head>
 
     <meta charset="UTF-8">
-    <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
+
+    <link
+        rel="icon"
+        type="image/x-icon"
+        href="favicon.ico?v=2"
+    >
 
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>My Profile</title>
+    <title>My Profile | Altrium</title>
+
 
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
         rel="stylesheet"
     >
 
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/profile.css">
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/profile.css"
+    >
 
 </head>
+
 
 <body>
 
 
+<!-- =========================================================
+     NAVBAR
+     ========================================================= -->
+
 <header class="navbar">
 
-    <a href="index.html">
-        <img src="assets/altrium_logoW.png" alt="Company Logo" style="height: 30px; width: auto;">
+
+    <!-- LOGO -->
+
+    <a
+        href="index.html"
+        class="logo"
+    >
+
+        <img
+            src="assets/altrium_logoW.png"
+            alt="Altrium"
+            style="height: 30px; width: auto;"
+        >
+
     </a>
 
 
 
+    <!-- NAVIGATION -->
+
     <nav class="nav-links">
 
-        <a href="index.html">
+        <a
+            href="index.html"
+            class="nav-home"
+        >
             Home
         </a>
 
-        <a href="jobs.html">
+
+        <a
+            href="jobs.html"
+            class="nav-jobs"
+        >
             Find jobs
         </a>
 
-        <a href="about.html">
+
+        <a
+            href="about.html"
+            class="nav-about"
+        >
             About Altrium
         </a>
 
-        <a href="contact.html">
+
+        <a
+            href="contact.html"
+            class="nav-contact"
+        >
             Contact Us
+        </a>
+
+
+        <a
+            href="admin/admin-dashboard.html"
+            id="dashboardLink"
+        >
+            Dashboard
         </a>
 
     </nav>
 
 
-    <div class="profile-nav">
 
-        <button onclick="logout()">
+    <!-- RIGHT SIDE -->
+
+    <div class="nav-right">
+
+
+        <!-- SIGN IN -->
+
+        <a
+            href="login.html"
+            id="signInLink"
+            class="signin-btn"
+        >
+            Sign in
+        </a>
+
+        <!-- PROFILE AVATAR -->
+
+        <a
+            href="profile.html"
+            id="profileLink"
+            class="profile-nav-icon"
+            aria-label="My profile"
+        ></a>
+        
+        <!-- NOTIFICATIONS -->
+
+        <div
+            class="notification-nav"
+            id="notificationNav"
+        >
+
+            <button
+                type="button"
+                class="notification-trigger"
+                id="notificationTrigger"
+                aria-label="Notifications"
+            >
+
+                <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+
+                    <path
+                        d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"
+                    ></path>
+
+                    <path
+                        d="M10 21h4"
+                    ></path>
+
+                </svg>
+
+
+                <span
+                    class="notification-unread-dot"
+                    id="notificationUnreadDot"
+                ></span>
+
+            </button>
+
+
+
+            <!-- NOTIFICATION DROPDOWN -->
+
+            <div
+                class="notification-panel"
+                id="notificationPanel"
+            >
+
+                <div class="notification-panel-header">
+
+                    <div>
+
+                        <span>
+                            NOTIFICATIONS
+                        </span>
+
+                        <h3>
+                            Updates
+                        </h3>
+
+                    </div>
+
+
+                    <span
+                        class="notification-count"
+                        id="notificationCount"
+                    >
+                        0 unread
+                    </span>
+
+                </div>
+
+
+
+                <div
+                    class="notification-list"
+                    id="notificationList"
+                >
+
+                    <div class="notification-empty">
+
+                        <strong>
+                            You're all caught up.
+                        </strong>
+
+                        <p>
+                            New job and application updates
+                            will appear here.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+                <!-- PROFILE PAGE ONLY SIGN OUT -->
+
+        <button
+            type="button"
+            id="profilePageSignOut"
+            class="profile-page-signout"
+            onclick="logout()"
+        >
             Sign out
         </button>
+
+
 
     </div>
 
 </header>
 
 
+
+<!-- =========================================================
+     PROFILE PAGE
+     ========================================================= -->
+
 <main class="profile-page">
 
 
-    <!-- PROFILE HERO -->
+    <!-- =====================================================
+         PROFILE HERO
+         ===================================================== -->
 
     <section class="profile-hero glass">
 
+
         <div class="profile-identity">
+
 
             <div class="avatar-wrapper">
 
@@ -83,12 +276,14 @@
                     alt="Profile picture"
                 >
 
+
                 <label
                     for="avatarUpload"
                     class="avatar-edit"
                 >
                     +
                 </label>
+
 
                 <input
                     type="file"
@@ -100,15 +295,18 @@
             </div>
 
 
+
             <div>
 
                 <span class="section-label">
                     YOUR PROFILE
                 </span>
 
+
                 <h1 id="profileName">
                     Your Name
                 </h1>
+
 
                 <p id="profileEmail">
                     your@email.com
@@ -119,21 +317,27 @@
         </div>
 
 
+
+        <!-- PROFILE COMPLETION -->
+
         <div class="profile-completion">
 
             <span>
                 PROFILE STRENGTH
             </span>
 
+
             <strong id="profilePercentage">
                 35%
             </strong>
+
 
             <div class="profile-progress-large">
 
                 <span id="profileProgress"></span>
 
             </div>
+
 
             <small>
                 Complete your profile to stand out.
@@ -144,61 +348,103 @@
     </section>
 
 
-    <!-- PROFILE GRID -->
+
+    <!-- =====================================================
+         PROFILE GRID
+         ===================================================== -->
 
     <div class="profile-layout">
 
 
-        <!-- SIDEBAR -->
+        <!-- =================================================
+             SIDEBAR
+             ================================================= -->
 
         <aside class="profile-sidebar glass">
 
+
             <button
+                type="button"
                 class="profile-tab active"
                 data-section="personal"
             >
-                <span>01</span>
+
+                <span>
+                    01
+                </span>
+
                 Personal details
+
             </button>
 
+
+
             <button
+                type="button"
                 class="profile-tab"
                 data-section="career"
             >
-                <span>02</span>
+
+                <span>
+                    02
+                </span>
+
                 Career details
+
             </button>
 
+
+
             <button
+                type="button"
                 class="profile-tab"
                 data-section="experience"
             >
-                <span>03</span>
+
+                <span>
+                    03
+                </span>
+
                 Experience
+
             </button>
 
+
+
             <button
+                type="button"
                 class="profile-tab"
                 data-section="applications"
             >
-                <span>04</span>
+
+                <span>
+                    04
+                </span>
+
                 Applied jobs
+
             </button>
 
         </aside>
 
 
-        <!-- CONTENT -->
+
+        <!-- =================================================
+             PROFILE CONTENT
+             ================================================= -->
 
         <section class="profile-content">
 
 
-            <!-- PERSONAL -->
+            <!-- =================================================
+                 PERSONAL DETAILS
+                 ================================================= -->
 
             <div
                 class="profile-section active"
                 id="personal"
             >
+
 
                 <div class="profile-section-heading">
 
@@ -208,8 +454,10 @@
                             PERSONAL DETAILS
                         </span>
 
+
                         <h2>
-                            Tell us about <em>you.</em>
+                            Tell us about
+                            <em>you.</em>
                         </h2>
 
                     </div>
@@ -217,13 +465,19 @@
                 </div>
 
 
+
                 <div class="form-card glass">
+
 
                     <div class="form-grid">
 
+
                         <div class="profile-input">
 
-                            <label>First name</label>
+                            <label for="profileFirstName">
+                                First name
+                            </label>
+
 
                             <input
                                 type="text"
@@ -235,9 +489,13 @@
                         </div>
 
 
+
                         <div class="profile-input">
 
-                            <label>Last name</label>
+                            <label for="profileLastName">
+                                Last name
+                            </label>
+
 
                             <input
                                 type="text"
@@ -249,9 +507,13 @@
                         </div>
 
 
+
                         <div class="profile-input">
 
-                            <label>Email</label>
+                            <label for="profileEmailInput">
+                                Email
+                            </label>
+
 
                             <input
                                 type="email"
@@ -262,9 +524,13 @@
                         </div>
 
 
+
                         <div class="profile-input">
 
-                            <label>Phone</label>
+                            <label for="profilePhone">
+                                Phone
+                            </label>
+
 
                             <input
                                 type="tel"
@@ -277,7 +543,9 @@
                     </div>
 
 
+
                     <button
+                        type="button"
                         class="save-btn"
                         onclick="savePersonalDetails()"
                     >
@@ -289,12 +557,16 @@
             </div>
 
 
-            <!-- CAREER -->
+
+            <!-- =================================================
+                 CAREER DETAILS
+                 ================================================= -->
 
             <div
                 class="profile-section"
                 id="career"
             >
+
 
                 <div class="profile-section-heading">
 
@@ -303,6 +575,7 @@
                         <span class="section-label">
                             CAREER DETAILS
                         </span>
+
 
                         <h2>
                             Shape your
@@ -314,14 +587,16 @@
                 </div>
 
 
+
                 <div class="form-card glass">
 
 
                     <div class="profile-input">
 
-                        <label>
+                        <label for="profileEducation">
                             Education
                         </label>
+
 
                         <textarea
                             id="profileEducation"
@@ -331,17 +606,20 @@
                     </div>
 
 
+
                     <div class="profile-input">
 
-                        <label>
+                        <label for="profileSkills">
                             Skills
                         </label>
+
 
                         <input
                             type="text"
                             id="profileSkills"
                             placeholder="UI Design, Figma, HTML, CSS..."
                         >
+
 
                         <small>
                             Separate skills with commas.
@@ -350,73 +628,126 @@
                     </div>
 
 
+
                     <div class="profile-input">
 
                         <label>
                             Preferred job type
                         </label>
 
-                        <div class="job-type-dropdown" id="jobTypeDropdown">
+
+                        <div
+                            class="job-type-dropdown"
+                            id="jobTypeDropdown"
+                        >
+
 
                             <button
                                 type="button"
                                 class="job-type-trigger"
                                 id="jobTypeTrigger"
                             >
+
                                 <span id="jobTypeSelected">
                                     Select job type
                                 </span>
 
+
                                 <span class="job-type-arrow">
                                     ↓
                                 </span>
+
                             </button>
+
 
 
                             <div class="job-type-menu">
 
-                                <button type="button" data-value="Full time">
+
+                                <button
+                                    type="button"
+                                    data-value="Full time"
+                                >
                                     Full time
                                 </button>
 
-                                <button type="button" data-value="Part time">
+
+                                <button
+                                    type="button"
+                                    data-value="Part time"
+                                >
                                     Part time
                                 </button>
 
-                                <button type="button" data-value="Internship">
+
+                                <button
+                                    type="button"
+                                    data-value="Internship"
+                                >
                                     Internship
                                 </button>
 
-                                <button type="button" data-value="Contract">
+
+                                <button
+                                    type="button"
+                                    data-value="Contract"
+                                >
                                     Contract
                                 </button>
 
-                                <button type="button" data-value="Remote">
+
+                                <button
+                                    type="button"
+                                    data-value="Remote"
+                                >
                                     Remote
                                 </button>
 
                             </div>
 
 
-                            <!-- Keep this for your existing JS/database code -->
 
-                            <select id="preferredJobType" hidden>
+                            <!-- Actual database value -->
 
-                                <option value="">Select job type</option>
-                                <option value="Full time">Full time</option>
-                                <option value="Part time">Part time</option>
-                                <option value="Internship">Internship</option>
-                                <option value="Contract">Contract</option>
-                                <option value="Remote">Remote</option>
+                            <select
+                                id="preferredJobType"
+                                hidden
+                            >
+
+                                <option value="">
+                                    Select job type
+                                </option>
+
+                                <option value="Full time">
+                                    Full time
+                                </option>
+
+                                <option value="Part time">
+                                    Part time
+                                </option>
+
+                                <option value="Internship">
+                                    Internship
+                                </option>
+
+                                <option value="Contract">
+                                    Contract
+                                </option>
+
+                                <option value="Remote">
+                                    Remote
+                                </option>
 
                             </select>
 
                         </div>
 
-                        </div>
+                    </div>
+
 
 
                     <button
+                        type="button"
                         class="save-btn"
                         onclick="saveCareerDetails()"
                     >
@@ -428,12 +759,16 @@
             </div>
 
 
-            <!-- EXPERIENCE -->
+
+            <!-- =================================================
+                 EXPERIENCE
+                 ================================================= -->
 
             <div
                 class="profile-section"
                 id="experience"
             >
+
 
                 <div class="profile-section-heading">
 
@@ -442,6 +777,7 @@
                         <span class="section-label">
                             WORK EXPERIENCE
                         </span>
+
 
                         <h2>
                             Your journey
@@ -453,13 +789,16 @@
                 </div>
 
 
+
                 <div class="form-card glass">
+
 
                     <div class="profile-input">
 
-                        <label>
+                        <label for="profileExperience">
                             Work experience
                         </label>
+
 
                         <textarea
                             id="profileExperience"
@@ -469,7 +808,9 @@
                     </div>
 
 
+
                     <button
+                        type="button"
                         class="save-btn"
                         onclick="saveExperience()"
                     >
@@ -481,12 +822,16 @@
             </div>
 
 
-            <!-- APPLICATIONS -->
+
+            <!-- =================================================
+                 APPLICATIONS
+                 ================================================= -->
 
             <div
                 class="profile-section"
                 id="applications"
             >
+
 
                 <div class="profile-section-heading">
 
@@ -496,6 +841,7 @@
                             APPLICATIONS
                         </span>
 
+
                         <h2>
                             Jobs you've
                             <em>applied for.</em>
@@ -504,6 +850,7 @@
                     </div>
 
                 </div>
+
 
 
                 <div class="applications-list">
@@ -517,9 +864,11 @@
                                 SOFTWARE ENGINEERING
                             </span>
 
+
                             <h3>
                                 Software Engineer
                             </h3>
+
 
                             <p>
                                 Technology Department
@@ -527,11 +876,13 @@
 
                         </div>
 
+
                         <div class="application-status reviewing">
                             Under review
                         </div>
 
                     </article>
+
 
 
                     <article class="application-card glass">
@@ -542,9 +893,11 @@
                                 DESIGN
                             </span>
 
+
                             <h3>
                                 UI/UX Designer
                             </h3>
+
 
                             <p>
                                 Creative Studio
@@ -552,11 +905,13 @@
 
                         </div>
 
+
                         <div class="application-status interview">
                             Interview
                         </div>
 
                     </article>
+
 
 
                     <article class="application-card glass">
@@ -567,9 +922,11 @@
                                 MARKETING
                             </span>
 
+
                             <h3>
                                 Marketing Intern
                             </h3>
+
 
                             <p>
                                 Growth Department
@@ -577,17 +934,16 @@
 
                         </div>
 
+
                         <div class="application-status submitted">
                             Submitted
                         </div>
 
                     </article>
 
-
                 </div>
 
             </div>
-
 
         </section>
 
@@ -595,14 +951,24 @@
 
 </main>
 
+
+
+<!-- =========================================================
+     PROFILE TOAST -->
+
 <div
     id="profileToastContainer"
     class="toast-container"
     aria-live="polite"
-    aria-atomic="true">
-</div>
+    aria-atomic="true"
+></div>
 
-<script src="js/profile.js"></script>
+
+
+<script src="js/navbar-auth.js?v=2"></script>
+<script src="js/profile.js?v=2"></script>
+
 
 </body>
+
 </html>

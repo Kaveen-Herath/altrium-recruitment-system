@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <link
+        rel="icon"
+        type="image/x-icon"
+        href="favicon.ico?v=2"
+    >
+
+    <title>Application Progress | Altrium</title>
+
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/application-progress.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     NAVBAR
+     ========================================================= -->
+
+<header class="navbar">
+
+    <a
+        href="index.html"
+        class="logo"
+    >
+        <img
+            src="assets/altrium_logoW.png"
+            alt="Altrium"
+            style="height: 30px; width: auto;"
+        >
+    </a>
+
+
+    <nav class="nav-links">
+
+        <a href="index.html">
+            Home
+        </a>
+
+        <a href="jobs.html">
+            Find jobs
+        </a>
+
+        <a href="about.html">
+            About Altrium
+        </a>
+
+        <a href="contact.html">
+            Contact Us
+        </a>
+
+        <a
+            href="admin/admin-dashboard.html"
+            id="dashboardLink"
+        >
+            Dashboard
+        </a>
+
+    </nav>
+
+
+    <div class="nav-right">
+
+        <a
+            href="login.html"
+            id="signInLink"
+            class="signin-btn"
+        >
+            Sign in
+        </a>
+
+
+        <a
+            href="profile.html"
+            id="profileLink"
+            class="profile-nav-icon"
+            aria-label="My profile"
+        ></a>
+
+
+        <div
+            class="notification-nav"
+            id="notificationNav"
+        >
+
+            <button
+                type="button"
+                class="notification-trigger"
+                id="notificationTrigger"
+                aria-label="Notifications"
+            >
+
+                <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path
+                        d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"
+                    ></path>
+
+                    <path
+                        d="M10 21h4"
+                    ></path>
+                </svg>
+
+                <span
+                    class="notification-unread-dot"
+                    id="notificationUnreadDot"
+                ></span>
+
+            </button>
+
+
+            <div
+                class="notification-panel"
+                id="notificationPanel"
+            >
+
+                <div class="notification-panel-header">
+
+                    <div>
+                        <span>NOTIFICATIONS</span>
+
+                        <h3>
+                            Updates
+                        </h3>
+                    </div>
+
+                    <span
+                        class="notification-count"
+                        id="notificationCount"
+                    >
+                        0 unread
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="notification-list"
+                    id="notificationList"
+                ></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+
+<!-- =========================================================
+     APPLICATION PROGRESS PAGE
+     ========================================================= -->
+
+<main class="progress-page">
+
+
+    <!-- LOADING -->
+
+    <div
+        class="progress-loading"
+        id="progressLoading"
+    >
+
+        <span class="progress-loading-ring"></span>
+
+        <p>
+            Loading your application...
+        </p>
+
+    </div>
+
+
+
+    <!-- ERROR -->
+
+    <div
+        class="progress-error"
+        id="progressError"
+        hidden
+    >
+
+        <span>
+            APPLICATION
+        </span>
+
+        <h1>
+            We couldn't load
+            <em>this application.</em>
+        </h1>
+
+        <p id="progressErrorMessage">
+            Please try again.
+        </p>
+
+        <a
+            href="jobs.html"
+            class="progress-primary-link"
+        >
+            Back to jobs
+        </a>
+
+    </div>
+
+
+
+    <!-- CONTENT -->
+
+    <div
+        class="progress-content"
+        id="progressContent"
+        hidden
+    >
+
+
+        <!-- =================================================
+             HERO
+             ================================================= -->
+
+        <section class="progress-hero">
+
+            <div class="progress-hero-main">
+
+                <span class="section-label">
+                    APPLICATION PROGRESS
+                </span>
+
+                <h1 id="progressJobTitle">
+                    Job position
+                </h1>
+
+                <div class="progress-job-meta">
+
+                    <span id="progressDepartment">
+                        Department
+                    </span>
+
+                    <span>•</span>
+
+                    <span id="progressLocation">
+                        Location
+                    </span>
+
+                    <span>•</span>
+
+                    <span id="progressEmploymentType">
+                        Employment type
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="progress-reference-card">
+
+                <span>
+                    APPLICATION REFERENCE
+                </span>
+
+                <strong id="progressReference">
+                    —
+                </strong>
+
+                <small id="progressAppliedDate">
+                    —
+                </small>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             CURRENT STATUS
+             ================================================= -->
+
+        <section class="progress-current">
+
+            <div>
+
+                <span class="section-label">
+                    CURRENT STATUS
+                </span>
+
+                <h2 class="progress-status-title">
+                    Your application is
+                    <span
+                        class="accent"
+                        id="progressCurrentStatus"
+                    >
+                        Submitted
+                    </span>
+                </h2>
+
+                <p id="progressStatusDescription">
+                    Your application has been successfully received.
+                </p>
+
+            </div>
+
+
+            <div
+                class="progress-status-pill"
+                id="progressStatusPill"
+            >
+                Submitted
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             TRACKER
+             ================================================= -->
+
+        <section class="progress-tracker-section">
+
+            <div class="progress-section-heading">
+
+                <span class="section-label">
+                    JOURNEY
+                </span>
+
+                <h2 class="progress-timeline-title">
+                    Application <span class="accent">timeline.</span>
+                </h2>
+
+            </div>
+
+
+            <div
+                class="progress-tracker"
+                id="progressTracker"
+            >
+
+                <div
+                    class="progress-step"
+                    data-status="submitted"
+                >
+
+                    <div class="progress-step-marker">
+                        <span>1</span>
+                    </div>
+
+                    <div>
+                        <strong>
+                            Submitted
+                        </strong>
+
+                        <small>
+                            Application received
+                        </small>
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="progress-step"
+                    data-status="screening"
+                >
+
+                    <div class="progress-step-marker">
+                        <span>2</span>
+                    </div>
+
+                    <div>
+                        <strong>
+                            Screening
+                        </strong>
+
+                        <small>
+                            Application review
+                        </small>
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="progress-step"
+                    data-status="shortlisted"
+                >
+
+                    <div class="progress-step-marker">
+                        <span>3</span>
+                    </div>
+
+                    <div>
+                        <strong>
+                            Shortlisted
+                        </strong>
+
+                        <small>
+                            Moving forward
+                        </small>
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="progress-step"
+                    data-status="interview"
+                >
+
+                    <div class="progress-step-marker">
+                        <span>4</span>
+                    </div>
+
+                    <div>
+                        <strong>
+                            Interview
+                        </strong>
+
+                        <small>
+                            Meet the team
+                        </small>
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="progress-step"
+                    data-status="offer"
+                >
+
+                    <div class="progress-step-marker">
+                        <span>5</span>
+                    </div>
+
+                    <div>
+                        <strong>
+                            Offer
+                        </strong>
+
+                        <small>
+                            Offer stage
+                        </small>
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="progress-step"
+                    data-status="hired"
+                >
+
+                    <div class="progress-step-marker">
+                        <span>6</span>
+                    </div>
+
+                    <div>
+                        <strong>
+                            Hired
+                        </strong>
+
+                        <small>
+                            Welcome aboard
+                        </small>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="progress-terminal-state"
+                id="progressTerminalState"
+                hidden
+            ></div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             LOWER GRID
+             ================================================= -->
+
+        <div class="progress-lower-grid">
+
+
+            <!-- HISTORY -->
+
+            <section class="progress-panel">
+
+                <div class="progress-panel-heading">
+
+                    <span class="section-label">
+                        ACTIVITY
+                    </span>
+
+                    <h3>
+                        Status history
+                    </h3>
+
+                </div>
+
+
+                <div
+                    class="progress-history"
+                    id="progressHistory"
+                ></div>
+
+            </section>
+
+
+
+            <!-- INTERVIEWS -->
+
+            <section class="progress-panel">
+
+                <div class="progress-panel-heading">
+
+                    <span class="section-label">
+                        INTERVIEWS
+                    </span>
+
+                    <h3>
+                        Interview details
+                    </h3>
+
+                </div>
+
+
+                <div
+                    class="progress-interviews"
+                    id="progressInterviews"
+                ></div>
+
+            </section>
+
+        </div>
+
+
+
+        <!-- =================================================
+             ACTIONS
+             ================================================= -->
+
+        <section class="progress-actions">
+
+            <a
+                href="jobs.html"
+                class="progress-secondary-link"
+            >
+                Browse jobs
+            </a>
+
+
+            <button
+                type="button"
+                class="progress-withdraw-button"
+                id="withdrawApplicationButton"
+                hidden
+            >
+                Withdraw application
+            </button>
+
+        </section>
+
+
+    </div>
+
+</main>
+
+
+<script src="js/navbar-auth.js?v=2"></script>
+<script src="js/application-progress.js?v=1"></script>
+
+</body>
+</html>

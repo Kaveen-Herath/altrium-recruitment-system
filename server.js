@@ -7,9 +7,10 @@ const crypto = require("crypto");
 const transporter = require("./email");
 const multer = require("multer");
 const supabase = require("./supabase");
-
-
 const app = express();
+
+const { google } =
+    require("googleapis");
 
 
 app.use(express.json()); // allows Express to read that information.
@@ -36,6 +37,11 @@ app.use(
     })
 );
 
+
+/* =========================================================
+   PROFILE PHOTO UPLOAD
+   ========================================================= */
+
 const profilePhotoUpload = multer({
     storage: multer.memoryStorage(),
 
@@ -57,6 +63,144 @@ const profilePhotoUpload = multer({
         }
     }
 });
+
+
+/* =========================================================
+   APPLICATION CV UPLOAD
+   ========================================================= */
+
+const applicationCvUpload = multer({
+
+    storage:
+        multer.memoryStorage(),
+
+    limits: {
+
+        fileSize:
+            5 * 1024 * 1024
+
+    },
+
+    fileFilter:
+        (req, file, cb) => {
+
+            const allowedTypes = [
+
+                "application/pdf",
+
+                "image/jpeg",
+
+                "image/png"
+
+            ];
+
+
+            if (
+                allowedTypes.includes(
+                    file.mimetype
+                )
+            ) {
+
+                cb(
+                    null,
+                    true
+                );
+
+            }
+
+            else {
+
+                cb(
+                    new Error(
+                        "Only PDF, JPG, JPEG and PNG files are allowed."
+                    )
+                );
+
+            }
+
+        }
+
+});
+
+
+/* =========================================================
+   APPLICATION CV UPLOAD ERROR HANDLER
+   ========================================================= */
+
+function handleApplicationCvUpload(
+    req,
+    res,
+    next
+) {
+
+    applicationCvUpload.single(
+        "cv"
+    )(
+        req,
+        res,
+        error => {
+
+            if (
+                error instanceof
+                multer.MulterError
+            ) {
+
+                if (
+                    error.code ===
+                    "LIMIT_FILE_SIZE"
+                ) {
+
+                    return res
+                        .status(400)
+                        .json({
+
+                            success: false,
+
+                            message:
+                                "Your CV must be 5 MB or smaller."
+
+                        });
+
+                }
+
+
+                return res
+                    .status(400)
+                    .json({
+
+                        success: false,
+
+                        message:
+                            "Unable to process the uploaded CV."
+
+                    });
+
+            }
+
+
+            if (error) {
+
+                return res
+                    .status(400)
+                    .json({
+
+                        success: false,
+
+                        message:
+                            error.message ||
+                            "Invalid CV file."
+
+                    });
+
+            }
+
+
+            next();
+
+        }
+    );
+
+}
 
 // ===============================================================================
 // ADMIN ========================================================================
@@ -190,6 +334,82 @@ app.post(
                     req.session.userId
                 ]
             );
+
+            /*  =================================================
+                NOTIFY ALL CANDIDATES ABOUT NEW VACANCY
+                ================================================= */
+
+                const createdJob =
+                    result.rows[0];
+
+
+                const deadlineText =
+                    createdJob.application_deadline
+                        ? new Date(
+                            createdJob.application_deadline
+                        ).toLocaleDateString(
+                            "en-GB",
+                            {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric"
+                            }
+                        )
+                        : null;
+
+
+                const notificationMessage =
+                    [
+                        `${createdJob.job_title} is now open`,
+
+                        createdJob.location
+                            ? `in ${createdJob.location}`
+                            : null,
+
+                        createdJob.employment_type
+                            ? `· ${createdJob.employment_type}`
+                            : null,
+
+                        deadlineText
+                            ? `· Apply before ${deadlineText}`
+                            : null
+                    ]
+                    .filter(Boolean)
+                    .join(" ");
+
+
+                await pool.query(
+                    `
+                    INSERT INTO notifications (
+
+                        user_id,
+                        notification_type,
+                        title,
+                        message,
+                        job_id,
+                        action_url
+
+                    )
+
+                    SELECT
+
+                        id,
+                        'new_job',
+                        'New job vacancy available',
+                        $1,
+                        $2,
+                        $3
+
+                    FROM users
+
+                    WHERE role = 'candidate'
+                    `,
+                    [
+                        notificationMessage,
+                        createdJob.id,
+                        `/jobs.html?job=${createdJob.id}`
+                    ]
+                );
 
 
             return res.status(201).json({
@@ -536,23 +756,2653 @@ app.patch(
     }
 );
 
-// ================================= TEMP TEST ROUTE
+
+/* =========================================================
+   GOOGLE CALENDAR OAUTH
+   ========================================================= */
+
+const googleOAuthClient =
+    new google.auth.OAuth2(
+        process.env.GOOGLE_CLIENT_ID,
+        process.env.GOOGLE_CLIENT_SECRET,
+        process.env.GOOGLE_REDIRECT_URI
+    );
+
+
+const GOOGLE_CALENDAR_SCOPES = [
+
+    "https://www.googleapis.com/auth/calendar.events"
+
+];
+
+/* =========================================================
+   GOOGLE TOKEN ENCRYPTION
+   ========================================================= */
+
+function getGoogleTokenEncryptionKey() {
+
+    const encodedKey =
+        process.env
+            .GOOGLE_TOKEN_ENCRYPTION_KEY;
+
+
+    if (
+        !encodedKey
+    ) {
+
+        throw new Error(
+            "GOOGLE_TOKEN_ENCRYPTION_KEY is missing."
+        );
+
+    }
+
+
+    const key =
+        Buffer.from(
+            encodedKey,
+            "base64"
+        );
+
+
+    if (
+        key.length !==
+        32
+    ) {
+
+        throw new Error(
+            "GOOGLE_TOKEN_ENCRYPTION_KEY must decode to exactly 32 bytes."
+        );
+
+    }
+
+
+    return key;
+
+}
+
+
+
+function encryptGoogleRefreshToken(
+    refreshToken
+) {
+
+    const key =
+        getGoogleTokenEncryptionKey();
+
+
+    const iv =
+        crypto.randomBytes(
+            12
+        );
+
+
+    const cipher =
+        crypto.createCipheriv(
+            "aes-256-gcm",
+            key,
+            iv
+        );
+
+
+    const encrypted =
+        Buffer.concat([
+
+            cipher.update(
+                refreshToken,
+                "utf8"
+            ),
+
+            cipher.final()
+
+        ]);
+
+
+    const authTag =
+        cipher.getAuthTag();
+
+
+    return [
+
+        iv.toString(
+            "base64"
+        ),
+
+        authTag.toString(
+            "base64"
+        ),
+
+        encrypted.toString(
+            "base64"
+        )
+
+    ].join(".");
+
+}
+
+
+
+function decryptGoogleRefreshToken(
+    encryptedValue
+) {
+
+    const parts =
+        String(
+            encryptedValue ||
+            ""
+        )
+        .split(".");
+
+
+    if (
+        parts.length !==
+        3
+    ) {
+
+        throw new Error(
+            "Stored Google refresh token has an invalid format."
+        );
+
+    }
+
+
+    const [
+        ivBase64,
+        authTagBase64,
+        encryptedBase64
+    ] =
+        parts;
+
+
+    const key =
+        getGoogleTokenEncryptionKey();
+
+
+    const iv =
+        Buffer.from(
+            ivBase64,
+            "base64"
+        );
+
+
+    const authTag =
+        Buffer.from(
+            authTagBase64,
+            "base64"
+        );
+
+
+    const encrypted =
+        Buffer.from(
+            encryptedBase64,
+            "base64"
+        );
+
+
+    const decipher =
+        crypto.createDecipheriv(
+            "aes-256-gcm",
+            key,
+            iv
+        );
+
+
+    decipher.setAuthTag(
+        authTag
+    );
+
+
+    const decrypted =
+        Buffer.concat([
+
+            decipher.update(
+                encrypted
+            ),
+
+            decipher.final()
+
+        ]);
+
+
+    return decrypted.toString(
+        "utf8"
+    );
+
+}
+
+/* =========================================================
+   LOAD STORED GOOGLE CALENDAR CONNECTION
+   ========================================================= */
+
+async function getStoredGoogleCalendarClient() {
+
+    const result =
+        await pool.query(
+            `
+            SELECT
+                encrypted_refresh_token,
+                google_calendar_id
+
+            FROM google_calendar_connections
+
+            ORDER BY id ASC
+
+            LIMIT 1
+            `
+        );
+
+
+    if (
+        result.rows.length ===
+        0
+    ) {
+
+        throw new Error(
+            "Google Calendar is not connected."
+        );
+
+    }
+
+
+    const connection =
+        result.rows[0];
+
+
+    const refreshToken =
+        decryptGoogleRefreshToken(
+            connection.encrypted_refresh_token
+        );
+
+
+    const auth =
+        new google.auth.OAuth2(
+            process.env.GOOGLE_CLIENT_ID,
+            process.env.GOOGLE_CLIENT_SECRET,
+            process.env.GOOGLE_REDIRECT_URI
+        );
+
+
+    auth.setCredentials({
+
+        refresh_token:
+            refreshToken
+
+    });
+
+
+    const calendar =
+        google.calendar({
+
+            version:
+                "v3",
+
+            auth
+
+        });
+
+
+    return {
+
+        calendar,
+
+        calendarId:
+            connection.google_calendar_id ||
+            "primary"
+
+    };
+
+}
+
+
+/* =========================================================
+   EMAIL HTML ESCAPE
+   ========================================================= */
+
+function escapeEmailHtml(value) {
+
+    return String(
+        value ??
+        ""
+    )
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+}
+
+
+
+/* =========================================================
+   FORMAT INTERVIEW EMAIL DATE
+   ========================================================= */
+
+function formatInterviewEmailDate(
+    value
+) {
+
+    const date =
+        new Date(
+            value
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "Date unavailable";
+
+    }
+
+
+    return new Intl.DateTimeFormat(
+        "en-GB",
+        {
+
+            weekday:
+                "long",
+
+            day:
+                "2-digit",
+
+            month:
+                "long",
+
+            year:
+                "numeric",
+
+            timeZone:
+                "Asia/Colombo"
+
+        }
+    ).format(
+        date
+    );
+
+}
+
+
+
+/* =========================================================
+   FORMAT INTERVIEW EMAIL TIME
+   ========================================================= */
+
+function formatInterviewEmailTime(
+    value
+) {
+
+    const date =
+        new Date(
+            value
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "Time unavailable";
+
+    }
+
+
+    return new Intl.DateTimeFormat(
+        "en-US",
+        {
+
+            hour:
+                "numeric",
+
+            minute:
+                "2-digit",
+
+            hour12:
+                true,
+
+            timeZone:
+                "Asia/Colombo"
+
+        }
+    ).format(
+        date
+    );
+
+}
+
+
+
+/* =========================================================
+   SEND BRANDED INTERVIEW CONFIRMATION EMAIL
+   ========================================================= */
+
+async function sendInterviewConfirmationEmail({
+
+    candidateName,
+    candidateEmail,
+
+    applicationId,
+    applicationReference,
+
+    jobTitle,
+
+    interviewRound,
+    interviewType,
+
+    scheduledStart,
+    scheduledEnd,
+
+    location,
+    meetingUrl,
+
+    instructions
+
+}) {
+
+    const ALTRIUM_LOGO_URL =
+        process.env
+            .ALTRIUM_EMAIL_LOGO_URL ||
+        "";
+
+
+    const APP_BASE_URL =
+        process.env.APP_BASE_URL ||
+        "http://localhost:3000";
+
+
+    const safeCandidateName =
+        escapeEmailHtml(
+            candidateName ||
+            "Candidate"
+        );
+
+
+    const safeJobTitle =
+        escapeEmailHtml(
+            jobTitle ||
+            "Position"
+        );
+
+
+    const safeReference =
+        escapeEmailHtml(
+            applicationReference ||
+            ""
+        );
+
+
+    const safeLocation =
+        escapeEmailHtml(
+            location ||
+            ""
+        );
+
+
+    const safeInstructions =
+        escapeEmailHtml(
+            instructions ||
+            ""
+        );
+
+
+    const safeMeetingUrl =
+        escapeEmailHtml(
+            meetingUrl ||
+            ""
+        );
+
+
+    const progressUrl =
+        `${APP_BASE_URL}/application-progress.html?id=${applicationId}`;
+
+
+    const safeProgressUrl =
+        escapeEmailHtml(
+            progressUrl
+        );
+
+
+    const interviewDate =
+        formatInterviewEmailDate(
+            scheduledStart
+        );
+
+
+    const interviewStartTime =
+        formatInterviewEmailTime(
+            scheduledStart
+        );
+
+
+    const interviewEndTime =
+        formatInterviewEmailTime(
+            scheduledEnd
+        );
+
+
+    const typeLabel =
+        interviewType ===
+        "online"
+            ? "Google Meet"
+
+            : interviewType ===
+                "onsite"
+                ? "Onsite interview"
+
+                : "Phone interview";
+
+
+
+    /* =====================================================
+       GOOGLE MEET / LOCATION SECTION
+       ===================================================== */
+
+    const meetingSection =
+
+        interviewType ===
+            "online" &&
+        meetingUrl
+
+            ? `
+
+                <tr>
+
+                    <td
+                        style="
+                            padding:
+                                0
+                                36px
+                                26px;
+                        "
+                    >
+
+                        <table
+                            role="presentation"
+                            width="100%"
+                            cellspacing="0"
+                            cellpadding="0"
+                            style="
+                                background:
+                                    #151515;
+
+                                border:
+                                    1px solid
+                                    rgba(
+                                        255,
+                                        132,
+                                        31,
+                                        0.28
+                                    );
+
+                                border-radius:
+                                    18px;
+                            "
+                        >
+
+                            <tr>
+
+                                <td
+                                    style="
+                                        padding:
+                                            22px
+                                            24px;
+                                    "
+                                >
+
+                                    <div
+                                        style="
+                                            color:
+                                                #ff9a35;
+
+                                            font-size:
+                                                11px;
+
+                                            font-weight:
+                                                800;
+
+                                            letter-spacing:
+                                                1.5px;
+
+                                            text-transform:
+                                                uppercase;
+
+                                            margin-bottom:
+                                                8px;
+                                        "
+                                    >
+                                        Google Meet
+                                    </div>
+
+
+                                    <div
+                                        style="
+                                            color:
+                                                #d1d1d1;
+
+                                            font-size:
+                                                14px;
+
+                                            line-height:
+                                                1.7;
+
+                                            margin-bottom:
+                                                16px;
+                                        "
+                                    >
+                                        This is your personal interview meeting link.
+                                        Join at the scheduled time using the button below.
+                                    </div>
+
+
+                                    <a
+                                        href="${safeMeetingUrl}"
+
+                                        style="
+                                            display:
+                                                inline-block;
+
+                                            padding:
+                                                14px
+                                                24px;
+
+                                            border-radius:
+                                                999px;
+
+                                            background:
+                                                linear-gradient(
+                                                    90deg,
+                                                    #ff841f,
+                                                    #ffc14d
+                                                );
+
+                                            color:
+                                                #111111;
+
+                                            text-decoration:
+                                                none;
+
+                                            font-size:
+                                                14px;
+
+                                            font-weight:
+                                                800;
+                                        "
+                                    >
+                                        Join Google Meet
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                        </table>
+
+                    </td>
+
+                </tr>
+
+            `
+
+            : interviewType ===
+                "onsite"
+
+                ? `
+
+                    <tr>
+
+                        <td
+                            style="
+                                padding:
+                                    0
+                                    36px
+                                    26px;
+                            "
+                        >
+
+                            <div
+                                style="
+                                    padding:
+                                        20px
+                                        22px;
+
+                                    background:
+                                        #151515;
+
+                                    border:
+                                        1px solid
+                                        rgba(
+                                            255,
+                                            255,
+                                            255,
+                                            0.08
+                                        );
+
+                                    border-radius:
+                                        16px;
+                                "
+                            >
+
+                                <div
+                                    style="
+                                        color:
+                                            #8f8f8f;
+
+                                        font-size:
+                                            11px;
+
+                                        font-weight:
+                                            800;
+
+                                        letter-spacing:
+                                            1.4px;
+
+                                        text-transform:
+                                            uppercase;
+
+                                        margin-bottom:
+                                            8px;
+                                    "
+                                >
+                                    Interview location
+                                </div>
+
+
+                                <div
+                                    style="
+                                        color:
+                                            #ffffff;
+
+                                        font-size:
+                                            16px;
+
+                                        font-weight:
+                                            700;
+                                    "
+                                >
+                                    ${
+                                        safeLocation ||
+                                        "Location will be shared separately"
+                                    }
+                                </div>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                `
+
+                : "";
+
+
+
+    /* =====================================================
+       INSTRUCTIONS SECTION
+       ===================================================== */
+
+    const instructionsSection =
+
+        instructions
+
+            ? `
+
+                <tr>
+
+                    <td
+                        style="
+                            padding:
+                                0
+                                36px
+                                26px;
+                        "
+                    >
+
+                        <div
+                            style="
+                                padding:
+                                    20px
+                                    22px;
+
+                                background:
+                                    #151515;
+
+                                border-left:
+                                    3px solid
+                                    #ff841f;
+
+                                border-radius:
+                                    0
+                                    16px
+                                    16px
+                                    0;
+                            "
+                        >
+
+                            <div
+                                style="
+                                    color:
+                                        #8f8f8f;
+
+                                    font-size:
+                                        11px;
+
+                                    font-weight:
+                                        800;
+
+                                    letter-spacing:
+                                        1.4px;
+
+                                    text-transform:
+                                        uppercase;
+
+                                    margin-bottom:
+                                        9px;
+                                "
+                            >
+                                Instructions
+                            </div>
+
+
+                            <div
+                                style="
+                                    color:
+                                        #d4d4d4;
+
+                                    font-size:
+                                        14px;
+
+                                    line-height:
+                                        1.75;
+                                "
+                            >
+                                ${safeInstructions}
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            `
+
+            : "";
+
+
+
+    /* =====================================================
+       SEND EMAIL
+       ===================================================== */
+
+    const emailInfo =
+        await transporter.sendMail({
+
+            from:
+                `"Altrium" <${process.env.EMAIL_FROM}>`,
+
+            to:
+                candidateEmail,
+
+            subject:
+                `Your interview for ${jobTitle} is confirmed | Altrium`,
+
+
+            text: `
+
+Hi ${candidateName},
+
+Your interview for ${jobTitle} has been confirmed.
+
+Application reference:
+${applicationReference}
+
+Interview round:
+Round ${interviewRound}
+
+Date:
+${interviewDate}
+
+Time:
+${interviewStartTime} - ${interviewEndTime}
+
+Interview type:
+${typeLabel}
+
+${
+    interviewType ===
+        "online" &&
+    meetingUrl
+
+        ? `Google Meet: ${meetingUrl}`
+
+        : ""
+}
+
+${
+    interviewType ===
+        "onsite" &&
+    location
+
+        ? `Location: ${location}`
+
+        : ""
+}
+
+${
+    instructions
+        ? `Instructions: ${instructions}`
+        : ""
+}
+
+View your application progress:
+
+${progressUrl}
+
+Best regards,
+Altrium Recruitment
+
+            `.trim(),
+
+
+            html: `
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Interview confirmed
+    </title>
+
+</head>
+
+
+<body
+    style="
+        margin:
+            0;
+
+        padding:
+            0;
+
+        background:
+            #080808;
+
+        font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+
+        color:
+            #ffffff;
+    "
+>
+
+    <table
+        role="presentation"
+        width="100%"
+        cellspacing="0"
+        cellpadding="0"
+
+        style="
+            width:
+                100%;
+
+            background:
+                #080808;
+
+            padding:
+                42px
+                18px;
+        "
+    >
+
+        <tr>
+
+            <td
+                align="center"
+            >
+
+                <table
+                    role="presentation"
+                    width="100%"
+                    cellspacing="0"
+                    cellpadding="0"
+
+                    style="
+                        width:
+                            100%;
+
+                        max-width:
+                            650px;
+
+                        background:
+                            #101010;
+
+                        border:
+                            1px solid
+                            rgba(
+                                255,
+                                255,
+                                255,
+                                0.08
+                            );
+
+                        border-radius:
+                            24px;
+
+                        overflow:
+                            hidden;
+                    "
+                >
+
+
+                    <!-- HEADER -->
+
+                    <tr>
+
+                        <td
+                            style="
+                                padding:
+                                    30px
+                                    36px;
+
+                                border-bottom:
+                                    1px solid
+                                    rgba(
+                                        255,
+                                        255,
+                                        255,
+                                        0.07
+                                    );
+                            "
+                        >
+
+                            ${
+                                ALTRIUM_LOGO_URL
+
+                                    ? `
+
+                                        <img
+                                            src="${
+                                                escapeEmailHtml(
+                                                    ALTRIUM_LOGO_URL
+                                                )
+                                            }"
+
+                                            alt="Altrium"
+
+                                            style="
+                                                display:
+                                                    block;
+
+                                                height:
+                                                    34px;
+
+                                                width:
+                                                    auto;
+                                            "
+                                        >
+
+                                    `
+
+                                    : `
+
+                                        <div
+                                            style="
+                                                color:
+                                                    #ffffff;
+
+                                                font-size:
+                                                    24px;
+
+                                                font-weight:
+                                                    800;
+                                            "
+                                        >
+                                            Altrium
+                                        </div>
+
+                                    `
+                            }
+
+                        </td>
+
+                    </tr>
+
+
+
+                    <!-- HERO -->
+
+                    <tr>
+
+                        <td
+                            style="
+                                padding:
+                                    38px
+                                    36px
+                                    30px;
+                            "
+                        >
+
+                            <div
+                                style="
+                                    color:
+                                        #999999;
+
+                                    font-size:
+                                        11px;
+
+                                    font-weight:
+                                        800;
+
+                                    letter-spacing:
+                                        1.8px;
+
+                                    text-transform:
+                                        uppercase;
+
+                                    margin-bottom:
+                                        13px;
+                                "
+                            >
+                                Interview scheduled
+                            </div>
+
+
+                            <h1
+                                style="
+                                    margin:
+                                        0
+                                        0
+                                        18px;
+
+                                    color:
+                                        #ffffff;
+
+                                    font-size:
+                                        38px;
+
+                                    line-height:
+                                        1.12;
+
+                                    font-weight:
+                                        800;
+                                "
+                            >
+
+                                Your interview is
+
+                                <span
+                                    style="
+                                        color:
+                                            #ff841f;
+                                    "
+                                >
+                                    confirmed.
+                                </span>
+
+                            </h1>
+
+
+                            <p
+                                style="
+                                    margin:
+                                        0;
+
+                                    color:
+                                        #cfcfcf;
+
+                                    font-size:
+                                        16px;
+
+                                    line-height:
+                                        1.8;
+                                "
+                            >
+
+                                Hi
+
+                                <strong
+                                    style="
+                                        color:
+                                            #ffffff;
+                                    "
+                                >
+                                    ${safeCandidateName}
+                                </strong>,
+
+                                <br><br>
+
+                                Your interview for
+
+                                <strong
+                                    style="
+                                        color:
+                                            #ffffff;
+                                    "
+                                >
+                                    ${safeJobTitle}
+                                </strong>
+
+                                has officially been scheduled.
+
+                            </p>
+
+                        </td>
+
+                    </tr>
+
+
+
+                    <!-- DETAILS -->
+
+                    <tr>
+
+                        <td
+                            style="
+                                padding:
+                                    0
+                                    36px
+                                    26px;
+                            "
+                        >
+
+                            <table
+                                role="presentation"
+                                width="100%"
+                                cellspacing="0"
+                                cellpadding="0"
+
+                                style="
+                                    background:
+                                        rgba(
+                                            255,
+                                            132,
+                                            31,
+                                            0.07
+                                        );
+
+                                    border:
+                                        1px solid
+                                        rgba(
+                                            255,
+                                            132,
+                                            31,
+                                            0.22
+                                        );
+
+                                    border-radius:
+                                        18px;
+                                "
+                            >
+
+                                <tr>
+
+                                    <td
+                                        style="
+                                            padding:
+                                                24px;
+                                        "
+                                    >
+
+                                        <div
+                                            style="
+                                                color:
+                                                    #ff9b3a;
+
+                                                font-size:
+                                                    11px;
+
+                                                font-weight:
+                                                    800;
+
+                                                letter-spacing:
+                                                    1.5px;
+
+                                                text-transform:
+                                                    uppercase;
+
+                                                margin-bottom:
+                                                    20px;
+                                            "
+                                        >
+                                            Interview details
+                                        </div>
+
+
+                                        <table
+                                            role="presentation"
+                                            width="100%"
+                                            cellspacing="0"
+                                            cellpadding="0"
+                                        >
+
+                                            <tr>
+
+                                                <td
+                                                    style="
+                                                        width:
+                                                            50%;
+
+                                                        vertical-align:
+                                                            top;
+
+                                                        padding:
+                                                            0
+                                                            12px
+                                                            18px
+                                                            0;
+                                                    "
+                                                >
+
+                                                    <div
+                                                        style="
+                                                            color:
+                                                                #858585;
+
+                                                            font-size:
+                                                                11px;
+
+                                                            text-transform:
+                                                                uppercase;
+
+                                                            margin-bottom:
+                                                                5px;
+                                                        "
+                                                    >
+                                                        Date
+                                                    </div>
+
+
+                                                    <div
+                                                        style="
+                                                            color:
+                                                                #ffffff;
+
+                                                            font-size:
+                                                                16px;
+
+                                                            font-weight:
+                                                                700;
+                                                        "
+                                                    >
+                                                        ${interviewDate}
+                                                    </div>
+
+                                                </td>
+
+
+                                                <td
+                                                    style="
+                                                        width:
+                                                            50%;
+
+                                                        vertical-align:
+                                                            top;
+
+                                                        padding:
+                                                            0
+                                                            0
+                                                            18px
+                                                            12px;
+                                                    "
+                                                >
+
+                                                    <div
+                                                        style="
+                                                            color:
+                                                                #858585;
+
+                                                            font-size:
+                                                                11px;
+
+                                                            text-transform:
+                                                                uppercase;
+
+                                                            margin-bottom:
+                                                                5px;
+                                                        "
+                                                    >
+                                                        Time
+                                                    </div>
+
+
+                                                    <div
+                                                        style="
+                                                            color:
+                                                                #ffffff;
+
+                                                            font-size:
+                                                                17px;
+
+                                                            font-weight:
+                                                                800;
+
+                                                            white-space:
+                                                                nowrap;
+                                                        "
+                                                    >
+                                                        ${interviewStartTime}
+                                                        –
+                                                        ${interviewEndTime}
+                                                    </div>
+
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr>
+
+                                                <td
+                                                    style="
+                                                        width:
+                                                            50%;
+
+                                                        vertical-align:
+                                                            top;
+
+                                                        padding-right:
+                                                            12px;
+                                                    "
+                                                >
+
+                                                    <div
+                                                        style="
+                                                            color:
+                                                                #858585;
+
+                                                            font-size:
+                                                                11px;
+
+                                                            text-transform:
+                                                                uppercase;
+
+                                                            margin-bottom:
+                                                                5px;
+                                                        "
+                                                    >
+                                                        Interview type
+                                                    </div>
+
+
+                                                    <div
+                                                        style="
+                                                            color:
+                                                                #ffffff;
+
+                                                            font-size:
+                                                                16px;
+
+                                                            font-weight:
+                                                                700;
+                                                        "
+                                                    >
+                                                        ${typeLabel}
+                                                    </div>
+
+                                                </td>
+
+
+                                                <td
+                                                    style="
+                                                        width:
+                                                            50%;
+
+                                                        vertical-align:
+                                                            top;
+
+                                                        padding-left:
+                                                            12px;
+                                                    "
+                                                >
+
+                                                    <div
+                                                        style="
+                                                            color:
+                                                                #858585;
+
+                                                            font-size:
+                                                                11px;
+
+                                                            text-transform:
+                                                                uppercase;
+
+                                                            margin-bottom:
+                                                                5px;
+                                                        "
+                                                    >
+                                                        Interview round
+                                                    </div>
+
+
+                                                    <div
+                                                        style="
+                                                            color:
+                                                                #ffffff;
+
+                                                            font-size:
+                                                                16px;
+
+                                                            font-weight:
+                                                                700;
+                                                        "
+                                                    >
+                                                        Round ${interviewRound}
+                                                    </div>
+
+                                                </td>
+
+                                            </tr>
+
+                                        </table>
+
+                                    </td>
+
+                                </tr>
+
+                            </table>
+
+                        </td>
+
+                    </tr>
+
+
+                    ${meetingSection}
+
+
+                    ${instructionsSection}
+
+
+
+                    <!-- PROGRESS -->
+
+                    <tr>
+
+                        <td
+                            style="
+                                padding:
+                                    0
+                                    36px
+                                    34px;
+                            "
+                        >
+
+                            <a
+                                href="${safeProgressUrl}"
+
+                                style="
+                                    display:
+                                        inline-block;
+
+                                    padding:
+                                        14px
+                                        24px;
+
+                                    border-radius:
+                                        999px;
+
+                                    background:
+                                        #191919;
+
+                                    border:
+                                        1px solid
+                                        rgba(
+                                            255,
+                                            255,
+                                            255,
+                                            0.10
+                                        );
+
+                                    color:
+                                        #ffffff;
+
+                                    text-decoration:
+                                        none;
+
+                                    font-size:
+                                        14px;
+
+                                    font-weight:
+                                        700;
+                                "
+                            >
+                                View application progress
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+
+
+                    <!-- FOOTER -->
+
+                    <tr>
+
+                        <td
+                            style="
+                                padding:
+                                    25px
+                                    36px
+                                    32px;
+
+                                border-top:
+                                    1px solid
+                                    rgba(
+                                        255,
+                                        255,
+                                        255,
+                                        0.07
+                                    );
+                            "
+                        >
+
+                            <div
+                                style="
+                                    color:
+                                        #777777;
+
+                                    font-size:
+                                        11px;
+
+                                    letter-spacing:
+                                        1px;
+
+                                    text-transform:
+                                        uppercase;
+
+                                    margin-bottom:
+                                        7px;
+                                "
+                            >
+                                Application reference
+                            </div>
+
+
+                            <div
+                                style="
+                                    color:
+                                        #ff9633;
+
+                                    font-size:
+                                        16px;
+
+                                    font-weight:
+                                        800;
+
+                                    margin-bottom:
+                                        20px;
+                                "
+                            >
+                                ${safeReference}
+                            </div>
+
+
+                            <p
+                                style="
+                                    margin:
+                                        0;
+
+                                    color:
+                                        #818181;
+
+                                    font-size:
+                                        13px;
+
+                                    line-height:
+                                        1.7;
+                                "
+                            >
+
+                                Please arrive or join on time
+                                and follow the interview instructions above.
+
+                                <br><br>
+
+                                Altrium Recruitment Team
+
+                            </p>
+
+                        </td>
+
+                    </tr>
+
+
+                </table>
+
+            </td>
+
+        </tr>
+
+    </table>
+
+</body>
+
+</html>
+
+            `
+
+        });
+
+
+    console.log(
+        "Interview confirmation email sent:",
+        emailInfo.messageId,
+        "to:",
+        candidateEmail
+    );
+
+
+    return emailInfo;
+
+}
+
+
+
+/* =========================================================
+   DELETE GOOGLE CALENDAR EVENT QUIETLY
+   ========================================================= */
+
+async function deleteGoogleCalendarEventQuietly(
+    calendar,
+    calendarId,
+    eventId
+) {
+
+    if (
+        !calendar ||
+        !calendarId ||
+        !eventId
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+        await calendar.events.delete({
+
+            calendarId,
+
+            eventId,
+
+            sendUpdates:
+                "none"
+
+        });
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Google Calendar cleanup error:",
+            eventId,
+            error.response?.data ||
+            error.message
+        );
+
+    }
+
+}
+
+
+
+/* =========================================================
+   CREATE GOOGLE INTERVIEW EVENT
+   ========================================================= */
+
+async function createGoogleInterviewEvent({
+
+    calendar,
+    calendarId,
+    session,
+    slot
+
+}) {
+
+    let createdEventId =
+        null;
+
+
+    try {
+
+        const candidateName =
+            `${slot.first_name || ""} ${slot.last_name || ""}`
+                .trim() ||
+            "Candidate";
+
+
+        const online =
+            session.interview_type ===
+            "online";
+
+
+        const descriptionParts = [
+
+            "Altrium Recruitment Interview",
+
+            `Position: ${session.job_title}`,
+
+            `Candidate: ${candidateName}`,
+
+            `Application: ${slot.application_reference}`,
+
+            `Interview round: ${session.interview_round}`
+
+        ];
+
+
+        if (
+            session.instructions
+        ) {
+
+            descriptionParts.push(
+
+                "",
+
+                "Candidate instructions:",
+
+                session.instructions
+
+            );
+
+        }
+
+
+
+        const requestBody = {
+
+            summary:
+                `${session.job_title} Interview - ${candidateName}`,
+
+
+            description:
+                descriptionParts.join(
+                    "\n"
+                ),
+
+
+            start: {
+
+                dateTime:
+                    new Date(
+                        slot.scheduled_start
+                    )
+                    .toISOString(),
+
+                timeZone:
+                    session.timezone ||
+                    "Asia/Colombo"
+
+            },
+
+
+            end: {
+
+                dateTime:
+                    new Date(
+                        slot.scheduled_end
+                    )
+                    .toISOString(),
+
+                timeZone:
+                    session.timezone ||
+                    "Asia/Colombo"
+
+            },
+
+
+            reminders: {
+
+                useDefault:
+                    true
+
+            },
+
+
+            extendedProperties: {
+
+                private: {
+
+                    altriumSessionId:
+                        String(
+                            session.id
+                        ),
+
+                    altriumSlotId:
+                        String(
+                            slot.id
+                        ),
+
+                    altriumApplicationId:
+                        String(
+                            slot.application_id
+                        )
+
+                }
+
+            }
+
+        };
+
+
+
+        if (
+            session.interview_type ===
+                "onsite" &&
+            session.location
+        ) {
+
+            requestBody.location =
+                session.location;
+
+        }
+
+
+
+        if (
+            online
+        ) {
+
+            requestBody.conferenceData = {
+
+                createRequest: {
+
+                    requestId:
+                        crypto.randomUUID(),
+
+                    conferenceSolutionKey: {
+
+                        type:
+                            "hangoutsMeet"
+
+                    }
+
+                }
+
+            };
+
+        }
+
+
+
+        const insertOptions = {
+
+            calendarId,
+
+            sendUpdates:
+                "none",
+
+            requestBody
+
+        };
+
+
+        if (
+            online
+        ) {
+
+            insertOptions.conferenceDataVersion =
+                1;
+
+        }
+
+
+
+        const createResponse =
+            await calendar.events.insert(
+                insertOptions
+            );
+
+
+        createdEventId =
+            createResponse.data.id;
+
+
+        let event =
+            createResponse.data;
+
+
+        let meetingUrl =
+            event.hangoutLink ||
+
+            event.conferenceData
+                ?.entryPoints
+                ?.find(
+                    entry =>
+                        entry.entryPointType ===
+                        "video"
+                )
+                ?.uri ||
+
+            null;
+
+
+
+        /* =====================================================
+           WAIT FOR GOOGLE MEET LINK
+           ===================================================== */
+
+        if (
+            online &&
+            !meetingUrl
+        ) {
+
+            for (
+                let attempt = 0;
+
+                attempt < 10 &&
+                !meetingUrl;
+
+                attempt += 1
+            ) {
+
+                await new Promise(
+                    resolve =>
+                        setTimeout(
+                            resolve,
+                            700
+                        )
+                );
+
+
+                const eventResponse =
+                    await calendar.events.get({
+
+                        calendarId,
+
+                        eventId:
+                            createdEventId
+
+                    });
+
+
+                event =
+                    eventResponse.data;
+
+
+                meetingUrl =
+                    event.hangoutLink ||
+
+                    event.conferenceData
+                        ?.entryPoints
+                        ?.find(
+                            entry =>
+                                entry.entryPointType ===
+                                "video"
+                        )
+                        ?.uri ||
+
+                    null;
+
+            }
+
+        }
+
+
+
+        if (
+            online &&
+            !meetingUrl
+        ) {
+
+            throw new Error(
+                "Google created the Calendar event but did not return a Meet link."
+            );
+
+        }
+
+
+
+        return {
+
+            eventId:
+                createdEventId,
+
+            calendarId,
+
+            meetingUrl,
+
+            calendarUrl:
+                event.htmlLink ||
+                null
+
+        };
+
+    }
+
+    catch (error) {
+
+        if (
+            createdEventId
+        ) {
+
+            await deleteGoogleCalendarEventQuietly(
+
+                calendar,
+
+                calendarId,
+
+                createdEventId
+
+            );
+
+        }
+
+
+        throw error;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   SEND GOOGLE CALENDAR INVITATION
+   WITH RATE-LIMIT RETRY
+   ========================================================= */
+
+async function inviteCandidateToGoogleInterview({
+
+    calendar,
+    calendarId,
+    eventId,
+    candidateEmail
+
+}) {
+
+    if (
+        !candidateEmail
+    ) {
+
+        return;
+
+    }
+
+
+    const maxAttempts =
+        5;
+
+
+
+    for (
+        let attempt = 0;
+
+        attempt < maxAttempts;
+
+        attempt += 1
+    ) {
+
+        try {
+
+            await calendar.events.patch({
+
+                calendarId,
+
+                eventId,
+
+                sendUpdates:
+                    "all",
+
+                requestBody: {
+
+                    attendees: [
+
+                        {
+
+                            email:
+                                candidateEmail
+
+                        }
+
+                    ]
+
+                }
+
+            });
+
+
+            return;
+
+        }
+
+        catch (error) {
+
+            const status =
+                error.response?.status ||
+                error.code;
+
+
+            const reason =
+                error.response?.data
+                    ?.error
+                    ?.errors
+                    ?.[0]
+                    ?.reason;
+
+
+            const message =
+                error.response?.data
+                    ?.error
+                    ?.message ||
+                "";
+
+
+            const rateLimited =
+
+                status ===
+                    429 ||
+
+                reason ===
+                    "rateLimitExceeded" ||
+
+                reason ===
+                    "userRateLimitExceeded" ||
+
+                (
+                    status ===
+                        403 &&
+
+                    /rate limit/i.test(
+                        message
+                    )
+                );
+
+
+            if (
+                !rateLimited ||
+                attempt ===
+                    maxAttempts - 1
+            ) {
+
+                throw error;
+
+            }
+
+
+            const delay =
+
+                Math.pow(
+                    2,
+                    attempt
+                ) *
+                1000 +
+
+                Math.floor(
+                    Math.random() *
+                    750
+                );
+
+
+            console.log(
+                `Google Calendar rate limited. Retrying invitation in ${delay}ms...`
+            );
+
+
+            await new Promise(
+                resolve =>
+                    setTimeout(
+                        resolve,
+                        delay
+                    )
+            );
+
+        }
+
+    }
+
+}
+
+
+// ===============================================================================
+// ROUTES ========================================================================
+
+/* =========================================================
+   ADMIN - CONNECT GOOGLE CALENDAR
+   ========================================================= */
 
 app.get(
-    "/api/admin/test",
+    "/api/google/calendar/connect",
     requireAdmin,
     (req, res) => {
 
-        res.json({
-            success: true,
-            message: "Admin access confirmed."
-        });
+        try {
+
+            const authorizationUrl =
+                googleOAuthClient.generateAuthUrl({
+
+                    access_type:
+                        "offline",
+
+                    prompt:
+                        "consent",
+
+                    scope:
+                        GOOGLE_CALENDAR_SCOPES
+
+                });
+
+
+            return res.redirect(
+                authorizationUrl
+            );
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Google Calendar connect error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success:
+                    false,
+
+                message:
+                    "Unable to start Google Calendar connection."
+
+            });
+
+        }
 
     }
 );
 
-// ===============================================================================
-// ROUTES ========================================================================
+/* =========================================================
+   GOOGLE CALENDAR OAUTH CALLBACK
+   ========================================================= */
+
+app.get(
+    "/api/google/calendar/callback",
+    requireAdmin,
+    async (req, res) => {
+
+        try {
+
+            const code =
+                req.query.code;
+
+
+            if (
+                !code
+            ) {
+
+                return res.status(400).send(
+                    "Google authorization code was not provided."
+                );
+
+            }
+
+
+            const {
+                tokens
+            } =
+                await googleOAuthClient
+                    .getToken(
+                        code
+                    );
+
+
+            googleOAuthClient
+                .setCredentials(
+                    tokens
+                );
+
+
+            /* =========================================================
+            PERSIST GOOGLE REFRESH TOKEN
+            ========================================================= */
+
+            const existingConnectionResult =
+                await pool.query(
+                    `
+                    SELECT
+                        id,
+                        encrypted_refresh_token
+
+                    FROM google_calendar_connections
+
+                    ORDER BY id ASC
+
+                    LIMIT 1
+                    `
+                );
+
+
+            const existingConnection =
+                existingConnectionResult
+                    .rows[0] ||
+                null;
+
+
+            if (
+                tokens.refresh_token
+            ) {
+
+                const encryptedRefreshToken =
+                    encryptGoogleRefreshToken(
+                        tokens.refresh_token
+                    );
+
+
+                if (
+                    existingConnection
+                ) {
+
+                    await pool.query(
+                        `
+                        UPDATE google_calendar_connections
+
+                        SET
+                            connected_by = $1,
+                            encrypted_refresh_token = $2,
+                            google_calendar_id = 'primary',
+                            updated_at = NOW()
+
+                        WHERE id = $3
+                        `,
+                        [
+                            req.session.userId,
+                            encryptedRefreshToken,
+                            existingConnection.id
+                        ]
+                    );
+
+                }
+
+                else {
+
+                    await pool.query(
+                        `
+                        INSERT INTO google_calendar_connections (
+
+                            connected_by,
+                            encrypted_refresh_token,
+                            google_calendar_id
+
+                        )
+
+                        VALUES (
+                            $1,
+                            $2,
+                            'primary'
+                        )
+                        `,
+                        [
+                            req.session.userId,
+                            encryptedRefreshToken
+                        ]
+                    );
+
+                }
+
+            }
+
+            else {
+
+                /*
+                    Google may occasionally omit a new refresh token
+                    if the account was already authorized.
+
+                    That is okay only if Altrium already has one saved.
+                */
+
+                if (
+                    !existingConnection
+                ) {
+
+                    throw new Error(
+                        "Google did not provide a refresh token. Reconnect the Google Calendar account."
+                    );
+
+                }
+
+            }
+
+
+            console.log(
+                "Google Calendar refresh token stored securely."
+            );
+
+
+            const calendar =
+                google.calendar({
+
+                    version:
+                        "v3",
+
+                    auth:
+                        googleOAuthClient
+
+                });
+
+
+            /*
+                Make one harmless Calendar request
+                to prove authorization works.
+            */
+
+            await calendar.events.list({
+
+                calendarId:
+                    "primary",
+
+                maxResults:
+                    1,
+
+                singleEvents:
+                    true
+
+            });
+
+
+            console.log(
+                "Google Calendar connected successfully."
+            );
+
+
+            return res.send(`
+                <!DOCTYPE html>
+
+                <html>
+
+                    <head>
+
+                        <title>
+                            Altrium Google Calendar
+                        </title>
+
+                    </head>
+
+                    <body
+                        style="
+                            background:#080808;
+                            color:#ffffff;
+                            font-family:Arial,sans-serif;
+                            padding:50px;
+                        "
+                    >
+
+                        <h1>
+                            Google Calendar connected.
+                        </h1>
+
+                        <p>
+                            Altrium successfully connected to the recruitment calendar.
+                        </p>
+
+                        <a
+                            href="/admin/admin-dashboard.html"
+                            style="
+                                color:#ff841f;
+                                font-weight:700;
+                            "
+                        >
+                            Return to Altrium
+                        </a>
+
+                    </body>
+
+                </html>
+            `);
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Google Calendar callback error:",
+                error
+            );
+
+
+            return res.status(500).send(
+                "Unable to connect Google Calendar."
+            );
+
+        }
+
+    }
+);
 
 
 /* =========================================================
@@ -1683,9 +4533,6 @@ app.post("/api/auth/verify-email", async (req, res) => {
 
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
 
 /* =========================================================
    VERIFY PASSWORD RESET CODE
@@ -2087,6 +4934,6487 @@ app.post(
             });
 
         }
+
+    }
+);
+
+/* =========================================================
+   REQUIRE CANDIDATE
+   ========================================================= */
+
+function requireCandidate(req, res, next) {
+
+    if (!req.session.userId) {
+
+        return res.status(401).json({
+            success: false,
+            message: "Please sign in to save jobs."
+        });
+
+    }
+
+
+    if (req.session.role !== "candidate") {
+
+        return res.status(403).json({
+            success: false,
+            message: "Only candidate accounts can save jobs."
+        });
+
+    }
+
+
+    next();
+}
+
+
+
+/* =========================================================
+   GET SAVED JOBS
+   ========================================================= */
+
+app.get(
+    "/api/saved-jobs",
+    requireCandidate,
+    async (req, res) => {
+
+        try {
+
+            const result =
+                await pool.query(
+                    `
+                    SELECT job_id
+                    FROM saved_jobs
+                    WHERE candidate_id = $1
+                    ORDER BY saved_at DESC
+                    `,
+                    [
+                        req.session.userId
+                    ]
+                );
+
+
+            res.json({
+                success: true,
+
+                savedJobIds:
+                    result.rows.map(
+                        row =>
+                            String(row.job_id)
+                    )
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Load saved jobs error:",
+                error
+            );
+
+
+            res.status(500).json({
+                success: false,
+                message:
+                    "Unable to load saved jobs."
+            });
+
+        }
+
+    }
+);
+
+
+
+/* =========================================================
+   SAVE JOB
+   ========================================================= */
+
+app.post(
+    "/api/saved-jobs/:jobId",
+    requireCandidate,
+    async (req, res) => {
+
+        try {
+
+            const jobId =
+                req.params.jobId;
+
+
+            /* Make sure the job exists and is public */
+
+            const jobResult =
+                await pool.query(
+                    `
+                    SELECT id
+                    FROM jobs
+                    WHERE id = $1
+                    AND status IN ('active', 'closed')
+                    `,
+                    [
+                        jobId
+                    ]
+                );
+
+
+            if (
+                jobResult.rows.length === 0
+            ) {
+
+                return res.status(404).json({
+                    success: false,
+                    message:
+                        "Job vacancy not found."
+                });
+
+            }
+
+
+            await pool.query(
+                `
+                INSERT INTO saved_jobs (
+                    candidate_id,
+                    job_id
+                )
+
+                VALUES ($1, $2)
+
+                ON CONFLICT (
+                    candidate_id,
+                    job_id
+                )
+
+                DO NOTHING
+                `,
+                [
+                    req.session.userId,
+                    jobId
+                ]
+            );
+
+
+            res.json({
+                success: true,
+                message:
+                    "Job saved successfully."
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Save job error:",
+                error
+            );
+
+
+            res.status(500).json({
+                success: false,
+                message:
+                    "Unable to save job."
+            });
+
+        }
+
+    }
+);
+
+
+
+/* =========================================================
+   UNSAVE JOB
+   ========================================================= */
+
+app.delete(
+    "/api/saved-jobs/:jobId",
+    requireCandidate,
+    async (req, res) => {
+
+        try {
+
+            const jobId =
+                req.params.jobId;
+
+
+            await pool.query(
+                `
+                DELETE FROM saved_jobs
+
+                WHERE candidate_id = $1
+                AND job_id = $2
+                `,
+                [
+                    req.session.userId,
+                    jobId
+                ]
+            );
+
+
+            res.json({
+                success: true,
+                message:
+                    "Job removed from saved jobs."
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Unsave job error:",
+                error
+            );
+
+
+            res.status(500).json({
+                success: false,
+                message:
+                    "Unable to remove saved job."
+            });
+
+        }
+
+    }
+);
+
+/* =========================================================
+   GET CANDIDATE APPLICATIONS
+   Used by jobs page to show already-applied vacancies
+   ========================================================= */
+
+app.get(
+    "/api/my-applications",
+    requireCandidate,
+    async (req, res) => {
+
+        try {
+
+            const result =
+                await pool.query(
+                    `
+                    SELECT
+                        id,
+                        job_id,
+                        application_reference,
+                        status,
+                        applied_at
+
+                    FROM applications
+
+                    WHERE candidate_id = $1
+
+                    ORDER BY applied_at DESC
+                    `,
+                    [
+                        req.session.userId
+                    ]
+                );
+
+
+            return res.json({
+
+                success: true,
+
+                applications:
+                    result.rows.map(
+                        application => ({
+
+                            id:
+                                application.id,
+
+                            jobId:
+                                application.job_id,
+
+                            reference:
+                                application.application_reference,
+
+                            status:
+                                application.status,
+
+                            appliedAt:
+                                application.applied_at
+
+                        })
+                    )
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Load candidate applications error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success: false,
+
+                message:
+                    "Unable to load your applications."
+
+            });
+
+        }
+
+    }
+);
+
+/* =========================================================
+   GET APPLICATION PREFILL INFORMATION
+   ========================================================= */
+
+app.get(
+    "/api/application-profile",
+    requireCandidate,
+    async (req, res) => {
+
+        try {
+
+            const result =
+                await pool.query(
+                    `
+                    SELECT
+
+                        u.first_name,
+                        u.last_name,
+                        u.email,
+                        u.phone_number,
+
+                        u.education,
+                        u.skills,
+                        u.work_experience,
+                        u.preferred_job_type,
+
+                        cp.nic,
+
+                        cp.date_of_birth::text
+                            AS date_of_birth,
+
+                        cp.country,
+                        cp.linkedin_url,
+                        cp.preferred_languages,
+                        cp.projects
+
+                    FROM users u
+
+                    LEFT JOIN candidate_profiles cp
+                        ON cp.candidate_id = u.id
+
+                    WHERE u.id = $1
+                    AND u.role = 'candidate'
+
+                    LIMIT 1
+                    `,
+                    [
+                        req.session.userId
+                    ]
+                );
+
+
+            if (result.rows.length === 0) {
+
+                return res.status(404).json({
+                    success: false,
+                    message:
+                        "Candidate profile not found."
+                });
+
+            }
+
+
+            const candidate =
+                result.rows[0];
+
+
+            res.json({
+
+                success: true,
+
+                candidate: {
+
+                    firstName:
+                        candidate.first_name || "",
+
+                    lastName:
+                        candidate.last_name || "",
+
+                    email:
+                        candidate.email || "",
+
+                    phoneNumber:
+                        candidate.phone_number || "",
+
+
+                    nic:
+                        candidate.nic || "",
+
+                    dateOfBirth:
+                        candidate.date_of_birth || "",
+
+                    country:
+                        candidate.country || "",
+
+
+                    education:
+                        candidate.education || "",
+
+                    linkedinUrl:
+                        candidate.linkedin_url || "",
+
+                    skills:
+                        candidate.skills || "",
+
+                    workExperience:
+                        candidate.work_experience || "",
+
+
+                    preferredLanguages:
+                        candidate.preferred_languages || [],
+
+                    projects:
+                        candidate.projects || "",
+
+                    preferredJobType:
+                        candidate.preferred_job_type || ""
+
+                }
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Application profile error:",
+                error
+            );
+
+
+            res.status(500).json({
+                success: false,
+                message:
+                    "Unable to load candidate information."
+            });
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   SUBMIT JOB APPLICATION
+   ========================================================= */
+
+app.post(
+    "/api/applications/:jobId",
+    requireCandidate,
+    handleApplicationCvUpload,
+    async (req, res) => {
+
+        const client =
+            await pool.connect();
+
+
+        let uploadedCvPath =
+            null;
+
+
+        try {
+
+            const candidateId =
+                req.session.userId;
+
+
+            const jobId =
+                req.params.jobId;
+
+
+            /* =================================================
+               READ FORM DATA
+               ================================================= */
+
+            const {
+                firstName,
+                lastName,
+                phoneNumber,
+                nic,
+                dateOfBirth,
+                country,
+                education,
+                linkedinUrl,
+                skills,
+                workExperience,
+                projects,
+                preferredJobType,
+                consent
+            } = req.body;
+
+
+
+            /* =================================================
+               PARSE LANGUAGES
+               ================================================= */
+
+            let preferredLanguages =
+                [];
+
+
+            if (
+                Array.isArray(
+                    req.body.preferredLanguages
+                )
+            ) {
+
+                preferredLanguages =
+                    req.body.preferredLanguages;
+
+            }
+
+            else if (
+                req.body.preferredLanguages
+            ) {
+
+                try {
+
+                    const parsedLanguages =
+                        JSON.parse(
+                            req.body.preferredLanguages
+                        );
+
+
+                    preferredLanguages =
+                        Array.isArray(
+                            parsedLanguages
+                        )
+                            ? parsedLanguages
+                            : [
+                                req.body.preferredLanguages
+                            ];
+
+                }
+
+                catch {
+
+                    preferredLanguages =
+                        [
+                            req.body.preferredLanguages
+                        ];
+
+                }
+
+            }
+
+
+
+            preferredLanguages =
+                preferredLanguages
+                    .map(
+                        language =>
+                            String(language)
+                                .trim()
+                    )
+                    .filter(Boolean);
+
+
+
+            /* =================================================
+               REQUIRED FIELD VALIDATION
+               ================================================= */
+
+            if (
+                !firstName?.trim() ||
+                !lastName?.trim() ||
+                !phoneNumber?.trim() ||
+                !nic?.trim() ||
+                !dateOfBirth ||
+                !country?.trim() ||
+                !education?.trim() ||
+                !skills?.trim() ||
+                !workExperience?.trim() ||
+                !preferredJobType?.trim()
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+
+                        success: false,
+
+                        message:
+                            "Please complete all required application fields."
+
+                    });
+
+            }
+
+
+
+            /* =================================================
+               LANGUAGE VALIDATION
+               ================================================= */
+
+            const allowedLanguages = [
+                "Sinhala",
+                "Tamil",
+                "English"
+            ];
+
+
+            if (
+                preferredLanguages.length === 0 ||
+                preferredLanguages.some(
+                    language =>
+                        !allowedLanguages.includes(
+                            language
+                        )
+                )
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+
+                        success: false,
+
+                        message:
+                            "Please select at least one valid language."
+
+                    });
+
+            }
+
+
+
+            /* =================================================
+               JOB TYPE VALIDATION
+               ================================================= */
+
+            const allowedJobTypes = [
+                "Full time",
+                "Part time",
+                "Internship",
+                "Contract",
+                "Remote"
+            ];
+
+
+            if (
+                !allowedJobTypes.includes(
+                    preferredJobType.trim()
+                )
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+
+                        success: false,
+
+                        message:
+                            "Please select a valid preferred job type."
+
+                    });
+
+            }
+
+
+
+            /* =================================================
+               CONSENT VALIDATION
+               ================================================= */
+
+            const consentGiven =
+                consent === "true" ||
+                consent === true ||
+                consent === "1" ||
+                consent === "on";
+
+
+            if (!consentGiven) {
+
+                return res
+                    .status(400)
+                    .json({
+
+                        success: false,
+
+                        message:
+                            "You must confirm the recruitment consent before submitting."
+
+                    });
+
+            }
+
+
+
+            /* =================================================
+               CV VALIDATION
+               ================================================= */
+
+            if (!req.file) {
+
+                return res
+                    .status(400)
+                    .json({
+
+                        success: false,
+
+                        message:
+                            "Please upload your CV or resume."
+
+                    });
+
+            }
+
+
+
+            /* =================================================
+               DATE OF BIRTH VALIDATION
+               ================================================= */
+
+            const dob =
+                new Date(
+                    `${dateOfBirth}T00:00:00`
+                );
+
+
+            if (
+                Number.isNaN(
+                    dob.getTime()
+                ) ||
+                dob > new Date()
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+
+                        success: false,
+
+                        message:
+                            "Please enter a valid date of birth."
+
+                    });
+
+            }
+
+
+
+            /* =================================================
+               LINKEDIN VALIDATION
+               Optional field
+               ================================================= */
+
+            const cleanLinkedin =
+                linkedinUrl?.trim() ||
+                null;
+
+
+            if (cleanLinkedin) {
+
+                try {
+
+                    const linkedin =
+                        new URL(
+                            cleanLinkedin
+                        );
+
+
+                    if (
+                        linkedin.protocol !==
+                            "https:" &&
+                        linkedin.protocol !==
+                            "http:"
+                    ) {
+
+                        throw new Error(
+                            "Invalid protocol"
+                        );
+
+                    }
+
+                }
+
+                catch {
+
+                    return res
+                        .status(400)
+                        .json({
+
+                            success: false,
+
+                            message:
+                                "Please enter a valid LinkedIn URL."
+
+                        });
+
+                }
+
+            }
+
+
+
+            /* =================================================
+               BEGIN DATABASE TRANSACTION
+               ================================================= */
+
+            await client.query(
+                "BEGIN"
+            );
+
+
+
+            /* =================================================
+               LOAD CANDIDATE ACCOUNT
+               Email comes from database, NOT browser.
+               ================================================= */
+
+            const userResult =
+                await client.query(
+                    `
+                    SELECT
+                        id,
+                        email
+
+                    FROM users
+
+                    WHERE id = $1
+                    AND role = 'candidate'
+
+                    FOR UPDATE
+                    `,
+                    [
+                        candidateId
+                    ]
+                );
+
+
+            if (
+                userResult.rows.length === 0
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res
+                    .status(404)
+                    .json({
+
+                        success: false,
+
+                        message:
+                            "Candidate account not found."
+
+                    });
+
+            }
+
+
+            const candidate =
+                userResult.rows[0];
+
+
+
+            /* =================================================
+               LOAD + VALIDATE VACANCY
+               ================================================= */
+
+            const jobResult =
+                await client.query(
+                    `
+                    SELECT
+                        id,
+                        job_title,
+                        department,
+                        status,
+                        application_deadline
+
+                    FROM jobs
+
+                    WHERE id = $1
+
+                    FOR UPDATE
+                    `,
+                    [
+                        jobId
+                    ]
+                );
+
+
+            if (
+                jobResult.rows.length === 0
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res
+                    .status(404)
+                    .json({
+
+                        success: false,
+
+                        message:
+                            "Job vacancy not found."
+
+                    });
+
+            }
+
+
+            const job =
+                jobResult.rows[0];
+
+
+
+            if (
+                job.status !== "active"
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res
+                    .status(400)
+                    .json({
+
+                        success: false,
+
+                        message:
+                            "This vacancy is no longer accepting applications."
+
+                    });
+
+            }
+
+
+
+            /* =================================================
+               DEADLINE CHECK
+               ================================================= */
+
+            if (
+                job.application_deadline
+            ) {
+
+                const deadlineResult =
+                    await client.query(
+                        `
+                        SELECT
+                            $1::date < CURRENT_DATE
+                                AS expired
+                        `,
+                        [
+                            job.application_deadline
+                        ]
+                    );
+
+
+                if (
+                    deadlineResult
+                        .rows[0]
+                        .expired
+                ) {
+
+                    await client.query(
+                        "ROLLBACK"
+                    );
+
+
+                    return res
+                        .status(400)
+                        .json({
+
+                            success: false,
+
+                            message:
+                                "The application deadline for this vacancy has passed."
+
+                        });
+
+                }
+
+            }
+
+
+
+            /* =================================================
+               PREVENT DUPLICATE APPLICATION
+               ================================================= */
+
+            const duplicateResult =
+                await client.query(
+                    `
+                    SELECT id
+
+                    FROM applications
+
+                    WHERE candidate_id = $1
+                    AND job_id = $2
+
+                    LIMIT 1
+                    `,
+                    [
+                        candidateId,
+                        jobId
+                    ]
+                );
+
+
+            if (
+                duplicateResult.rows.length > 0
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res
+                    .status(409)
+                    .json({
+
+                        success: false,
+
+                        message:
+                            "You have already submitted an application for this vacancy."
+
+                    });
+
+            }
+
+
+
+            /* =================================================
+               RESERVE APPLICATION ID
+               ================================================= */
+
+            const applicationIdResult =
+                await client.query(
+                    `
+                    SELECT
+                        nextval(
+                            pg_get_serial_sequence(
+                                'applications',
+                                'id'
+                            )
+                        ) AS id
+                    `
+                );
+
+
+            const applicationId =
+                applicationIdResult
+                    .rows[0]
+                    .id;
+
+
+
+            /* =================================================
+               APPLICATION REFERENCE
+               Example:
+               ALT-2026-00042
+               ================================================= */
+
+            const applicationYear =
+                new Date()
+                    .getFullYear();
+
+
+            const applicationReference =
+                `ALT-${applicationYear}-${
+                    String(
+                        applicationId
+                    )
+                    .padStart(
+                        5,
+                        "0"
+                    )
+                }`;
+
+
+
+            /* =================================================
+               BUILD PRIVATE CV PATH
+               ================================================= */
+
+            const extensionMap = {
+
+                "application/pdf":
+                    "pdf",
+
+                "image/jpeg":
+                    "jpg",
+
+                "image/png":
+                    "png"
+
+            };
+
+
+            const cvExtension =
+                extensionMap[
+                    req.file.mimetype
+                ];
+
+
+            uploadedCvPath =
+                `candidate-${candidateId}/job-${jobId}/${applicationReference}/version-1/cv-${crypto.randomUUID()}.${cvExtension}`;
+
+
+
+            /* =================================================
+               UPLOAD CV TO PRIVATE SUPABASE BUCKET
+               ================================================= */
+
+            const {
+                error: cvUploadError
+            } =
+                await supabase
+                    .storage
+                    .from(
+                        "application-cvs"
+                    )
+                    .upload(
+                        uploadedCvPath,
+                        req.file.buffer,
+                        {
+
+                            contentType:
+                                req.file.mimetype,
+
+                            upsert:
+                                false
+
+                        }
+                    );
+
+
+            if (cvUploadError) {
+
+                throw new Error(
+                    `CV upload failed: ${cvUploadError.message}`
+                );
+
+            }
+
+
+
+            /* =================================================
+               CREATE APPLICATION
+               ================================================= */
+
+            await client.query(
+                `
+                INSERT INTO applications (
+
+                    id,
+                    application_reference,
+                    candidate_id,
+                    job_id,
+                    status,
+                    cv_path,
+                    consent_given,
+                    consented_at,
+                    current_version_number
+
+                )
+
+                VALUES (
+
+                    $1,
+                    $2,
+                    $3,
+                    $4,
+                    'submitted',
+                    $5,
+                    TRUE,
+                    NOW(),
+                    1
+
+                )
+                `,
+                [
+                    applicationId,
+                    applicationReference,
+                    candidateId,
+                    jobId,
+                    uploadedCvPath
+                ]
+            );
+
+
+
+            /* =================================================
+               CREATE VERSION 1 SNAPSHOT
+               ================================================= */
+
+            await client.query(
+                `
+                INSERT INTO application_versions (
+
+                    application_id,
+                    version_number,
+
+                    first_name,
+                    last_name,
+                    email,
+                    phone_number,
+
+                    nic,
+                    date_of_birth,
+                    country,
+
+                    education,
+                    linkedin_url,
+                    skills,
+                    work_experience,
+                    projects,
+
+                    preferred_languages,
+                    preferred_job_type,
+
+                    cv_path,
+
+                    job_title_snapshot,
+                    department_snapshot
+
+                )
+
+                VALUES (
+
+                    $1,
+                    1,
+
+                    $2,
+                    $3,
+                    $4,
+                    $5,
+
+                    $6,
+                    $7,
+                    $8,
+
+                    $9,
+                    $10,
+                    $11,
+                    $12,
+                    $13,
+
+                    $14,
+                    $15,
+
+                    $16,
+
+                    $17,
+                    $18
+
+                )
+                `,
+                [
+                    applicationId,
+
+                    firstName.trim(),
+
+                    lastName.trim(),
+
+                    candidate.email,
+
+                    phoneNumber.trim(),
+
+                    nic.trim(),
+
+                    dateOfBirth,
+
+                    country.trim(),
+
+                    education.trim(),
+
+                    cleanLinkedin,
+
+                    skills.trim(),
+
+                    workExperience.trim(),
+
+                    projects?.trim() ||
+                        null,
+
+                    preferredLanguages,
+
+                    preferredJobType.trim(),
+
+                    uploadedCvPath,
+
+                    job.job_title,
+
+                    job.department
+                ]
+            );
+
+
+
+            /* =================================================
+               UPDATE REUSABLE USER PROFILE
+               ================================================= */
+
+            await client.query(
+                `
+                UPDATE users
+
+                SET
+                    first_name = $1,
+                    last_name = $2,
+                    phone_number = $3,
+                    education = $4,
+                    skills = $5,
+                    work_experience = $6,
+                    preferred_job_type = $7
+
+                WHERE id = $8
+                `,
+                [
+                    firstName.trim(),
+
+                    lastName.trim(),
+
+                    phoneNumber.trim(),
+
+                    education.trim(),
+
+                    skills.trim(),
+
+                    workExperience.trim(),
+
+                    preferredJobType.trim(),
+
+                    candidateId
+                ]
+            );
+
+
+
+            /* =================================================
+               CREATE / UPDATE CANDIDATE PROFILE
+               ================================================= */
+
+            await client.query(
+                `
+                INSERT INTO candidate_profiles (
+
+                    candidate_id,
+                    nic,
+                    date_of_birth,
+                    country,
+                    linkedin_url,
+                    preferred_languages,
+                    projects
+
+                )
+
+                VALUES (
+
+                    $1,
+                    $2,
+                    $3,
+                    $4,
+                    $5,
+                    $6,
+                    $7
+
+                )
+
+                ON CONFLICT (
+                    candidate_id
+                )
+
+                DO UPDATE SET
+
+                    nic =
+                        EXCLUDED.nic,
+
+                    date_of_birth =
+                        EXCLUDED.date_of_birth,
+
+                    country =
+                        EXCLUDED.country,
+
+                    linkedin_url =
+                        EXCLUDED.linkedin_url,
+
+                    preferred_languages =
+                        EXCLUDED.preferred_languages,
+
+                    projects =
+                        EXCLUDED.projects,
+
+                    updated_at =
+                        NOW()
+                `,
+                [
+                    candidateId,
+
+                    nic.trim(),
+
+                    dateOfBirth,
+
+                    country.trim(),
+
+                    cleanLinkedin,
+
+                    preferredLanguages,
+
+                    projects?.trim() ||
+                        null
+                ]
+            );
+
+
+
+            /* =================================================
+               CREATE FIRST PROGRESS HISTORY ENTRY
+               ================================================= */
+
+            await client.query(
+                `
+                INSERT INTO application_status_history (
+
+                    application_id,
+                    previous_status,
+                    new_status,
+                    changed_by,
+                    status_note
+
+                )
+
+                VALUES (
+
+                    $1,
+                    NULL,
+                    'submitted',
+                    $2,
+                    'Application successfully submitted.'
+
+                )
+                `,
+                [
+                    applicationId,
+                    candidateId
+                ]
+            );
+
+
+
+            /* =================================================
+               CREATE ACTIVITY LOG
+               ================================================= */
+
+            await client.query(
+                `
+                INSERT INTO application_activity (
+
+                    application_id,
+                    performed_by,
+                    activity_type,
+                    title,
+                    description
+
+                )
+
+                VALUES (
+
+                    $1,
+                    $2,
+                    'application_submitted',
+                    'Application submitted',
+                    'Candidate submitted the application.'
+
+                )
+                `,
+                [
+                    applicationId,
+                    candidateId
+                ]
+            );
+
+
+
+            /* =================================================
+               CREATE NAVBAR NOTIFICATION
+               ================================================= */
+
+            await client.query(
+                `
+                INSERT INTO notifications (
+
+                    user_id,
+                    notification_type,
+                    title,
+                    message,
+                    application_id,
+                    job_id,
+                    action_url
+
+                )
+
+                VALUES (
+
+                    $1,
+                    'application_submitted',
+                    'Application submitted',
+                    $2,
+                    $3,
+                    $4,
+                    $5
+
+                )
+                `,
+                [
+                    candidateId,
+
+                    `Your application for ${job.job_title} was successfully submitted. View your progress.`,
+
+                    applicationId,
+
+                    jobId,
+
+                    `/application-progress.html?id=${applicationId}`
+                ]
+            );
+
+
+
+            /* =================================================
+               COMMIT EVERYTHING
+               ================================================= */
+
+            await client.query(
+                "COMMIT"
+            );
+
+
+
+            return res
+                .status(201)
+                .json({
+
+                    success:
+                        true,
+
+                    message:
+                        "Application submitted successfully.",
+
+                    application: {
+
+                        id:
+                            applicationId,
+
+                        reference:
+                            applicationReference,
+
+                        status:
+                            "submitted",
+
+                        jobId:
+                            jobId,
+
+                        jobTitle:
+                            job.job_title
+
+                    }
+
+                });
+
+        }
+
+        catch (error) {
+
+            try {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+            }
+
+            catch (rollbackError) {
+
+                console.error(
+                    "Application rollback error:",
+                    rollbackError
+                );
+
+            }
+
+
+
+            /* =================================================
+               REMOVE CV IF DATABASE FAILED
+               ================================================= */
+
+            if (
+                uploadedCvPath
+            ) {
+
+                try {
+
+                    const {
+                        error: removeError
+                    } =
+                        await supabase
+                            .storage
+                            .from(
+                                "application-cvs"
+                            )
+                            .remove(
+                                [
+                                    uploadedCvPath
+                                ]
+                            );
+
+
+                    if (removeError) {
+
+                        console.error(
+                            "CV cleanup error:",
+                            removeError
+                        );
+
+                    }
+
+                }
+
+                catch (cleanupError) {
+
+                    console.error(
+                        "CV cleanup error:",
+                        cleanupError
+                    );
+
+                }
+
+            }
+
+
+
+            console.error(
+                "Application submission error:",
+                error
+            );
+
+
+
+            /* DUPLICATE APPLICATION */
+
+            if (
+                error.code ===
+                "23505"
+            ) {
+
+                return res
+                    .status(409)
+                    .json({
+
+                        success: false,
+
+                        message:
+                            "You have already submitted an application for this vacancy."
+
+                    });
+
+            }
+
+
+
+            return res
+                .status(500)
+                .json({
+
+                    success: false,
+
+                    message:
+                        "Unable to submit your application. Please try again."
+
+                });
+
+        }
+
+        finally {
+
+            client.release();
+
+        }
+
+    }
+);
+
+/* =========================================================
+   REQUIRE LOGGED-IN USER
+   ========================================================= */
+
+function requireLoggedIn(
+    req,
+    res,
+    next
+) {
+
+    if (!req.session.userId) {
+
+        return res.status(401).json({
+            success: false,
+            message: "Please sign in."
+        });
+
+    }
+
+
+    next();
+
+}
+
+
+
+/* =========================================================
+   GET USER NOTIFICATIONS
+   ========================================================= */
+
+app.get(
+    "/api/notifications",
+    requireLoggedIn,
+    async (req, res) => {
+
+        try {
+
+            const result =
+                await pool.query(
+                    `
+                    SELECT
+                        id,
+                        notification_type,
+                        title,
+                        message,
+                        application_id,
+                        job_id,
+                        action_url,
+                        is_read,
+                        read_at,
+                        created_at
+
+                    FROM notifications
+
+                    WHERE user_id = $1
+
+                    ORDER BY created_at DESC
+
+                    LIMIT 50
+                    `,
+                    [
+                        req.session.userId
+                    ]
+                );
+
+
+            const unreadResult =
+                await pool.query(
+                    `
+                    SELECT COUNT(*)::integer
+                        AS unread_count
+
+                    FROM notifications
+
+                    WHERE user_id = $1
+                    AND is_read = FALSE
+                    `,
+                    [
+                        req.session.userId
+                    ]
+                );
+
+
+            return res.json({
+
+                success: true,
+
+                notifications:
+                    result.rows,
+
+                unreadCount:
+                    unreadResult
+                        .rows[0]
+                        .unread_count
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Load notifications error:",
+                error
+            );
+
+
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Unable to load notifications."
+            });
+
+        }
+
+    }
+);
+
+
+
+/* =========================================================
+   MARK ONE NOTIFICATION AS READ
+   ========================================================= */
+
+app.patch(
+    "/api/notifications/:id/read",
+    requireLoggedIn,
+    async (req, res) => {
+
+        try {
+
+            const result =
+                await pool.query(
+                    `
+                    UPDATE notifications
+
+                    SET
+                        is_read = TRUE,
+
+                        read_at =
+                            COALESCE(
+                                read_at,
+                                NOW()
+                            )
+
+                    WHERE id = $1
+                    AND user_id = $2
+
+                    RETURNING id
+                    `,
+                    [
+                        req.params.id,
+                        req.session.userId
+                    ]
+                );
+
+
+            if (
+                result.rows.length === 0
+            ) {
+
+                return res.status(404).json({
+                    success: false,
+                    message:
+                        "Notification not found."
+                });
+
+            }
+
+
+            return res.json({
+                success: true
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Mark notification read error:",
+                error
+            );
+
+
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Unable to update notification."
+            });
+
+        }
+
+    }
+);
+
+
+
+/* =========================================================
+   MARK ALL NOTIFICATIONS AS READ
+   ========================================================= */
+
+app.patch(
+    "/api/notifications/read-all",
+    requireLoggedIn,
+    async (req, res) => {
+
+        try {
+
+            await pool.query(
+                `
+                UPDATE notifications
+
+                SET
+                    is_read = TRUE,
+
+                    read_at =
+                        COALESCE(
+                            read_at,
+                            NOW()
+                        )
+
+                WHERE user_id = $1
+                AND is_read = FALSE
+                `,
+                [
+                    req.session.userId
+                ]
+            );
+
+
+            return res.json({
+                success: true
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Mark notifications read error:",
+                error
+            );
+
+
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Unable to update notifications."
+            });
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   GET CANDIDATE APPLICATION PROGRESS
+   ========================================================= */
+
+app.get(
+    "/api/applications/:id/progress",
+    requireCandidate,
+    async (req, res) => {
+
+        try {
+
+            const applicationId =
+                req.params.id;
+
+
+            const candidateId =
+                req.session.userId;
+
+
+
+            /* =================================================
+               LOAD APPLICATION
+               Candidate can ONLY access their own application.
+               ================================================= */
+
+            const applicationResult =
+                await pool.query(
+                    `
+                    SELECT
+                        a.id,
+                        a.application_reference,
+                        a.status,
+                        a.applied_at,
+                        a.updated_at,
+                        a.is_locked,
+
+                        j.id AS job_id,
+                        j.job_title,
+                        j.department,
+                        j.location,
+                        j.employment_type,
+                        j.application_deadline
+
+                    FROM applications a
+
+                    INNER JOIN jobs j
+                        ON j.id = a.job_id
+
+                    WHERE a.id = $1
+                    AND a.candidate_id = $2
+
+                    LIMIT 1
+                    `,
+                    [
+                        applicationId,
+                        candidateId
+                    ]
+                );
+
+
+            if (
+                applicationResult.rows.length === 0
+            ) {
+
+                return res.status(404).json({
+                    success: false,
+                    message:
+                        "Application not found."
+                });
+
+            }
+
+
+            const application =
+                applicationResult.rows[0];
+
+
+
+            /* =================================================
+               LOAD STATUS HISTORY
+               ================================================= */
+
+            const historyResult =
+                await pool.query(
+                    `
+                    SELECT
+                        id,
+                        previous_status,
+                        new_status,
+                        status_note,
+                        created_at
+
+                    FROM application_status_history
+
+                    WHERE application_id = $1
+
+                    ORDER BY
+                        created_at ASC,
+                        id ASC
+                    `,
+                    [
+                        applicationId
+                    ]
+                );
+
+
+
+            /* =================================================
+               LOAD INTERVIEWS
+
+               Manager notes are NOT returned here.
+               ================================================= */
+
+            const interviewResult =
+                await pool.query(
+                    `
+                    SELECT
+                        id,
+                        round_number,
+                        interview_title,
+                        interview_type,
+                        scheduled_at,
+                        duration_minutes,
+                        location,
+                        meeting_url,
+                        instructions,
+                        interview_status,
+                        created_at,
+                        updated_at
+
+                    FROM application_interviews
+
+                    WHERE application_id = $1
+
+                    ORDER BY
+                        round_number ASC,
+                        scheduled_at ASC
+                    `,
+                    [
+                        applicationId
+                    ]
+                );
+
+
+
+            /* =================================================
+               WITHDRAW AVAILABILITY
+               ================================================= */
+
+            const terminalStatuses = [
+                "hired",
+                "rejected",
+                "withdrawn"
+            ];
+
+
+            const canWithdraw =
+                !terminalStatuses.includes(
+                    application.status
+                );
+
+
+
+            /* =================================================
+               RESPONSE
+               ================================================= */
+
+            return res.json({
+
+                success: true,
+
+                application: {
+
+                    id:
+                        application.id,
+
+                    reference:
+                        application
+                            .application_reference,
+
+                    status:
+                        application.status,
+
+                    appliedAt:
+                        application.applied_at,
+
+                    updatedAt:
+                        application.updated_at,
+
+                    isLocked:
+                        application.is_locked,
+
+                    canWithdraw:
+                        canWithdraw,
+
+
+                    job: {
+
+                        id:
+                            application.job_id,
+
+                        title:
+                            application.job_title,
+
+                        department:
+                            application.department,
+
+                        location:
+                            application.location,
+
+                        employmentType:
+                            application
+                                .employment_type,
+
+                        applicationDeadline:
+                            application
+                                .application_deadline
+
+                    },
+
+
+                    history:
+                        historyResult.rows.map(
+                            item => ({
+
+                                id:
+                                    item.id,
+
+                                previousStatus:
+                                    item.previous_status,
+
+                                status:
+                                    item.new_status,
+
+                                note:
+                                    item.status_note,
+
+                                createdAt:
+                                    item.created_at
+
+                            })
+                        ),
+
+
+                    interviews:
+                        interviewResult.rows.map(
+                            interview => ({
+
+                                id:
+                                    interview.id,
+
+                                roundNumber:
+                                    interview.round_number,
+
+                                title:
+                                    interview
+                                        .interview_title,
+
+                                type:
+                                    interview
+                                        .interview_type,
+
+                                scheduledAt:
+                                    interview
+                                        .scheduled_at,
+
+                                durationMinutes:
+                                    interview
+                                        .duration_minutes,
+
+                                location:
+                                    interview.location,
+
+                                meetingUrl:
+                                    interview.meeting_url,
+
+                                instructions:
+                                    interview.instructions,
+
+                                status:
+                                    interview
+                                        .interview_status,
+
+                                createdAt:
+                                    interview.created_at,
+
+                                updatedAt:
+                                    interview.updated_at
+
+                            })
+                        )
+
+                }
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Application progress error:",
+                error
+            );
+
+
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Unable to load application progress."
+            });
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   ADMIN - LOAD APPLICATIONS
+   ========================================================= */
+
+app.get(
+    "/api/admin/applications",
+    requireAdmin,
+    async (req, res) => {
+
+        try {
+
+            const result =
+                await pool.query(
+                    `
+                    SELECT
+
+                        a.id,
+                        a.application_reference,
+                        a.status,
+                        a.applied_at,
+                        a.updated_at,
+                        a.current_version_number,
+                        a.is_locked,
+
+                        a.candidate_id,
+                        a.job_id,
+
+                        av.first_name,
+                        av.last_name,
+                        av.email,
+                        av.phone_number,
+
+                        av.job_title_snapshot,
+                        av.department_snapshot,
+
+                        j.location,
+                        j.employment_type
+
+                    FROM applications a
+
+
+                    INNER JOIN application_versions av
+                        ON av.application_id = a.id
+                        AND av.version_number =
+                            a.current_version_number
+
+
+                    INNER JOIN jobs j
+                        ON j.id = a.job_id
+
+
+                    ORDER BY
+                        a.applied_at DESC
+                    `
+                );
+
+
+            return res.json({
+
+                success: true,
+
+                applications:
+                    result.rows.map(
+                        application => ({
+
+                            id:
+                                application.id,
+
+                            reference:
+                                application
+                                    .application_reference,
+
+                            status:
+                                application.status,
+
+                            appliedAt:
+                                application.applied_at,
+
+                            updatedAt:
+                                application.updated_at,
+
+                            currentVersion:
+                                application
+                                    .current_version_number,
+
+                            isLocked:
+                                application.is_locked,
+
+
+                            candidate: {
+
+                                id:
+                                    application
+                                        .candidate_id,
+
+                                firstName:
+                                    application
+                                        .first_name,
+
+                                lastName:
+                                    application
+                                        .last_name,
+
+                                email:
+                                    application.email,
+
+                                phoneNumber:
+                                    application
+                                        .phone_number
+
+                            },
+
+
+                            job: {
+
+                                id:
+                                    application.job_id,
+
+                                title:
+                                    application
+                                        .job_title_snapshot,
+
+                                department:
+                                    application
+                                        .department_snapshot,
+
+                                location:
+                                    application.location,
+
+                                employmentType:
+                                    application
+                                        .employment_type
+
+                            }
+
+                        })
+                    )
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Load admin applications error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success: false,
+
+                message:
+                    "Unable to load applications."
+
+            });
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   ADMIN - VIEW SINGLE APPLICATION
+   ========================================================= */
+
+app.get(
+    "/api/admin/applications/:id",
+    requireAdmin,
+    async (req, res) => {
+
+        try {
+
+            const applicationId =
+                req.params.id;
+
+
+            /* =================================================
+               LOAD APPLICATION + CURRENT VERSION
+               ================================================= */
+
+            const applicationResult =
+                await pool.query(
+                    `
+                    SELECT
+
+                        a.id,
+                        a.application_reference,
+                        a.candidate_id,
+                        a.job_id,
+                        a.status,
+                        a.applied_at,
+                        a.updated_at,
+                        a.current_version_number,
+                        a.is_locked,
+
+                        av.*,
+
+                        j.job_title,
+                        j.department,
+                        j.location,
+                        j.employment_type,
+                        j.application_deadline
+
+                    FROM applications a
+
+                    INNER JOIN application_versions av
+                        ON av.application_id = a.id
+                        AND av.version_number =
+                            a.current_version_number
+
+                    INNER JOIN jobs j
+                        ON j.id = a.job_id
+
+                    WHERE a.id = $1
+
+                    LIMIT 1
+                    `,
+                    [
+                        applicationId
+                    ]
+                );
+
+
+            if (
+                applicationResult.rows.length ===
+                0
+            ) {
+
+                return res.status(404).json({
+                    success: false,
+                    message:
+                        "Application not found."
+                });
+
+            }
+
+
+            const application =
+                applicationResult.rows[0];
+
+
+
+            /* =================================================
+               CREATE TEMPORARY PRIVATE CV LINK
+               ================================================= */
+
+            let cvUrl =
+                null;
+
+
+            if (
+                application.cv_path
+            ) {
+
+                const {
+                    data: signedData,
+                    error: signedError
+                } =
+                    await supabase.storage
+                        .from(
+                            "application-cvs"
+                        )
+                        .createSignedUrl(
+                            application.cv_path,
+                            60 * 10
+                        );
+
+
+                if (signedError) {
+
+                    console.error(
+                        "Create CV signed URL error:",
+                        signedError
+                    );
+
+                }
+
+                else {
+
+                    cvUrl =
+                        signedData.signedUrl;
+
+                }
+
+            }
+
+
+
+            /* =================================================
+               STATUS HISTORY
+               ================================================= */
+
+            const historyResult =
+                await pool.query(
+                    `
+                    SELECT
+
+                        h.id,
+                        h.previous_status,
+                        h.new_status,
+                        h.status_note,
+                        h.created_at,
+
+                        u.first_name
+                            AS changed_by_first_name,
+
+                        u.last_name
+                            AS changed_by_last_name
+
+                    FROM application_status_history h
+
+                    LEFT JOIN users u
+                        ON u.id = h.changed_by
+
+                    WHERE h.application_id = $1
+
+                    ORDER BY
+                        h.created_at ASC
+                    `,
+                    [
+                        applicationId
+                    ]
+                );
+
+
+
+            /* =================================================
+               SEND MANAGER-SAFE APPLICATION DETAILS
+               ================================================= */
+
+            return res.json({
+
+                success: true,
+
+                application: {
+
+                    id:
+                        application.id,
+
+                    reference:
+                        application
+                            .application_reference,
+
+                    status:
+                        application.status,
+
+                    appliedAt:
+                        application.applied_at,
+
+                    updatedAt:
+                        application.updated_at,
+
+                    currentVersion:
+                        application
+                            .current_version_number,
+
+                    isLocked:
+                        application.is_locked,
+
+
+                    candidate: {
+
+                        id:
+                            application
+                                .candidate_id,
+
+                        firstName:
+                            application
+                                .first_name,
+
+                        lastName:
+                            application
+                                .last_name,
+
+                        email:
+                            application.email,
+
+                        phoneNumber:
+                            application
+                                .phone_number,
+
+                        nic:
+                            application.nic,
+
+                        dateOfBirth:
+                            application
+                                .date_of_birth,
+
+                        country:
+                            application.country
+
+                    },
+
+
+                    professional: {
+
+                        education:
+                            application.education,
+
+                        linkedinUrl:
+                            application
+                                .linkedin_url,
+
+                        skills:
+                            application.skills,
+
+                        workExperience:
+                            application
+                                .work_experience,
+
+                        projects:
+                            application.projects
+
+                    },
+
+
+                    preferences: {
+
+                        languages:
+                            application
+                                .preferred_languages ||
+                            [],
+
+                        preferredJobType:
+                            application
+                                .preferred_job_type
+
+                    },
+
+
+                    job: {
+
+                        id:
+                            application.job_id,
+
+                        title:
+                            application
+                                .job_title,
+
+                        department:
+                            application
+                                .department,
+
+                        location:
+                            application.location,
+
+                        employmentType:
+                            application
+                                .employment_type,
+
+                        applicationDeadline:
+                            application
+                                .application_deadline
+
+                    },
+
+
+                    cv: {
+
+                        path:
+                            application.cv_path,
+
+                        url:
+                            cvUrl
+
+                    },
+
+
+                    history:
+                        historyResult.rows.map(
+                            item => ({
+
+                                id:
+                                    item.id,
+
+                                previousStatus:
+                                    item
+                                        .previous_status,
+
+                                status:
+                                    item
+                                        .new_status,
+
+                                note:
+                                    item.status_note,
+
+                                createdAt:
+                                    item.created_at,
+
+                                changedBy:
+                                    item
+                                        .changed_by_first_name
+                                        ? `${item.changed_by_first_name} ${item.changed_by_last_name || ""}`.trim()
+                                        : null
+
+                            })
+                        )
+
+                }
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Load admin application detail error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success: false,
+
+                message:
+                    "Unable to load application details."
+
+            });
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   ADMIN - CHANGE APPLICATION STATUS
+   ========================================================= */
+
+app.patch(
+    "/api/admin/applications/:id/status",
+    requireAdmin,
+    async (req, res) => {
+
+        const client =
+            await pool.connect();
+
+
+        try {
+
+            const applicationId =
+                req.params.id;
+
+
+            const newStatus =
+                String(
+                    req.body.status || ""
+                )
+                .trim()
+                .toLowerCase();
+
+
+            /* =================================================
+               VALID STATUSES
+               ================================================= */
+
+            const validStatuses = [
+                "submitted",
+                "screening",
+                "shortlisted",
+                "interview",
+                "offer",
+                "hired",
+                "rejected",
+                "withdrawn"
+            ];
+
+
+            if (
+                !validStatuses.includes(
+                    newStatus
+                )
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        "Invalid application status."
+
+                });
+
+            }
+
+
+            await client.query(
+                "BEGIN"
+            );
+
+
+            /* =================================================
+               LOCK APPLICATION
+               ================================================= */
+
+            const applicationResult =
+                await client.query(
+                    `
+                    SELECT
+
+                        a.id,
+                        a.application_reference,
+                        a.candidate_id,
+                        a.job_id,
+                        a.status,
+                        a.is_locked,
+
+                        j.job_title,
+
+                        u.email AS candidate_email,
+                        u.first_name AS candidate_first_name
+
+                    FROM applications a
+
+                    INNER JOIN jobs j
+                        ON j.id = a.job_id
+
+                    INNER JOIN users u
+                        ON u.id = a.candidate_id
+
+                    WHERE a.id = $1
+
+                    FOR UPDATE
+                    `,
+                    [
+                        applicationId
+                    ]
+                );
+
+
+            if (
+                applicationResult.rows.length ===
+                0
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(404).json({
+
+                    success: false,
+
+                    message:
+                        "Application not found."
+
+                });
+
+            }
+
+
+            const application =
+                applicationResult.rows[0];
+
+
+            const previousStatus =
+                application.status;
+
+
+
+            /* =================================================
+               DO NOT CHANGE LOCKED APPLICATION
+               ================================================= */
+
+            if (
+                application.is_locked
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(409).json({
+
+                    success: false,
+
+                    message:
+                        "This application is locked."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               SAME STATUS
+               ================================================= */
+
+            if (
+                previousStatus ===
+                newStatus
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        "Application is already at this status."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               ALLOWED STATUS TRANSITIONS
+               ================================================= */
+
+            const allowedTransitions = {
+
+                submitted: [
+                    "screening",
+                    "rejected"
+                ],
+
+                screening: [
+                    "shortlisted",
+                    "rejected"
+                ],
+
+                shortlisted: [
+                    "rejected"
+                ],
+
+                interview: [
+                    "offer",
+                    "rejected"
+                ],
+
+                offer: [
+                    "hired",
+                    "rejected"
+                ],
+
+                hired: [],
+
+                rejected: [],
+
+                withdrawn: []
+
+            };
+
+
+            const allowedNextStatuses =
+                allowedTransitions[
+                    previousStatus
+                ] || [];
+
+
+            if (
+                !allowedNextStatuses.includes(
+                    newStatus
+                )
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        `Cannot move application from ${previousStatus} to ${newStatus}.`
+
+                });
+
+            }
+
+
+
+            /*
+                Managers must not manually mark an
+                application as withdrawn.
+
+                Withdrawal will later have its own
+                candidate-controlled endpoint.
+            */
+
+            if (
+                newStatus ===
+                "withdrawn"
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(403).json({
+
+                    success: false,
+
+                    message:
+                        "Only the candidate can withdraw an application."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               STATUS INFORMATION
+               ================================================= */
+
+            const statusMessages = {
+
+                screening: {
+                    title:
+                        "Application update",
+
+                    message:
+                        `Your application for ${application.job_title} has moved to Screening.`,
+
+                    history:
+                        "Application moved to screening."
+                },
+
+
+                shortlisted: {
+                    title:
+                        "You've been shortlisted",
+
+                    message:
+                        `Your application for ${application.job_title} has been shortlisted and is moving forward.`,
+
+                    history:
+                        "Candidate shortlisted."
+                },
+
+
+                interview: {
+                    title:
+                        "Application update",
+
+                    message:
+                        `Your application for ${application.job_title} has moved to the Interview stage.`,
+
+                    history:
+                        "Application moved to interview stage."
+                },
+
+
+                offer: {
+                    title:
+                        "Offer stage",
+
+                    message:
+                        `Your application for ${application.job_title} has progressed to the Offer stage.`,
+
+                    history:
+                        "Application moved to offer stage."
+                },
+
+
+                hired: {
+                    title:
+                        "Congratulations!",
+
+                    message:
+                        `Your application for ${application.job_title} has reached the Hired stage.`,
+
+                    history:
+                        "Candidate marked as hired."
+                },
+
+
+                rejected: {
+                    title:
+                        "Application update",
+
+                    message:
+                        `Your application for ${application.job_title} will not be moving forward.`,
+
+                    history:
+                        "Application rejected."
+                }
+
+            };
+
+
+            const statusInfo =
+                statusMessages[
+                    newStatus
+                ];
+
+
+
+            /* =================================================
+               UPDATE APPLICATION
+               ================================================= */
+
+            await client.query(
+                `
+                UPDATE applications
+
+                SET
+                    status = $1,
+                    updated_at = NOW()
+
+                WHERE id = $2
+                `,
+                [
+                    newStatus,
+                    applicationId
+                ]
+            );
+
+
+
+            /* =================================================
+               STATUS HISTORY
+               ================================================= */
+
+            await client.query(
+                `
+                INSERT INTO application_status_history (
+
+                    application_id,
+                    previous_status,
+                    new_status,
+                    changed_by,
+                    status_note
+
+                )
+
+                VALUES (
+                    $1,
+                    $2,
+                    $3,
+                    $4,
+                    $5
+                )
+                `,
+                [
+                    applicationId,
+                    previousStatus,
+                    newStatus,
+                    req.session.userId,
+                    statusInfo.history
+                ]
+            );
+
+
+
+            /* =================================================
+               APPLICATION ACTIVITY
+               ================================================= */
+
+            await client.query(
+                `
+                INSERT INTO application_activity (
+
+                    application_id,
+                    performed_by,
+                    activity_type,
+                    title,
+                    description
+
+                )
+
+                VALUES (
+                    $1,
+                    $2,
+                    $3,
+                    $4,
+                    $5
+                )
+                `,
+                [
+                    applicationId,
+                    req.session.userId,
+                    "status_change",
+                    "Application status changed",
+                    `${previousStatus} → ${newStatus}`
+                ]
+            );
+
+
+
+            /* =================================================
+               NOTIFY CANDIDATE
+               ================================================= */
+
+            await client.query(
+                `
+                INSERT INTO notifications (
+
+                    user_id,
+                    notification_type,
+                    title,
+                    message,
+                    application_id,
+                    job_id,
+                    action_url
+
+                )
+
+                VALUES (
+                    $1,
+                    $2,
+                    $3,
+                    $4,
+                    $5,
+                    $6,
+                    $7
+                )
+                `,
+                [
+                    application.candidate_id,
+                    `application_${newStatus}`,
+                    statusInfo.title,
+                    statusInfo.message,
+                    applicationId,
+                    application.job_id,
+                    `/application-progress.html?id=${applicationId}`
+                ]
+            );
+
+
+
+            await client.query(
+                "COMMIT"
+            );
+
+
+            /*  =================================================
+                EMAIL CANDIDATE WHEN SHORTLISTED
+                ================================================= */
+
+                if (
+                    newStatus === "shortlisted"
+                ) {
+
+                    try {
+
+                        const candidateName =
+                            application.candidate_first_name ||
+                            "Candidate";
+
+                        const ALTRIUM_LOGO_URL =
+                            process.env.ALTRIUM_EMAIL_LOGO_URL;
+
+                        const emailInfo =
+                            await transporter.sendMail({
+
+                                from:
+                                    `"Altrium" <${process.env.EMAIL_FROM}>`,
+
+                                to:
+                                    application.candidate_email,
+
+                                subject:
+                                    `You've been shortlisted for ${application.job_title} | Altrium`,
+
+                                text: `
+                Hi ${candidateName},
+
+                Good news — your application for ${application.job_title} has been shortlisted.
+
+                Application reference:
+                ${application.application_reference}
+
+                Your profile stood out to our team and your application is now moving forward in the recruitment process.
+
+                Your interview details will be shared with you soon.
+
+                Once the interview is scheduled, the date, time, interview type, and meeting details will be sent to you by email and will also be available in your Altrium account.
+
+                Please keep an eye on your email and your Altrium notifications for the next update.
+
+                Best regards,
+                Altrium Recruitment
+                                `.trim(),
+
+                                html: `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Application shortlisted</title>
+                </head>
+                <body style="margin:0; padding:0; background-color:#0a0a0a; font-family:Arial, Helvetica, sans-serif; color:#f5f5f5;">
+
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#0a0a0a; margin:0; padding:40px 0;">
+                        <tr>
+                            <td align="center">
+
+                                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px; background:linear-gradient(180deg, #111111 0%, #0b0b0b 100%); border:1px solid rgba(255,255,255,0.08); border-radius:24px; overflow:hidden;">
+
+                                    <!-- HEADER -->
+                                    <tr>
+                                        <td style="padding:32px 36px 20px 36px; border-bottom:1px solid rgba(255,255,255,0.06);">
+                                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                                                <tr>
+                                                    <td align="left">
+                                                        <img
+                                                            src="${ALTRIUM_LOGO_URL}"
+                                                            alt="Altrium"
+                                                            style="height:34px; width:auto; display:block;"
+                                                        >
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                    <!-- HERO -->
+                                    <tr>
+                                        <td style="padding:36px;">
+                                            <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:#9b9b9b; font-weight:700; margin-bottom:14px;">
+                                                Application update
+                                            </div>
+
+                                            <h1 style="margin:0 0 16px 0; font-size:38px; line-height:1.15; font-weight:800; color:#f8f8f8;">
+                                                You've been <span style="color:#ff8a1f;">shortlisted.</span>
+                                            </h1>
+
+                                            <p style="margin:0; font-size:16px; line-height:1.8; color:#cfcfcf;">
+                                                Hi <strong style="color:#ffffff;">${candidateName}</strong>,
+                                                <br><br>
+                                                Great news! your application for
+                                                <strong style="color:#ffffff;">${application.job_title}</strong>
+                                                has been shortlisted and is moving forward in our recruitment process.
+                                            </p>
+                                        </td>
+                                    </tr>
+
+                                    <!-- INFO BOX -->
+                                    <tr>
+                                        <td style="padding:0 36px 24px 36px;">
+                                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:linear-gradient(180deg, rgba(255,138,31,0.10) 0%, rgba(255,138,31,0.04) 100%); border:1px solid rgba(255,138,31,0.22); border-radius:18px;">
+                                                <tr>
+                                                    <td style="padding:22px 24px;">
+                                                        <div style="font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:#ffb15c; font-weight:700; margin-bottom:12px;">
+                                                            What happens next
+                                                        </div>
+
+                                                        <p style="margin:0 0 14px 0; font-size:15px; line-height:1.8; color:#dfdfdf;">
+                                                            Your interview details will be shared with you soon.
+                                                        </p>
+
+                                                        <p style="margin:0; font-size:15px; line-height:1.8; color:#dfdfdf;">
+                                                            Once scheduled, the <strong style="color:#ffffff;">date</strong>,
+                                                            <strong style="color:#ffffff;">time</strong>,
+                                                            <strong style="color:#ffffff;">interview type</strong>,
+                                                            and <strong style="color:#ffffff;">meeting details</strong>
+                                                            will be sent to you by email and will also appear in your
+                                                            <strong style="color:#ffffff;">Altrium application progress page</strong>.
+                                                        </p>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                    <!-- REFERENCE + ROLE -->
+                                    <tr>
+                                        <td style="padding:0 36px 24px 36px;">
+                                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                                                <tr>
+                                                    <td style="width:50%; padding-right:8px;">
+                                                        <div style="background:#161616; border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:18px 20px;">
+                                                            <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#8c8c8c; font-weight:700; margin-bottom:8px;">
+                                                                Position
+                                                            </div>
+                                                            <div style="font-size:18px; font-weight:700; color:#ffffff;">
+                                                                ${application.job_title}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+
+                                                    <td style="width:50%; padding-left:8px;">
+                                                        <div style="background:#161616; border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:18px 20px;">
+                                                            <div style="font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#8c8c8c; font-weight:700; margin-bottom:8px;">
+                                                                Application reference
+                                                            </div>
+                                                            <div style="font-size:18px; font-weight:800; color:#ff9a35;">
+                                                                ${application.application_reference}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                    <!-- CTA -->
+                                    <tr>
+                                        <td style="padding:0 36px 32px 36px;">
+                                            <a
+                                                href="http://localhost:3000/application-progress.html?id=${application.id}"
+                                                style="display:inline-block; background:linear-gradient(90deg, #ff8a1f 0%, #f3be5f 100%); color:#111111; text-decoration:none; font-size:15px; font-weight:800; padding:15px 28px; border-radius:999px;"
+                                            >
+                                                View application progress
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <!-- FOOTER -->
+                                    <tr>
+                                        <td style="padding:24px 36px 34px 36px; border-top:1px solid rgba(255,255,255,0.06);">
+                                            <p style="margin:0 0 10px 0; font-size:14px; line-height:1.7; color:#b9b9b9;">
+                                                Please keep an eye on your email and Altrium notifications for further updates.
+                                            </p>
+
+                                            <p style="margin:0; font-size:13px; color:#7f7f7f; line-height:1.7;">
+                                                Altrium Recruitment Team
+                                            </p>
+                                        </td>
+                                    </tr>
+
+                                </table>
+
+                            </td>
+                        </tr>
+                    </table>
+
+                </body>
+                </html>
+                                `
+
+                            });
+
+
+                        console.log(
+                            "Shortlisted email sent:",
+                            emailInfo.messageId,
+                            "to:",
+                            application.candidate_email
+                        );
+
+                    }
+
+                    catch (emailError) {
+
+                        console.error(
+                            "Shortlisted email error:",
+                            emailError
+                        );
+
+                    }
+
+                }
+
+                    /*  =========================================================
+                    FORMAT INTERVIEW EMAIL DATE
+                    ========================================================= */
+
+                function formatInterviewEmailDate(
+                    value
+                ) {
+
+                    return new Intl.DateTimeFormat(
+                        "en-GB",
+                        {
+                            weekday: "long",
+                            day: "2-digit",
+                            month: "long",
+                            year: "numeric",
+                            timeZone: "Asia/Colombo"
+                        }
+                    ).format(
+                        new Date(value)
+                    );
+
+                }
+
+
+
+                /* =========================================================
+                FORMAT INTERVIEW EMAIL TIME
+                ========================================================= */
+
+                function formatInterviewEmailTime(
+                    value
+                ) {
+
+                    return new Intl.DateTimeFormat(
+                        "en-US",
+                        {
+                            hour: "numeric",
+                            minute: "2-digit",
+                            hour12: true,
+                            timeZone: "Asia/Colombo"
+                        }
+                    ).format(
+                        new Date(value)
+                    );
+
+                }
+
+
+            return res.json({
+
+                success: true,
+
+                message:
+                    "Application status updated successfully.",
+
+                application: {
+
+                    id:
+                        applicationId,
+
+                    reference:
+                        application
+                            .application_reference,
+
+                    previousStatus,
+
+                    status:
+                        newStatus
+
+                }
+
+            });
+
+        }
+
+        catch (error) {
+
+            await client.query(
+                "ROLLBACK"
+            );
+
+
+            console.error(
+                "Update application status error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success: false,
+
+                message:
+                    "Unable to update application status."
+
+            });
+
+        }
+
+        finally {
+
+            client.release();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   ADMIN - LOAD INTERVIEW SESSIONS
+   ========================================================= */
+
+app.get(
+    "/api/admin/interview-sessions",
+    requireAdmin,
+    async (req, res) => {
+
+        try {
+
+            const result =
+                await pool.query(
+                    `
+                    SELECT
+
+                        s.id,
+                        s.job_id,
+                        s.title,
+                        s.interview_round,
+                        s.session_date,
+                        s.start_time,
+                        s.end_time,
+                        s.timezone,
+                        s.duration_minutes,
+                        s.break_minutes,
+                        s.interview_type,
+                        s.assignment_method,
+                        s.location,
+                        s.instructions,
+                        s.status,
+                        s.confirmed_at,
+                        s.created_at,
+
+                        j.job_title,
+                        j.department,
+                        j.location AS job_location,
+
+                        COUNT(sl.id)
+                            AS total_slots,
+
+                        COUNT(sl.id)
+                            FILTER (
+                                WHERE sl.status = 'booked'
+                            )
+                            AS booked_slots,
+
+                        COUNT(sl.id)
+                            FILTER (
+                                WHERE sl.status = 'available'
+                            )
+                            AS available_slots
+
+                    FROM interview_sessions s
+
+                    INNER JOIN jobs j
+                        ON j.id = s.job_id
+
+                    LEFT JOIN interview_session_slots sl
+                        ON sl.session_id = s.id
+
+                    GROUP BY
+                        s.id,
+                        j.id
+
+                    ORDER BY
+                        s.session_date ASC,
+                        s.start_time ASC
+                    `
+                );
+
+
+            return res.json({
+
+                success: true,
+
+                sessions:
+                    result.rows.map(
+                        session => ({
+
+                            id:
+                                session.id,
+
+                            title:
+                                session.title,
+
+                            round:
+                                session
+                                    .interview_round,
+
+                            date:
+                                session
+                                    .session_date,
+
+                            startTime:
+                                session
+                                    .start_time,
+
+                            endTime:
+                                session
+                                    .end_time,
+
+                            timezone:
+                                session.timezone,
+
+                            durationMinutes:
+                                session
+                                    .duration_minutes,
+
+                            breakMinutes:
+                                session
+                                    .break_minutes,
+
+                            interviewType:
+                                session
+                                    .interview_type,
+
+                            assignmentMethod:
+                                session
+                                    .assignment_method,
+
+                            location:
+                                session.location,
+
+                            instructions:
+                                session.instructions,
+
+                            status:
+                                session.status,
+
+                            confirmedAt:
+                                session
+                                    .confirmed_at,
+
+                            createdAt:
+                                session
+                                    .created_at,
+
+                            job: {
+
+                                id:
+                                    session.job_id,
+
+                                title:
+                                    session.job_title,
+
+                                department:
+                                    session.department,
+
+                                location:
+                                    session
+                                        .job_location
+
+                            },
+
+                            slots: {
+
+                                total:
+                                    Number(
+                                        session
+                                            .total_slots
+                                    ),
+
+                                booked:
+                                    Number(
+                                        session
+                                            .booked_slots
+                                    ),
+
+                                available:
+                                    Number(
+                                        session
+                                            .available_slots
+                                    )
+
+                            }
+
+                        })
+                    )
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Load interview sessions error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success: false,
+
+                message:
+                    "Unable to load interview sessions."
+
+            });
+
+        }
+
+    }
+);
+
+/* =========================================================
+   ADMIN - VIEW SINGLE INTERVIEW SESSION
+   ========================================================= */
+
+app.get(
+    "/api/admin/interview-sessions/:id",
+    requireAdmin,
+    async (req, res) => {
+
+        try {
+
+            const sessionId =
+                req.params.id;
+
+
+            /* =================================================
+               LOAD SESSION
+               ================================================= */
+
+            const sessionResult =
+                await pool.query(
+                    `
+                    SELECT
+
+                        s.id,
+                        s.job_id,
+                        s.title,
+                        s.interview_round,
+                        s.session_date,
+                        s.start_time,
+                        s.end_time,
+                        s.timezone,
+                        s.duration_minutes,
+                        s.break_minutes,
+                        s.interview_type,
+                        s.assignment_method,
+                        s.location,
+                        s.instructions,
+                        s.status,
+                        s.confirmed_at,
+                        s.created_at,
+                        s.updated_at,
+
+                        j.job_title,
+                        j.department,
+                        j.location AS job_location,
+                        j.employment_type
+
+                    FROM interview_sessions s
+
+                    INNER JOIN jobs j
+                        ON j.id = s.job_id
+
+                    WHERE s.id = $1
+
+                    LIMIT 1
+                    `,
+                    [
+                        sessionId
+                    ]
+                );
+
+
+            if (
+                sessionResult.rows.length ===
+                0
+            ) {
+
+                return res.status(404).json({
+
+                    success: false,
+
+                    message:
+                        "Interview session not found."
+
+                });
+
+            }
+
+
+            const session =
+                sessionResult.rows[0];
+
+
+            /* =================================================
+               LOAD SESSION SLOTS + CANDIDATES
+               ================================================= */
+
+            const slotResult =
+                await pool.query(
+                    `
+                    SELECT
+
+                        sl.id,
+                        sl.slot_number,
+                        sl.scheduled_start,
+                        sl.scheduled_end,
+                        sl.status,
+                        sl.assigned_at,
+                        sl.application_id,
+
+                        a.application_reference,
+                        a.status AS application_status,
+                        a.applied_at,
+
+                        av.first_name,
+                        av.last_name,
+                        av.email,
+                        av.phone_number
+
+                    FROM interview_session_slots sl
+
+                    LEFT JOIN applications a
+                        ON a.id =
+                            sl.application_id
+
+                    LEFT JOIN application_versions av
+                        ON av.application_id =
+                            a.id
+
+                        AND av.version_number =
+                            a.current_version_number
+
+                    WHERE sl.session_id = $1
+
+                    ORDER BY
+                        sl.slot_number ASC
+                    `,
+                    [
+                        sessionId
+                    ]
+                );
+
+
+            /* =================================================
+               RESPONSE
+               ================================================= */
+
+            return res.json({
+
+                success: true,
+
+                session: {
+
+                    id:
+                        session.id,
+
+                    title:
+                        session.title,
+
+                    round:
+                        session.interview_round,
+
+                    date:
+                        session.session_date,
+
+                    startTime:
+                        session.start_time,
+
+                    endTime:
+                        session.end_time,
+
+                    timezone:
+                        session.timezone,
+
+                    durationMinutes:
+                        session.duration_minutes,
+
+                    breakMinutes:
+                        session.break_minutes,
+
+                    interviewType:
+                        session.interview_type,
+
+                    assignmentMethod:
+                        session.assignment_method,
+
+                    location:
+                        session.location,
+
+                    instructions:
+                        session.instructions,
+
+                    status:
+                        session.status,
+
+                    confirmedAt:
+                        session.confirmed_at,
+
+                    createdAt:
+                        session.created_at,
+
+                    updatedAt:
+                        session.updated_at,
+
+
+                    job: {
+
+                        id:
+                            session.job_id,
+
+                        title:
+                            session.job_title,
+
+                        department:
+                            session.department,
+
+                        location:
+                            session.job_location,
+
+                        employmentType:
+                            session.employment_type
+
+                    },
+
+
+                    slots:
+                        slotResult.rows.map(
+                            slot => ({
+
+                                id:
+                                    slot.id,
+
+                                slotNumber:
+                                    slot.slot_number,
+
+                                scheduledStart:
+                                    slot.scheduled_start,
+
+                                scheduledEnd:
+                                    slot.scheduled_end,
+
+                                status:
+                                    slot.status,
+
+                                assignedAt:
+                                    slot.assigned_at,
+
+
+                                candidate:
+                                    slot.application_id
+                                        ? {
+
+                                            applicationId:
+                                                slot.application_id,
+
+                                            reference:
+                                                slot.application_reference,
+
+                                            applicationStatus:
+                                                slot.application_status,
+
+                                            appliedAt:
+                                                slot.applied_at,
+
+                                            firstName:
+                                                slot.first_name,
+
+                                            lastName:
+                                                slot.last_name,
+
+                                            email:
+                                                slot.email,
+
+                                            phoneNumber:
+                                                slot.phone_number
+
+                                        }
+                                        : null
+
+                            })
+                        )
+
+                }
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Load interview session detail error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success: false,
+
+                message:
+                    "Unable to load interview session."
+
+            });
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   ADMIN - INTERVIEW SESSION VACANCY OPTIONS
+   ========================================================= */
+
+app.get(
+    "/api/admin/interview-session-options",
+    requireAdmin,
+    async (req, res) => {
+
+        try {
+
+            const result =
+                await pool.query(
+                    `
+                    SELECT
+
+                        j.id,
+                        j.job_title,
+                        j.department,
+                        j.location,
+                        j.employment_type,
+                        j.status,
+
+                        COUNT(a.id)
+                            FILTER (
+                                WHERE a.status = 'shortlisted'
+                            )
+                            AS shortlisted_count
+
+                    FROM jobs j
+
+                    LEFT JOIN applications a
+                        ON a.job_id = j.id
+
+                    GROUP BY
+                        j.id
+
+                    HAVING
+                        COUNT(a.id)
+                            FILTER (
+                                WHERE a.status = 'shortlisted'
+                            ) > 0
+
+                    ORDER BY
+                        j.job_title ASC
+                    `
+                );
+
+
+            return res.json({
+
+                success: true,
+
+                jobs:
+                    result.rows.map(
+                        job => ({
+
+                            id:
+                                job.id,
+
+                            title:
+                                job.job_title,
+
+                            department:
+                                job.department,
+
+                            location:
+                                job.location,
+
+                            employmentType:
+                                job.employment_type,
+
+                            status:
+                                job.status,
+
+                            shortlistedCount:
+                                Number(
+                                    job.shortlisted_count
+                                )
+
+                        })
+                    )
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Load interview session options error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success: false,
+
+                message:
+                    "Unable to load interview session options."
+
+            });
+
+        }
+
+    }
+);
+
+/* =========================================================
+   ADMIN - CREATE DRAFT INTERVIEW SESSION
+   ========================================================= */
+
+app.post(
+    "/api/admin/interview-sessions",
+    requireAdmin,
+    async (req, res) => {
+
+        const client =
+            await pool.connect();
+
+
+        try {
+
+            const {
+                jobId,
+                sessionDate,
+                interviewRound,
+                startTime,
+                endTime,
+                durationMinutes,
+                breakMinutes,
+                interviewType,
+                assignmentMethod,
+                location,
+                instructions
+            } = req.body;
+
+
+            const round =
+                Number(interviewRound);
+
+
+            const duration =
+                Number(durationMinutes);
+
+
+            const breakLength =
+                Number(breakMinutes);
+
+
+            const allowedInterviewTypes = [
+                "online",
+                "onsite",
+                "phone"
+            ];
+
+
+            const allowedAssignmentMethods = [
+                "fifo",
+                "random",
+                "manual"
+            ];
+
+
+            /* =================================================
+               BASIC VALIDATION
+               ================================================= */
+
+            if (
+                !jobId ||
+                !sessionDate ||
+                !startTime ||
+                !endTime
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        "Please complete the interview schedule."
+
+                });
+
+            }
+
+
+            if (
+                !Number.isInteger(round) ||
+                round < 1 ||
+                round > 20
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        "Please enter a valid interview round."
+
+                });
+
+            }
+
+
+            if (
+                !Number.isInteger(duration) ||
+                duration < 5 ||
+                duration > 240
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        "Please select a valid interview duration."
+
+                });
+
+            }
+
+
+            if (
+                !Number.isInteger(breakLength) ||
+                breakLength < 0 ||
+                breakLength > 120
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        "Please select a valid interview break."
+
+                });
+
+            }
+
+
+            if (
+                !allowedInterviewTypes.includes(
+                    interviewType
+                )
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        "Please select a valid interview type."
+
+                });
+
+            }
+
+
+            if (
+                !allowedAssignmentMethods.includes(
+                    assignmentMethod
+                )
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        "Please select a valid assignment method."
+
+                });
+
+            }
+
+
+            if (
+                interviewType === "onsite" &&
+                !location?.trim()
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        "Please enter the onsite interview location."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               TIME HELPERS
+               ================================================= */
+
+            const parseTime =
+                value => {
+
+                    const match =
+                        String(value || "")
+                            .match(
+                                /^([01]\d|2[0-3]):([0-5]\d)$/
+                            );
+
+
+                    if (!match) {
+
+                        return null;
+
+                    }
+
+
+                    return (
+                        Number(match[1]) * 60 +
+                        Number(match[2])
+                    );
+
+                };
+
+
+            const minutesToTime =
+                totalMinutes => {
+
+                    const hours =
+                        Math.floor(
+                            totalMinutes / 60
+                        );
+
+
+                    const minutes =
+                        totalMinutes % 60;
+
+
+                    return (
+                        `${String(hours).padStart(2, "0")}:` +
+                        `${String(minutes).padStart(2, "0")}`
+                    );
+
+                };
+
+
+            const startMinutes =
+                parseTime(startTime);
+
+
+            const endMinutes =
+                parseTime(endTime);
+
+
+            if (
+                startMinutes === null ||
+                endMinutes === null ||
+                endMinutes <= startMinutes
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        "Please select a valid interview time window."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               GENERATE SLOTS ON SERVER
+
+               Never trust browser-calculated slots.
+               ================================================= */
+
+            const generatedSlots =
+                [];
+
+
+            let cursor =
+                startMinutes;
+
+
+            let slotNumber =
+                1;
+
+
+            while (
+                cursor + duration <=
+                endMinutes
+            ) {
+
+                generatedSlots.push({
+
+                    number:
+                        slotNumber,
+
+                    startTime:
+                        minutesToTime(
+                            cursor
+                        ),
+
+                    endTime:
+                        minutesToTime(
+                            cursor +
+                            duration
+                        )
+
+                });
+
+
+                cursor +=
+                    duration +
+                    breakLength;
+
+
+                slotNumber +=
+                    1;
+
+            }
+
+
+            if (
+                generatedSlots.length ===
+                0
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        "The selected time window cannot fit any interviews."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               BEGIN TRANSACTION
+               ================================================= */
+
+            await client.query(
+                "BEGIN"
+            );
+
+
+
+            /* =================================================
+               DATE MUST NOT BE IN THE PAST
+               Sri Lanka recruitment timezone.
+               ================================================= */
+
+            const dateCheck =
+                await client.query(
+                    `
+                    SELECT
+                        $1::date <
+                        (
+                            NOW()
+                            AT TIME ZONE
+                            'Asia/Colombo'
+                        )::date
+                        AS is_past
+                    `,
+                    [
+                        sessionDate
+                    ]
+                );
+
+
+            if (
+                dateCheck.rows[0].is_past
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        "Interview date cannot be in the past."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               LOAD VACANCY
+               ================================================= */
+
+            const jobResult =
+                await client.query(
+                    `
+                    SELECT
+                        id,
+                        job_title,
+                        department,
+                        location
+
+                    FROM jobs
+
+                    WHERE id = $1
+
+                    LIMIT 1
+                    `,
+                    [
+                        jobId
+                    ]
+                );
+
+
+            if (
+                jobResult.rows.length ===
+                0
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(404).json({
+
+                    success: false,
+
+                    message:
+                        "Job vacancy not found."
+
+                });
+
+            }
+
+
+            const job =
+                jobResult.rows[0];
+
+
+
+            /* =================================================
+               LOAD ELIGIBLE SHORTLISTED CANDIDATES
+
+               Excludes candidates already assigned to
+               another draft / confirmed interview session.
+               ================================================= */
+
+            const orderClause =
+                assignmentMethod === "random"
+                    ? "RANDOM()"
+                    : "a.applied_at ASC";
+
+
+            const candidateResult =
+                await client.query(
+                    `
+                    SELECT
+
+                        a.id,
+                        a.application_reference,
+                        a.applied_at,
+
+                        av.first_name,
+                        av.last_name,
+                        av.email
+
+                    FROM applications a
+
+                    INNER JOIN application_versions av
+                        ON av.application_id = a.id
+                        AND av.version_number =
+                            a.current_version_number
+
+                    WHERE a.job_id = $1
+
+                    AND a.status =
+                        'shortlisted'
+
+                    AND NOT EXISTS (
+
+                        SELECT 1
+
+                        FROM interview_session_slots existing_slot
+
+                        INNER JOIN interview_sessions existing_session
+                            ON existing_session.id =
+                                existing_slot.session_id
+
+                        WHERE
+                            existing_slot.application_id =
+                                a.id
+
+                        AND existing_slot.status =
+                            'booked'
+
+                        AND existing_session.status
+                            IN (
+                                'draft',
+                                'confirmed'
+                            )
+
+                    )
+
+                    ORDER BY
+                        ${orderClause}
+
+                    FOR UPDATE OF a
+                    `,
+                    [
+                        jobId
+                    ]
+                );
+
+
+            const candidates =
+                candidateResult.rows;
+
+
+            if (
+                candidates.length ===
+                0
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        "There are no available shortlisted candidates for this vacancy."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               CREATE DRAFT SESSION
+               ================================================= */
+
+            const title =
+                `${job.job_title} Interview - Round ${round}`;
+
+
+            const sessionResult =
+                await client.query(
+                    `
+                    INSERT INTO interview_sessions (
+
+                        job_id,
+                        title,
+                        interview_round,
+
+                        session_date,
+                        start_time,
+                        end_time,
+                        timezone,
+
+                        duration_minutes,
+                        break_minutes,
+
+                        interview_type,
+                        assignment_method,
+
+                        location,
+                        instructions,
+
+                        status,
+                        created_by
+
+                    )
+
+                    VALUES (
+
+                        $1,
+                        $2,
+                        $3,
+
+                        $4,
+                        $5,
+                        $6,
+                        'Asia/Colombo',
+
+                        $7,
+                        $8,
+
+                        $9,
+                        $10,
+
+                        $11,
+                        $12,
+
+                        'draft',
+                        $13
+
+                    )
+
+                    RETURNING *
+                    `,
+                    [
+                        jobId,
+
+                        title,
+
+                        round,
+
+                        sessionDate,
+
+                        startTime,
+
+                        endTime,
+
+                        duration,
+
+                        breakLength,
+
+                        interviewType,
+
+                        assignmentMethod,
+
+                        interviewType ===
+                            "onsite"
+                            ? location.trim()
+                            : null,
+
+                        instructions?.trim() ||
+                            null,
+
+                        req.session.userId
+                    ]
+                );
+
+
+            const createdSession =
+                sessionResult.rows[0];
+
+
+
+            /* =================================================
+               AUTO ASSIGNMENT
+
+               FIFO / Random:
+               assign shortlisted candidates immediately.
+
+               Manual:
+               leave slots empty for manager assignment later.
+               ================================================= */
+
+            const candidatesToAssign =
+                assignmentMethod ===
+                    "manual"
+                    ? []
+                    : candidates.slice(
+                        0,
+                        generatedSlots.length
+                    );
+
+
+
+            const createdSlots =
+                [];
+
+
+            for (
+                let index = 0;
+                index < generatedSlots.length;
+                index += 1
+            ) {
+
+                const slot =
+                    generatedSlots[index];
+
+
+                const candidate =
+                    candidatesToAssign[index] ||
+                    null;
+
+
+                const slotResult =
+                    await client.query(
+                        `
+                        INSERT INTO interview_session_slots (
+
+                            session_id,
+                            slot_number,
+
+                            scheduled_start,
+                            scheduled_end,
+
+                            application_id,
+
+                            status,
+
+                            assigned_at
+
+                        )
+
+                        VALUES (
+
+                            $1,
+                            $2,
+
+                            (
+                                (
+                                    $3::date +
+                                    $4::time
+                                )
+                                AT TIME ZONE
+                                'Asia/Colombo'
+                            ),
+
+                            (
+                                (
+                                    $3::date +
+                                    $5::time
+                                )
+                                AT TIME ZONE
+                                'Asia/Colombo'
+                            ),
+
+                            $6,
+
+                            $7,
+
+                            CASE
+                                WHEN $6::bigint
+                                    IS NULL
+                                THEN NULL
+                                ELSE NOW()
+                            END
+
+                        )
+
+                        RETURNING *
+                        `,
+                        [
+                            createdSession.id,
+
+                            slot.number,
+
+                            sessionDate,
+
+                            slot.startTime,
+
+                            slot.endTime,
+
+                            candidate
+                                ? candidate.id
+                                : null,
+
+                            candidate
+                                ? "booked"
+                                : "available"
+                        ]
+                    );
+
+
+                createdSlots.push({
+
+                    id:
+                        slotResult.rows[0].id,
+
+                    slotNumber:
+                        slot.number,
+
+                    startTime:
+                        slot.startTime,
+
+                    endTime:
+                        slot.endTime,
+
+                    status:
+                        candidate
+                            ? "booked"
+                            : "available",
+
+                    candidate:
+                        candidate
+                            ? {
+
+                                applicationId:
+                                    candidate.id,
+
+                                reference:
+                                    candidate
+                                        .application_reference,
+
+                                firstName:
+                                    candidate.first_name,
+
+                                lastName:
+                                    candidate.last_name,
+
+                                email:
+                                    candidate.email
+
+                            }
+                            : null
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               COMMIT
+               ================================================= */
+
+            await client.query(
+                "COMMIT"
+            );
+
+
+
+            return res.status(201).json({
+
+                success: true,
+
+                message:
+                    "Interview session draft created successfully.",
+
+                session: {
+
+                    id:
+                        createdSession.id,
+
+                    title:
+                        createdSession.title,
+
+                    status:
+                        createdSession.status,
+
+                    job: {
+
+                        id:
+                            job.id,
+
+                        title:
+                            job.job_title,
+
+                        department:
+                            job.department
+
+                    },
+
+                    date:
+                        createdSession.session_date,
+
+                    startTime:
+                        createdSession.start_time,
+
+                    endTime:
+                        createdSession.end_time,
+
+                    interviewRound:
+                        createdSession.interview_round,
+
+                    interviewType:
+                        createdSession.interview_type,
+
+                    assignmentMethod:
+                        createdSession.assignment_method,
+
+                    durationMinutes:
+                        createdSession.duration_minutes,
+
+                    breakMinutes:
+                        createdSession.break_minutes,
+
+                    totalSlots:
+                        createdSlots.length,
+
+                    assignedCandidates:
+                        createdSlots.filter(
+                            slot =>
+                                slot.candidate
+                        ).length,
+
+                    remainingShortlisted:
+                        Math.max(
+                            0,
+                            candidates.length -
+                            createdSlots.filter(
+                                slot =>
+                                    slot.candidate
+                            ).length
+                        ),
+
+                    slots:
+                        createdSlots
+
+                }
+
+            });
+
+        }
+
+        catch (error) {
+
+            try {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+            }
+
+            catch (rollbackError) {
+
+                console.error(
+                    "Interview session rollback error:",
+                    rollbackError
+                );
+
+            }
+
+
+            console.error(
+                "Create interview session error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success: false,
+
+                message:
+                    "Unable to create interview session."
+
+            });
+
+        }
+
+        finally {
+
+            client.release();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   ADMIN - CONFIRM INTERVIEW SESSION
+   ========================================================= */
+
+app.patch(
+    "/api/admin/interview-sessions/:id/confirm",
+    requireAdmin,
+    async (req, res) => {
+
+        const sessionId =
+            req.params.id;
+
+
+        let client =
+            null;
+
+
+        let calendar =
+            null;
+
+
+        let calendarId =
+            null;
+
+
+        let databaseCommitted =
+            false;
+
+
+        const createdGoogleEvents =
+            [];
+
+
+        const createRouteError =
+            (
+                statusCode,
+                message
+            ) => {
+
+                const error =
+                    new Error(
+                        message
+                    );
+
+
+                error.statusCode =
+                    statusCode;
+
+
+                return error;
+
+            };
+
+
+        try {
+
+            /* =================================================
+               LOAD DRAFT SESSION
+               First read - no transaction yet.
+               ================================================= */
+
+            const sessionResult =
+                await pool.query(
+                    `
+                    SELECT
+
+                        s.id,
+                        s.job_id,
+                        s.title,
+                        s.interview_round,
+                        s.session_date,
+                        s.start_time,
+                        s.end_time,
+                        s.timezone,
+                        s.duration_minutes,
+                        s.break_minutes,
+                        s.interview_type,
+                        s.location,
+                        s.instructions,
+                        s.status,
+
+                        j.job_title
+
+                    FROM interview_sessions s
+
+                    INNER JOIN jobs j
+                        ON j.id =
+                            s.job_id
+
+                    WHERE s.id = $1
+
+                    LIMIT 1
+                    `,
+                    [
+                        sessionId
+                    ]
+                );
+
+
+            if (
+                sessionResult.rows.length ===
+                0
+            ) {
+
+                throw createRouteError(
+                    404,
+                    "Interview session not found."
+                );
+
+            }
+
+
+            const session =
+                sessionResult.rows[0];
+
+
+            if (
+                session.status !==
+                "draft"
+            ) {
+
+                throw createRouteError(
+                    409,
+                    "Only draft interview sessions can be confirmed."
+                );
+
+            }
+
+
+
+            /* =================================================
+               LOAD BOOKED SLOTS
+               ================================================= */
+
+            const slotResult =
+                await pool.query(
+                    `
+                    SELECT
+
+                        sl.id,
+                        sl.slot_number,
+                        sl.application_id,
+                        sl.scheduled_start,
+                        sl.scheduled_end,
+                        sl.status,
+
+                        a.application_reference,
+                        a.status
+                            AS application_status,
+
+                        a.candidate_id,
+
+                        u.first_name,
+                        u.last_name,
+                        u.email
+                            AS candidate_email
+
+                    FROM interview_session_slots sl
+
+                    INNER JOIN applications a
+                        ON a.id =
+                            sl.application_id
+
+                    INNER JOIN users u
+                        ON u.id =
+                            a.candidate_id
+
+                    WHERE sl.session_id = $1
+
+                    AND sl.status =
+                        'booked'
+
+                    ORDER BY
+                        sl.slot_number ASC
+                    `,
+                    [
+                        sessionId
+                    ]
+                );
+
+
+            const bookedSlots =
+                slotResult.rows;
+
+
+            if (
+                bookedSlots.length ===
+                0
+            ) {
+
+                throw createRouteError(
+                    400,
+                    "This interview session has no assigned candidates."
+                );
+
+            }
+
+
+
+            /* =================================================
+               VERIFY ALL CANDIDATES STILL SHORTLISTED
+               ================================================= */
+
+            const invalidCandidate =
+                bookedSlots.find(
+                    slot =>
+                        slot.application_status !==
+                        "shortlisted"
+                );
+
+
+            if (
+                invalidCandidate
+            ) {
+
+                throw createRouteError(
+                    409,
+                    `Application ${invalidCandidate.application_reference} is no longer shortlisted. Review the schedule before confirming.`
+                );
+
+            }
+
+
+
+            /* =================================================
+               CONNECT TO STORED GOOGLE CALENDAR
+               ================================================= */
+
+            const googleConnection =
+                await getStoredGoogleCalendarClient();
+
+
+            calendar =
+                googleConnection.calendar;
+
+
+            calendarId =
+                googleConnection.calendarId;
+
+
+
+            /* =================================================
+               CREATE GOOGLE EVENTS
+
+               Still no candidate invitations yet.
+               ================================================= */
+
+            for (
+                const slot of
+                bookedSlots
+            ) {
+
+                const googleEvent =
+                    await createGoogleInterviewEvent({
+
+                        calendar,
+
+                        calendarId,
+
+                        session,
+
+                        slot
+
+                    });
+
+
+                createdGoogleEvents.push({
+
+                    slotId:
+                        slot.id,
+
+                    applicationId:
+                        slot.application_id,
+
+                    candidateEmail:
+                        slot.candidate_email,
+
+                    eventId:
+                        googleEvent.eventId,
+
+                    calendarId:
+                        googleEvent.calendarId,
+
+                    meetingUrl:
+                        googleEvent.meetingUrl,
+
+                    calendarUrl:
+                        googleEvent.calendarUrl
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               BEGIN FINAL DATABASE TRANSACTION
+               ================================================= */
+
+            client =
+                await pool.connect();
+
+
+            await client.query(
+                "BEGIN"
+            );
+
+
+
+            /* =================================================
+               LOCK SESSION AGAIN
+
+               Prevent two admins confirming the
+               same draft at the same time.
+               ================================================= */
+
+            const lockedSessionResult =
+                await client.query(
+                    `
+                    SELECT
+                        id,
+                        status
+
+                    FROM interview_sessions
+
+                    WHERE id = $1
+
+                    FOR UPDATE
+                    `,
+                    [
+                        sessionId
+                    ]
+                );
+
+
+            if (
+                lockedSessionResult.rows.length ===
+                0
+            ) {
+
+                throw createRouteError(
+                    404,
+                    "Interview session no longer exists."
+                );
+
+            }
+
+
+            if (
+                lockedSessionResult
+                    .rows[0]
+                    .status !==
+                "draft"
+            ) {
+
+                throw createRouteError(
+                    409,
+                    "This interview session has already been confirmed or changed."
+                );
+
+            }
+
+
+
+            /* =================================================
+               LOCK SLOT ASSIGNMENTS + APPLICATIONS AGAIN
+               ================================================= */
+
+            const lockedSlotResult =
+                await client.query(
+                    `
+                    SELECT
+
+                        sl.id,
+                        sl.slot_number,
+                        sl.application_id,
+                        sl.scheduled_start,
+                        sl.scheduled_end,
+
+                        a.application_reference,
+                        a.status
+                            AS application_status,
+
+                        a.candidate_id,
+
+                        u.email
+                            AS candidate_email
+
+                    FROM interview_session_slots sl
+
+                    INNER JOIN applications a
+                        ON a.id =
+                            sl.application_id
+
+                    INNER JOIN users u
+                        ON u.id =
+                            a.candidate_id
+
+                    WHERE sl.session_id = $1
+
+                    AND sl.status =
+                        'booked'
+
+                    ORDER BY
+                        sl.slot_number ASC
+
+                    FOR UPDATE OF
+                        sl,
+                        a
+                    `,
+                    [
+                        sessionId
+                    ]
+                );
+
+
+            const lockedSlots =
+                lockedSlotResult.rows;
+
+
+
+            /* =================================================
+               MAKE SURE SCHEDULE DID NOT CHANGE
+               WHILE GOOGLE EVENTS WERE BEING CREATED
+               ================================================= */
+
+            if (
+                lockedSlots.length !==
+                bookedSlots.length
+            ) {
+
+                throw createRouteError(
+                    409,
+                    "The interview schedule changed during confirmation. Please review it again."
+                );
+
+            }
+
+
+            for (
+                const lockedSlot of
+                lockedSlots
+            ) {
+
+                const originalSlot =
+                    bookedSlots.find(
+                        slot =>
+                            String(
+                                slot.id
+                            ) ===
+                            String(
+                                lockedSlot.id
+                            )
+                    );
+
+
+                if (
+                    !originalSlot ||
+                    String(
+                        originalSlot.application_id
+                    ) !==
+                    String(
+                        lockedSlot.application_id
+                    ) ||
+                    new Date(
+                        originalSlot.scheduled_start
+                    )
+                    .getTime() !==
+                    new Date(
+                        lockedSlot.scheduled_start
+                    )
+                    .getTime() ||
+                    new Date(
+                        originalSlot.scheduled_end
+                    )
+                    .getTime() !==
+                    new Date(
+                        lockedSlot.scheduled_end
+                    )
+                    .getTime()
+                ) {
+
+                    throw createRouteError(
+                        409,
+                        "The interview schedule changed during confirmation. Please review it again."
+                    );
+
+                }
+
+
+                if (
+                    lockedSlot.application_status !==
+                    "shortlisted"
+                ) {
+
+                    throw createRouteError(
+                        409,
+                        `Application ${lockedSlot.application_reference} is no longer shortlisted.`
+                    );
+
+                }
+
+            }
+
+
+
+            /* =================================================
+               CREATE OFFICIAL APPLICATION INTERVIEWS
+               ================================================= */
+
+            for (
+                const slot of
+                lockedSlots
+            ) {
+
+                const googleEvent =
+                    createdGoogleEvents.find(
+                        event =>
+                            String(
+                                event.slotId
+                            ) ===
+                            String(
+                                slot.id
+                            )
+                    );
+
+
+                if (
+                    !googleEvent
+                ) {
+
+                    throw new Error(
+                        `Google Calendar event missing for interview slot ${slot.id}.`
+                    );
+
+                }
+
+
+                await client.query(
+                    `
+                    INSERT INTO application_interviews (
+
+                        application_id,
+                        round_number,
+                        interview_title,
+                        interview_type,
+
+                        scheduled_at,
+                        duration_minutes,
+
+                        location,
+                        meeting_url,
+
+                        instructions,
+                        interview_status,
+
+                        scheduled_by,
+
+                        session_id,
+                        slot_id,
+
+                        google_event_id,
+                        google_calendar_id,
+
+                        timezone
+
+                    )
+
+                    VALUES (
+
+                        $1,
+                        $2,
+                        $3,
+                        $4,
+
+                        $5,
+                        $6,
+
+                        $7,
+                        $8,
+
+                        $9,
+                        'scheduled',
+
+                        $10,
+
+                        $11,
+                        $12,
+
+                        $13,
+                        $14,
+
+                        $15
+
+                    )
+                    `,
+                    [
+
+                        slot.application_id,
+
+                        session.interview_round,
+
+                        session.title,
+
+                        session.interview_type,
+
+                        slot.scheduled_start,
+
+                        session.duration_minutes,
+
+                        session.location,
+
+                        googleEvent.meetingUrl,
+
+                        session.instructions,
+
+                        req.session.userId,
+
+                        session.id,
+
+                        slot.id,
+
+                        googleEvent.eventId,
+
+                        googleEvent.calendarId,
+
+                        session.timezone ||
+                            "Asia/Colombo"
+
+                    ]
+                );
+
+
+
+                /* =================================================
+                   SHORTLISTED -> INTERVIEW
+                   ================================================= */
+
+                const applicationUpdate =
+                    await client.query(
+                        `
+                        UPDATE applications
+
+                        SET
+                            status =
+                                'interview',
+
+                            updated_at =
+                                NOW()
+
+                        WHERE id = $1
+
+                        AND status =
+                            'shortlisted'
+
+                        RETURNING id
+                        `,
+                        [
+                            slot.application_id
+                        ]
+                    );
+
+
+                if (
+                    applicationUpdate.rows.length ===
+                    0
+                ) {
+
+                    throw createRouteError(
+                        409,
+                        `Application ${slot.application_reference} could not be moved to interview.`
+                    );
+
+                }
+
+
+
+                /* =================================================
+                   STATUS HISTORY
+                   ================================================= */
+
+                await client.query(
+                    `
+                    INSERT INTO application_status_history (
+
+                        application_id,
+                        previous_status,
+                        new_status,
+                        changed_by,
+                        status_note
+
+                    )
+
+                    VALUES (
+
+                        $1,
+                        'shortlisted',
+                        'interview',
+                        $2,
+                        'Interview scheduled and session confirmed.'
+
+                    )
+                    `,
+                    [
+                        slot.application_id,
+                        req.session.userId
+                    ]
+                );
+
+
+
+                /* =================================================
+                   ACTIVITY LOG
+                   ================================================= */
+
+                await client.query(
+                    `
+                    INSERT INTO application_activity (
+
+                        application_id,
+                        performed_by,
+                        activity_type,
+                        title,
+                        description
+
+                    )
+
+                    VALUES (
+
+                        $1,
+                        $2,
+                        'interview_scheduled',
+                        'Interview scheduled',
+                        $3
+
+                    )
+                    `,
+                    [
+
+                        slot.application_id,
+
+                        req.session.userId,
+
+                        `Interview Round ${session.interview_round} scheduled.`
+
+                    ]
+                );
+
+
+
+                /* =================================================
+                   ALTRIUM NOTIFICATION
+                   ================================================= */
+
+                await client.query(
+                    `
+                    INSERT INTO notifications (
+
+                        user_id,
+                        notification_type,
+                        title,
+                        message,
+
+                        application_id,
+                        job_id,
+
+                        action_url
+
+                    )
+
+                    VALUES (
+
+                        $1,
+                        'application_interview',
+                        'Interview scheduled',
+                        $2,
+
+                        $3,
+                        $4,
+
+                        $5
+
+                    )
+                    `,
+                    [
+
+                        slot.candidate_id,
+
+                        `Your interview for ${session.job_title} has been scheduled. View your interview details in Altrium.`,
+
+                        slot.application_id,
+
+                        session.job_id,
+
+                        `/application-progress.html?id=${slot.application_id}`
+
+                    ]
+                );
+
+            }
+
+
+
+            /* =================================================
+               CONFIRM SESSION
+               ================================================= */
+
+            const confirmedResult =
+                await client.query(
+                    `
+                    UPDATE interview_sessions
+
+                    SET
+                        status =
+                            'confirmed',
+
+                        confirmed_by =
+                            $1,
+
+                        confirmed_at =
+                            NOW(),
+
+                        updated_at =
+                            NOW()
+
+                    WHERE id = $2
+
+                    AND status =
+                        'draft'
+
+                    RETURNING *
+                    `,
+                    [
+                        req.session.userId,
+                        sessionId
+                    ]
+                );
+
+
+            if (
+                confirmedResult.rows.length ===
+                0
+            ) {
+
+                throw createRouteError(
+                    409,
+                    "Interview session could not be confirmed."
+                );
+
+            }
+
+
+
+            /* =================================================
+               COMMIT DATABASE
+               ================================================= */
+
+            await client.query(
+                "COMMIT"
+            );
+
+
+            databaseCommitted =
+                true;
+
+
+
+            /* =================================================
+               NOW SEND GOOGLE INVITATIONS
+
+               Database is officially confirmed first.
+               ================================================= */
+
+            let calendarInvitesSent =
+                    0;
+
+
+                for (
+                    const googleEvent of
+                    createdGoogleEvents
+                ) {
+
+                    try {
+
+                        await inviteCandidateToGoogleInterview({
+
+                            calendar,
+
+                            calendarId:
+                                googleEvent.calendarId,
+
+                            eventId:
+                                googleEvent.eventId,
+
+                            candidateEmail:
+                                googleEvent.candidateEmail
+
+                        });
+
+
+                        calendarInvitesSent +=
+                            1;
+
+                    }
+
+                    catch (inviteError) {
+
+                        console.error(
+                            "Google interview invitation error:",
+                            googleEvent.applicationId,
+                            inviteError.response?.data ||
+                            inviteError
+                        );
+
+                    }
+
+                }
+
+
+                /* =================================================
+                SEND BRANDED INTERVIEW EMAILS
+                ================================================= */
+
+                let interviewEmailsSent =
+                    0;
+
+
+                for (
+                    const slot of
+                    bookedSlots
+                ) {
+
+                    const googleEvent =
+                        createdGoogleEvents.find(
+                            event =>
+                                String(
+                                    event.slotId
+                                ) ===
+                                String(
+                                    slot.id
+                                )
+                        );
+
+
+                    try {
+
+                        const candidateName =
+                            `${slot.first_name || ""} ${slot.last_name || ""}`
+                                .trim() ||
+                            "Candidate";
+
+
+                        await sendInterviewConfirmationEmail({
+
+                            candidateName,
+
+                            candidateEmail:
+                                slot.candidate_email,
+
+                            applicationId:
+                                slot.application_id,
+
+                            applicationReference:
+                                slot.application_reference,
+
+                            jobTitle:
+                                session.job_title,
+
+                            interviewRound:
+                                session.interview_round,
+
+                            interviewType:
+                                session.interview_type,
+
+                            scheduledStart:
+                                slot.scheduled_start,
+
+                            scheduledEnd:
+                                slot.scheduled_end,
+
+                            location:
+                                session.location,
+
+                            meetingUrl:
+                                googleEvent?.meetingUrl ||
+                                null,
+
+                            instructions:
+                                session.instructions
+
+                        });
+
+
+                        interviewEmailsSent +=
+                            1;
+
+                    }
+
+                    catch (emailError) {
+
+                        console.error(
+                            "Interview confirmation email error:",
+                            slot.application_id,
+                            emailError
+                        );
+
+                    }
+
+                }
+
+
+                /* =================================================
+                SUCCESS
+                ================================================= */
+
+                return res.json({
+
+                    success:
+                        true,
+
+                    message:
+                        "Interview session confirmed successfully.",
+
+                    session: {
+
+                        id:
+                            confirmedResult
+                                .rows[0]
+                                .id,
+
+                        status:
+                            confirmedResult
+                                .rows[0]
+                                .status,
+
+                        confirmedAt:
+                            confirmedResult
+                                .rows[0]
+                                .confirmed_at,
+
+                        candidatesConfirmed:
+                            bookedSlots.length,
+
+                        googleEventsCreated:
+                            createdGoogleEvents.length,
+
+                        calendarInvitesSent,
+
+                        interviewEmailsSent
+
+                    }
+
+                });
+
+        }
+
+        catch (error) {
+
+            /* =================================================
+               ROLLBACK DATABASE IF NEEDED
+               ================================================= */
+
+            if (
+                client &&
+                !databaseCommitted
+            ) {
+
+                try {
+
+                    await client.query(
+                        "ROLLBACK"
+                    );
+
+                }
+
+                catch (rollbackError) {
+
+                    console.error(
+                        "Confirm interview rollback error:",
+                        rollbackError
+                    );
+
+                }
+
+            }
+
+
+
+            /* =================================================
+               REMOVE GOOGLE EVENTS IF DATABASE FAILED
+
+               Candidate invitations were not sent yet,
+               so cleanup is silent.
+               ================================================= */
+
+            if (
+                !databaseCommitted &&
+                calendar
+            ) {
+
+                for (
+                    const googleEvent of
+                    createdGoogleEvents
+                ) {
+
+                    await deleteGoogleCalendarEventQuietly(
+
+                        calendar,
+
+                        googleEvent.calendarId,
+
+                        googleEvent.eventId
+
+                    );
+
+                }
+
+            }
+
+
+            console.error(
+                "Confirm interview session error:",
+                error.response?.data ||
+                error
+            );
+
+
+
+            /* =================================================
+               KNOWN ROUTE ERROR
+               ================================================= */
+
+            if (
+                error.statusCode
+            ) {
+
+                return res
+                    .status(
+                        error.statusCode
+                    )
+                    .json({
+
+                        success:
+                            false,
+
+                        message:
+                            error.message
+
+                    });
+
+            }
+
+
+
+            /* =================================================
+               DATABASE DUPLICATE
+               ================================================= */
+
+            if (
+                error.code ===
+                "23505"
+            ) {
+
+                return res.status(409).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "One or more candidates already have an interview scheduled."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               GOOGLE ERROR
+               ================================================= */
+
+            if (
+                error.response?.data
+            ) {
+
+                return res.status(502).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Google Calendar could not create the interview schedule. The Altrium session remains a draft."
+
+                });
+
+            }
+
+
+
+            return res.status(500).json({
+
+                success:
+                    false,
+
+                message:
+                    "Unable to confirm interview session."
+
+            });
+
+        }
+
+        finally {
+
+            if (
+                client
+            ) {
+
+                client.release();
+
+            }
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   START SERVER
+   ========================================================= */
+
+app.listen(
+    PORT,
+    () => {
+
+        console.log(
+            `Server running on http://localhost:${PORT}`
+        );
 
     }
 );

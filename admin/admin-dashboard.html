@@ -240,7 +240,7 @@
             </span>
 
             <strong>
-                Admin Panel
+                System Panel
             </strong>
 
         </div>
@@ -289,6 +289,21 @@
                 </span>
 
                 Applications
+
+            </button>
+
+
+            <button
+                type="button"
+                class="admin-nav-item"
+                data-section="interviews"
+            >
+
+                <span class="admin-nav-number">
+                    04
+                </span>
+
+                Interviews
 
             </button>
 
@@ -502,33 +517,253 @@
             id="applications"
         >
 
-            <div class="admin-page-heading">
+            <!--=====================================================
+                APPLICATIONS TOOLBAR
+                ===================================================== -->
 
-                <span class="admin-section-label">
+            <div class="applications-toolbar">
+
+                <div class="applications-toolbar-heading">
+
+                    <h2>
+                        Candidate applications
+                    </h2>
+
+                    <p>
+                        Review applications submitted for Altrium vacancies.
+                    </p>
+
+                </div>
+
+
+                <strong
+                    class="applications-total-count"
+                    id="applicationsTotalCount"
+                >
+                    0 applications
+                </strong>
+
+            </div>
+
+
+            <!-- =====================================================
+                APPLICATION SEARCH
+                ===================================================== -->
+
+            <div class="applications-search-row">
+
+                <div class="applications-search">
+
+                    <span>
+                        ⌕
+                    </span>
+
+                    <input
+                        type="text"
+                        id="adminApplicationSearch"
+                        placeholder="Search candidate, reference or job..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- =====================================================
+                APPLICATION STATUS FILTERS
+                ===================================================== -->
+
+            <div
+                class="applications-status-filters"
+                id="applicationsStatusFilters"
+            >
+
+                <button
+                    type="button"
+                    class="application-filter-button active"
+                    data-status="all"
+                >
+                    All
+                </button>
+
+                <button
+                    type="button"
+                    class="application-filter-button"
+                    data-status="submitted"
+                >
+                    Submitted
+                </button>
+
+                <button
+                    type="button"
+                    class="application-filter-button"
+                    data-status="screening"
+                >
+                    Screening
+                </button>
+
+                <button
+                    type="button"
+                    class="application-filter-button"
+                    data-status="shortlisted"
+                >
+                    Shortlisted
+                </button>
+
+                <button
+                    type="button"
+                    class="application-filter-button"
+                    data-status="interview"
+                >
+                    Interview
+                </button>
+
+                <button
+                    type="button"
+                    class="application-filter-button"
+                    data-status="offer"
+                >
+                    Offer
+                </button>
+
+                <button
+                    type="button"
+                    class="application-filter-button"
+                    data-status="hired"
+                >
+                    Hired
+                </button>
+
+                <button
+                    type="button"
+                    class="application-filter-button"
+                    data-status="rejected"
+                >
+                    Rejected
+                </button>
+
+                <button
+                    type="button"
+                    class="application-filter-button"
+                    data-status="withdrawn"
+                >
+                    Withdrawn
+                </button>
+
+            </div>
+
+
+            <!-- =====================================================
+                APPLICATION LIST HEADING
+                ===================================================== -->
+
+            <div class="applications-list-heading">
+
+                <span>
                     APPLICATIONS
                 </span>
 
+                <strong id="applicationsVisibleCount">
+                    0 results
+                </strong>
+
+            </div>
+
+
+            <!-- =====================================================
+                APPLICATION LIST
+                ===================================================== -->
+
+            <div
+                class="admin-applications-list"
+                id="adminApplicationsList"
+            >
+
+                <div class="applications-loading">
+                    Loading applications...
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+            INTERVIEWS SECTION
+            ===================================================== -->
+
+        <section
+            class="admin-section"
+            id="interviews"
+        >
+
+            <div class="admin-page-heading">
+
+                <span class="admin-section-label">
+                    INTERVIEWS
+                </span>
+
                 <h1>
-                    Review
-                    <em>candidates.</em>
+                    Manage
+                    <em>interviews.</em>
                 </h1>
 
                 <p>
-                    View candidates who have applied for vacancies.
+                    Create interview sessions, manage time slots,
+                    and review scheduled candidates.
                 </p>
 
             </div>
 
 
-            <div class="admin-placeholder">
+            <div class="interview-toolbar">
 
-                <h2>
-                    Candidate applications
-                </h2>
+                <div>
 
-                <p>
-                    Applicant information will appear here later.
-                </p>
+                    <h2>
+                        Interview sessions
+                    </h2>
+
+                    <p>
+                        Plan interview days and assign shortlisted candidates.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="create-interview-session-button"
+                    id="openCreateInterviewSession"
+                >
+                    <span>+</span>
+                    Create interview session
+                </button>
+
+            </div>
+
+
+            <div class="interview-session-heading">
+
+                <span>
+                    UPCOMING & DRAFT SESSIONS
+                </span>
+
+                <strong id="interviewSessionCount">
+                    0 sessions
+                </strong>
+
+            </div>
+
+
+            <div
+                class="interview-session-list"
+                id="interviewSessionList"
+            >
+
+                <div class="interview-session-empty">
+                    No interview sessions have been created yet.
+                </div>
 
             </div>
 
@@ -1058,10 +1293,1498 @@
 </div>
 
 
+<!-- =====================================================
+     APPLICATION REVIEW MODAL
+     ===================================================== -->
+
+<div
+    class="admin-modal"
+    id="applicationReviewModal"
+>
+
+    <div
+        class="admin-modal-backdrop"
+        id="applicationReviewBackdrop"
+    ></div>
+
+
+    <div class="application-review-modal-card">
+
+
+        <!-- HEADER -->
+
+        <div class="application-review-header">
+
+            <div>
+
+                <span class="admin-section-label">
+                    CANDIDATE APPLICATION
+                </span>
+
+                <h2 id="reviewApplicationCandidateName">
+                    Candidate
+                </h2>
+
+                <p id="reviewApplicationJobTitle">
+                    Job position
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="admin-modal-close"
+                id="closeApplicationReviewModal"
+                aria-label="Close application"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- LOADING -->
+
+        <div
+            class="application-review-loading"
+            id="applicationReviewLoading"
+        >
+            Loading application...
+        </div>
+
+
+        <!-- CONTENT -->
+
+        <div
+            class="application-review-content"
+            id="applicationReviewContent"
+            hidden
+        >
+
+
+            <!-- SUMMARY -->
+
+            <div class="application-review-summary">
+
+                <div>
+
+                    <span>
+                        APPLICATION REFERENCE
+                    </span>
+
+                    <strong id="reviewApplicationReference">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        CURRENT STATUS
+                    </span>
+
+                    <strong
+                        class="application-review-status"
+                        id="reviewApplicationStatus"
+                    >
+                        Submitted
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        APPLIED
+                    </span>
+
+                    <strong id="reviewApplicationAppliedDate">
+                        —
+                    </strong>
+
+                </div>
+
+            </div>
+
+            <!--=====================================================
+                STATUS MANAGEMENT
+                ===================================================== -->
+
+            <section class="application-status-manager">
+
+                <div class="application-status-manager-heading">
+
+                    <div>
+
+                        <span>
+                            STATUS MANAGEMENT
+                        </span>
+
+                        <h3>
+                            Manage application stage
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div class="application-status-manager-body">
+
+                    <div class="application-current-stage">
+
+                        <span>
+                            CURRENT STAGE
+                        </span>
+
+                        <strong id="managerCurrentApplicationStatus">
+                            Submitted
+                        </strong>
+
+                    </div>
+
+
+                    <div
+                        class="application-status-actions"
+                        id="applicationStatusActions"
+                    ></div>
+
+                </div>
+
+
+                <p
+                    class="application-status-message"
+                    id="applicationStatusMessage"
+                    hidden
+                ></p>
+
+            </section>
+
+
+            <!-- CANDIDATE INFORMATION -->
+
+            <section class="application-review-section">
+
+                <div class="application-review-section-heading">
+
+                    <span>
+                        CANDIDATE
+                    </span>
+
+                    <h3>
+                        Personal information
+                    </h3>
+
+                </div>
+
+
+                <div class="application-review-grid">
+
+                    <div class="application-review-field">
+                        <span>Full name</span>
+                        <strong id="reviewCandidateFullName">—</strong>
+                    </div>
+
+
+                    <div class="application-review-field">
+                        <span>Email address</span>
+                        <strong id="reviewCandidateEmail">—</strong>
+                    </div>
+
+
+                    <div class="application-review-field">
+                        <span>Phone number</span>
+                        <strong id="reviewCandidatePhone">—</strong>
+                    </div>
+
+
+                    <div class="application-review-field">
+                        <span>NIC</span>
+                        <strong id="reviewCandidateNic">—</strong>
+                    </div>
+
+
+                    <div class="application-review-field">
+                        <span>Date of birth</span>
+                        <strong id="reviewCandidateDob">—</strong>
+                    </div>
+
+
+                    <div class="application-review-field">
+                        <span>Country</span>
+                        <strong id="reviewCandidateCountry">—</strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- PROFESSIONAL INFORMATION -->
+
+            <section class="application-review-section">
+
+                <div class="application-review-section-heading">
+
+                    <span>
+                        PROFILE
+                    </span>
+
+                    <h3>
+                        Professional information
+                    </h3>
+
+                </div>
+
+
+                <div class="application-review-grid">
+
+                    <div class="application-review-field">
+                        <span>Education</span>
+                        <strong id="reviewEducation">—</strong>
+                    </div>
+
+
+                    <div class="application-review-field">
+                        <span>Preferred job type</span>
+                        <strong id="reviewPreferredJobType">—</strong>
+                    </div>
+
+
+                    <div class="application-review-field application-review-field-full">
+                        <span>Skills</span>
+                        <strong id="reviewSkills">—</strong>
+                    </div>
+
+
+                    <div class="application-review-field application-review-field-full">
+                        <span>Work experience</span>
+                        <p id="reviewWorkExperience">—</p>
+                    </div>
+
+
+                    <div class="application-review-field application-review-field-full">
+                        <span>Projects</span>
+                        <p id="reviewProjects">—</p>
+                    </div>
+
+
+                    <div class="application-review-field">
+                        <span>Languages</span>
+                        <strong id="reviewLanguages">—</strong>
+                    </div>
+
+
+                    <div class="application-review-field">
+
+                        <span>
+                            LinkedIn
+                        </span>
+
+                        <a
+                            href="#"
+                            id="reviewLinkedin"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            hidden
+                        >
+                            View LinkedIn profile
+                        </a>
+
+                        <strong id="reviewLinkedinEmpty">
+                            Not provided
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- JOB -->
+
+            <section class="application-review-section">
+
+                <div class="application-review-section-heading">
+
+                    <span>
+                        VACANCY
+                    </span>
+
+                    <h3>
+                        Applied position
+                    </h3>
+
+                </div>
+
+
+                <div class="application-review-grid">
+
+                    <div class="application-review-field">
+                        <span>Job title</span>
+                        <strong id="reviewJobTitle">—</strong>
+                    </div>
+
+
+                    <div class="application-review-field">
+                        <span>Department</span>
+                        <strong id="reviewJobDepartment">—</strong>
+                    </div>
+
+
+                    <div class="application-review-field">
+                        <span>Location</span>
+                        <strong id="reviewJobLocation">—</strong>
+                    </div>
+
+
+                    <div class="application-review-field">
+                        <span>Employment type</span>
+                        <strong id="reviewJobEmploymentType">—</strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- CV -->
+
+            <section class="application-review-section">
+
+                <div class="application-review-section-heading">
+
+                    <span>
+                        DOCUMENT
+                    </span>
+
+                    <h3>
+                        Candidate CV
+                    </h3>
+
+                </div>
+
+
+                <div class="application-review-cv">
+
+                    <div>
+
+                        <strong>
+                            Application CV
+                        </strong>
+
+                        <p>
+                            This document is accessed through a temporary
+                            secure link.
+                        </p>
+
+                    </div>
+
+
+                    <a
+                        href="#"
+                        class="application-review-cv-button"
+                        id="reviewCvButton"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        View CV
+                    </a>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- STATUS HISTORY -->
+
+            <section class="application-review-section">
+
+                <div class="application-review-section-heading">
+
+                    <span>
+                        ACTIVITY
+                    </span>
+
+                    <h3>
+                        Status history
+                    </h3>
+
+                </div>
+
+
+                <div
+                    class="application-review-history"
+                    id="reviewStatusHistory"
+                ></div>
+
+            </section>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     CREATE INTERVIEW SESSION MODAL
+     ===================================================== -->
+
+<div
+    class="admin-modal"
+    id="createInterviewSessionModal"
+>
+
+    <div
+        class="admin-modal-backdrop"
+        id="createInterviewSessionBackdrop"
+    ></div>
+
+
+    <div class="interview-create-modal-card">
+
+        <!-- HEADER -->
+
+        <div class="admin-modal-header">
+
+            <div>
+
+                <span class="admin-section-label">
+                    NEW INTERVIEW SESSION
+                </span>
+
+                <h2>
+                    Create interview session.
+                </h2>
+
+                <p>
+                    Set the interview window and let Altrium
+                    calculate the available candidate slots.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="admin-modal-close"
+                id="closeCreateInterviewSession"
+                aria-label="Close"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <form id="createInterviewSessionForm">
+
+
+    <!-- =====================================================
+         VACANCY
+         ===================================================== -->
+
+    <section class="interview-form-section">
+
+        <div class="interview-form-heading">
+
+            <span>
+                VACANCY
+            </span>
+
+            <h3>
+                Select shortlisted candidates
+            </h3>
+
+        </div>
+
+
+        <div class="admin-input admin-input-full">
+
+            <label>
+                Job vacancy
+            </label>
+
+
+            <div
+                class="admin-custom-select"
+                id="interviewJobDropdown"
+            >
+
+                <button
+                    type="button"
+                    class="admin-custom-select-trigger"
+                    id="interviewJobTrigger"
+                >
+
+                    <span id="interviewJobText">
+                        Select vacancy
+                    </span>
+
+                    <span class="admin-select-arrow">
+                        ↓
+                    </span>
+
+                </button>
+
+
+                <div
+                    class="admin-custom-select-menu"
+                    id="interviewJobMenu"
+                ></div>
+
+
+                <input
+                    type="hidden"
+                    id="interviewSessionJob"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="interview-selected-job"
+            id="interviewSelectedJob"
+            hidden
+        >
+
+            <div>
+
+                <span>
+                    SHORTLISTED
+                </span>
+
+                <strong id="interviewShortlistedCount">
+                    0
+                </strong>
+
+            </div>
+
+
+            <p id="interviewSelectedJobMeta">
+                —
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         DATE + TIME
+         ===================================================== -->
+
+    <section class="interview-form-section">
+
+        <div class="interview-form-heading">
+
+            <span>
+                SCHEDULE
+            </span>
+
+            <h3>
+                Interview date and time
+            </h3>
+
+        </div>
+
+
+        <div class="admin-form-grid">
+
+
+            <!-- DATE -->
+
+            <div class="admin-input">
+
+                <label>
+                    Interview date
+                </label>
+
+
+                <div
+                    class="admin-date-picker"
+                    id="interviewDatePicker"
+                >
+
+                    <button
+                        type="button"
+                        class="admin-date-trigger"
+                        id="interviewDateTrigger"
+                    >
+
+                        <span id="interviewDateText">
+                            Select interview date
+                        </span>
+
+                        <span class="admin-date-icon">
+                            ▦
+                        </span>
+
+                    </button>
+
+
+                    <div
+                        class="admin-calendar"
+                        id="interviewDateCalendar"
+                    >
+
+                        <div class="admin-calendar-header">
+
+                            <button
+                                type="button"
+                                id="previousInterviewMonth"
+                            >
+                                ‹
+                            </button>
+
+
+                            <strong id="interviewMonthLabel">
+                            </strong>
+
+
+                            <button
+                                type="button"
+                                id="nextInterviewMonth"
+                            >
+                                ›
+                            </button>
+
+                        </div>
+
+
+                        <div class="admin-calendar-weekdays">
+
+                            <span>Su</span>
+                            <span>Mo</span>
+                            <span>Tu</span>
+                            <span>We</span>
+                            <span>Th</span>
+                            <span>Fr</span>
+                            <span>Sa</span>
+
+                        </div>
+
+
+                        <div
+                            class="admin-calendar-days"
+                            id="interviewCalendarDays"
+                        ></div>
+
+                    </div>
+
+
+                    <input
+                        type="hidden"
+                        id="interviewSessionDate"
+                    >
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ROUND -->
+
+            <div class="admin-input">
+
+                <label for="interviewSessionRound">
+                    Interview round
+                </label>
+
+                <input
+                    type="number"
+                    id="interviewSessionRound"
+                    min="1"
+                    max="20"
+                    value="1"
+                    required
+                >
+
+            </div>
+
+
+
+            <!-- START TIME -->
+
+            <div class="admin-input">
+
+                <label>
+                    Start time
+                </label>
+
+
+                <div
+                    class="admin-custom-select"
+                    id="interviewStartDropdown"
+                >
+
+                    <button
+                        type="button"
+                        class="admin-custom-select-trigger"
+                        id="interviewStartTrigger"
+                    >
+
+                        <span id="interviewStartText">
+                            10:00 AM
+                        </span>
+
+                        <span class="admin-select-arrow">
+                            ↓
+                        </span>
+
+                    </button>
+
+
+                    <div
+                        class="admin-custom-select-menu interview-time-menu"
+                        id="interviewStartMenu"
+                    ></div>
+
+
+                    <input
+                        type="hidden"
+                        id="interviewSessionStart"
+                        value="10:00"
+                    >
+
+                </div>
+
+            </div>
+
+
+
+            <!-- END TIME -->
+
+            <div class="admin-input">
+
+                <label>
+                    End time
+                </label>
+
+
+                <div
+                    class="admin-custom-select"
+                    id="interviewEndDropdown"
+                >
+
+                    <button
+                        type="button"
+                        class="admin-custom-select-trigger"
+                        id="interviewEndTrigger"
+                    >
+
+                        <span id="interviewEndText">
+                            2:00 PM
+                        </span>
+
+                        <span class="admin-select-arrow">
+                            ↓
+                        </span>
+
+                    </button>
+
+
+                    <div
+                        class="admin-custom-select-menu interview-time-menu"
+                        id="interviewEndMenu"
+                    ></div>
+
+
+                    <input
+                        type="hidden"
+                        id="interviewSessionEnd"
+                        value="14:00"
+                    >
+
+                </div>
+
+            </div>
+
+
+
+            <!-- DURATION -->
+
+            <div class="admin-input">
+
+                <label>
+                    Interview duration
+                </label>
+
+
+                <div
+                    class="admin-custom-select"
+                    id="interviewDurationDropdown"
+                >
+
+                    <button
+                        type="button"
+                        class="admin-custom-select-trigger"
+                        id="interviewDurationTrigger"
+                    >
+
+                        <span id="interviewDurationText">
+                            30 minutes
+                        </span>
+
+                        <span class="admin-select-arrow">
+                            ↓
+                        </span>
+
+                    </button>
+
+
+                    <div
+                        class="admin-custom-select-menu"
+                        id="interviewDurationMenu"
+                    ></div>
+
+
+                    <input
+                        type="hidden"
+                        id="interviewDuration"
+                        value="30"
+                    >
+
+                </div>
+
+            </div>
+
+
+
+            <!-- BREAK -->
+
+            <div class="admin-input">
+
+                <label>
+                    Break between interviews
+                </label>
+
+
+                <div
+                    class="admin-custom-select"
+                    id="interviewBreakDropdown"
+                >
+
+                    <button
+                        type="button"
+                        class="admin-custom-select-trigger"
+                        id="interviewBreakTrigger"
+                    >
+
+                        <span id="interviewBreakText">
+                            10 minutes
+                        </span>
+
+                        <span class="admin-select-arrow">
+                            ↓
+                        </span>
+
+                    </button>
+
+
+                    <div
+                        class="admin-custom-select-menu"
+                        id="interviewBreakMenu"
+                    ></div>
+
+
+                    <input
+                        type="hidden"
+                        id="interviewBreak"
+                        value="10"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         INTERVIEW SETTINGS
+         ===================================================== -->
+
+    <section class="interview-form-section">
+
+        <div class="interview-form-heading">
+
+            <span>
+                SETTINGS
+            </span>
+
+            <h3>
+                Interview configuration
+            </h3>
+
+        </div>
+
+
+        <div class="admin-form-grid">
+
+
+            <!-- TYPE -->
+
+            <div class="admin-input">
+
+                <label>
+                    Interview type
+                </label>
+
+
+                <div
+                    class="admin-custom-select"
+                    id="interviewTypeDropdown"
+                >
+
+                    <button
+                        type="button"
+                        class="admin-custom-select-trigger"
+                        id="interviewTypeTrigger"
+                    >
+
+                        <span id="interviewTypeText">
+                            Online
+                        </span>
+
+                        <span class="admin-select-arrow">
+                            ↓
+                        </span>
+
+                    </button>
+
+
+                    <div
+                        class="admin-custom-select-menu"
+                        id="interviewTypeMenu"
+                    ></div>
+
+
+                    <input
+                        type="hidden"
+                        id="interviewType"
+                        value="online"
+                    >
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ASSIGNMENT -->
+
+            <div class="admin-input">
+
+                <label>
+                    Assignment method
+                </label>
+
+
+                <div
+                    class="admin-custom-select"
+                    id="interviewAssignmentDropdown"
+                >
+
+                    <button
+                        type="button"
+                        class="admin-custom-select-trigger"
+                        id="interviewAssignmentTrigger"
+                    >
+
+                        <span id="interviewAssignmentText">
+                            FIFO — earliest application first
+                        </span>
+
+                        <span class="admin-select-arrow">
+                            ↓
+                        </span>
+
+                    </button>
+
+
+                    <div
+                        class="admin-custom-select-menu"
+                        id="interviewAssignmentMenu"
+                    ></div>
+
+
+                    <input
+                        type="hidden"
+                        id="interviewAssignmentMethod"
+                        value="fifo"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ONSITE LOCATION -->
+
+        <div
+            class="admin-input admin-input-full"
+            id="interviewLocationField"
+            hidden
+        >
+
+            <label for="interviewLocation">
+                Interview location
+            </label>
+
+            <input
+                type="text"
+                id="interviewLocation"
+                placeholder="e.g. Altrium Head Office, Colombo"
+            >
+
+        </div>
+
+
+
+        <!-- INSTRUCTIONS -->
+
+        <div class="admin-input admin-input-full">
+
+            <label for="interviewInstructions">
+                Candidate instructions
+            </label>
+
+            <textarea
+                id="interviewInstructions"
+                placeholder="e.g. Please join 10 minutes before your scheduled interview."
+            ></textarea>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         SCHEDULE PREVIEW
+         ===================================================== -->
+
+    <section class="interview-schedule-preview">
+
+        <div class="interview-form-heading">
+
+            <span>
+                SCHEDULE PREVIEW
+            </span>
+
+            <h3>
+                Available interview capacity
+            </h3>
+
+        </div>
+
+
+        <div class="interview-preview-stats">
+
+            <div>
+
+                <span>
+                    SHORTLISTED
+                </span>
+
+                <strong id="previewShortlisted">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    AVAILABLE SLOTS
+                </span>
+
+                <strong id="previewSlots">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    CAN SCHEDULE
+                </span>
+
+                <strong id="previewSchedulable">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    REMAINING
+                </span>
+
+                <strong id="previewRemaining">
+                    0
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="interview-slot-preview"
+            id="interviewSlotPreview"
+        ></div>
+
+
+        <div
+            class="interview-capacity-warning"
+            id="interviewCapacityWarning"
+            hidden
+        ></div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         ACTIONS
+         ===================================================== -->
+
+    <div class="admin-modal-actions">
+
+        <button
+            type="button"
+            class="admin-cancel-button"
+            id="cancelCreateInterviewSession"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            type="submit"
+            class="admin-create-job-btn"
+            id="generateInterviewScheduleButton"
+        >
+            Generate schedule
+        </button>
+
+    </div>
+
+
+</form>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     INTERVIEW SESSION REVIEW MODAL
+     ========================================================= -->
+
+<div
+    class="admin-modal"
+    id="interviewSessionReviewModal"
+>
+
+    <div
+        class="admin-modal-backdrop"
+        id="interviewSessionReviewBackdrop"
+    ></div>
+
+
+    <div class="interview-review-modal-card">
+
+        <!-- HEADER -->
+
+        <div class="interview-review-header">
+
+            <div>
+
+                <span class="admin-section-label">
+                    INTERVIEW SESSION
+                </span>
+
+                <h2 id="interviewReviewJobTitle">
+                    Interview schedule
+                </h2>
+
+                <p id="interviewReviewSubtitle">
+                    Review candidate assignments before confirming.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="admin-modal-close"
+                id="closeInterviewSessionReview"
+                aria-label="Close"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- LOADING -->
+
+        <div
+            class="interview-review-loading"
+            id="interviewReviewLoading"
+        >
+            Loading interview schedule...
+        </div>
+
+
+        <!-- CONTENT -->
+
+        <div
+            id="interviewReviewContent"
+            hidden
+        >
+
+            <!-- SUMMARY -->
+
+            <div class="interview-review-summary">
+
+                <div>
+                    <span>STATUS</span>
+
+                    <strong
+                        class="interview-review-status"
+                        id="interviewReviewStatus"
+                    >
+                        Draft
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>DATE</span>
+
+                    <strong id="interviewReviewDate">
+                        —
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>INTERVIEW WINDOW</span>
+
+                    <strong id="interviewReviewWindow">
+                        —
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>ROUND</span>
+
+                    <strong id="interviewReviewRound">
+                        —
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>TYPE</span>
+
+                    <strong id="interviewReviewType">
+                        —
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>ASSIGNMENT</span>
+
+                    <strong id="interviewReviewAssignment">
+                        —
+                    </strong>
+                </div>
+
+            </div>
+
+
+
+            <!-- SESSION DETAILS -->
+
+            <section class="interview-review-section">
+
+                <div class="interview-review-section-heading">
+
+                    <span>
+                        SESSION DETAILS
+                    </span>
+
+                    <h3>
+                        Interview setup
+                    </h3>
+
+                </div>
+
+
+                <div class="interview-review-details">
+
+                    <div>
+
+                        <span>
+                            Interview duration
+                        </span>
+
+                        <strong id="interviewReviewDuration">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Break between interviews
+                        </span>
+
+                        <strong id="interviewReviewBreak">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Location
+                        </span>
+
+                        <strong id="interviewReviewLocation">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Total slots
+                        </span>
+
+                        <strong id="interviewReviewSlotCount">
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="interview-review-instructions">
+
+                    <span>
+                        CANDIDATE INSTRUCTIONS
+                    </span>
+
+                    <p id="interviewReviewInstructions">
+                        No instructions provided.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- CANDIDATE SCHEDULE -->
+
+            <section class="interview-review-section">
+
+                <div class="interview-review-section-heading">
+
+                    <span>
+                        CANDIDATE SCHEDULE
+                    </span>
+
+                    <h3>
+                        Assigned interview slots
+                    </h3>
+
+                </div>
+
+
+                <div
+                    class="interview-review-slots"
+                    id="interviewReviewSlots"
+                ></div>
+
+            </section>
+
+
+
+            <!-- ACTIONS -->
+
+            <div class="interview-review-actions">
+
+                <button
+                    type="button"
+                    class="admin-cancel-button"
+                    id="closeInterviewReviewBottom"
+                >
+                    Close
+                </button>
+
+
+                <button
+                    type="button"
+                    class="interview-confirm-session-button"
+                    id="confirmInterviewSessionButton"
+                    hidden
+                >
+                    Confirm interview session
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
 
 <script src="admin-dashboard.js?v=2"></script>
 <script src="../js/navbar-auth.js?v=1"></script>
-
 
 </body>
 

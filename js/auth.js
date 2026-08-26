@@ -970,6 +970,8 @@ if (loginForm) {
                 setTimeout(
                     function () {
 
+                        /* ADMIN ALWAYS GOES TO ADMIN DASHBOARD */
+
                         if (
                             data.user.role ===
                             "admin"
@@ -978,11 +980,49 @@ if (loginForm) {
                             window.location.href =
                                 "admin/admin-dashboard.html";
 
-                        } else {
+                            return;
+                        }
+
+
+                        /* =================================================
+                        CANDIDATE RETURN-TO FLOW
+                        ================================================= */
+
+                        const params =
+                            new URLSearchParams(
+                                window.location.search
+                            );
+
+
+                        const returnTo =
+                            params.get("returnTo");
+
+
+                        /*
+                            Only allow our jobs application URL.
+
+                            Example:
+                            jobs.html?apply=6
+                        */
+
+                        if (
+                            returnTo &&
+                            returnTo.startsWith(
+                                "jobs.html?apply="
+                            )
+                        ) {
 
                             window.location.href =
-                                "profile.html";
+                                returnTo;
+
+                            return;
                         }
+
+
+                        /* NORMAL CANDIDATE LOGIN */
+
+                        window.location.href =
+                            "profile.html";
 
                     },
                     900
@@ -1576,7 +1616,6 @@ if (sendResetCodeButton) {
                 sendResetCodeButton.innerHTML =
                     `
                         SEND RESET CODE
-                        <span>→</span>
                     `;
 
             }
@@ -1836,7 +1875,6 @@ if (verifyResetCodeButton) {
                 verifyResetCodeButton.innerHTML =
                     `
                         VERIFY CODE
-                        <span>→</span>
                     `;
 
             }
@@ -2065,7 +2103,6 @@ if (resetPasswordButton) {
                 resetPasswordButton.innerHTML =
                     `
                         RESET PASSWORD
-                        <span>→</span>
                     `;
 
             }

@@ -2,6 +2,15 @@
    ALTRIUM JOBS PAGE
    ========================================================= */
 
+#jobDetailsSaveButton.saved {
+    color: var(--orange);
+
+    border-color:
+        rgba(255, 132, 31, 0.45);
+
+    background:
+        rgba(255, 132, 31, 0.08);
+}
 
 /* ================= PAGE ================= */
 
@@ -996,6 +1005,11 @@ input[type="number"]::-webkit-outer-spin-button {
 
     background:
         rgba(255, 132, 31, 0.08);
+
+    box-shadow:
+        0 0 18px
+        rgba(255, 132, 31, 0.10);
+
 }
 
 
@@ -1858,6 +1872,1956 @@ input[type="number"]::-webkit-outer-spin-button {
 
     border-radius: 10px;
 }
+
+
+
+/* =========================================================
+   APPLICATION MODAL
+   ========================================================= */
+
+.application-modal {
+    position: fixed;
+    inset: 0;
+
+    z-index: 2300;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 28px;
+
+    opacity: 0;
+    visibility: hidden;
+
+    pointer-events: none;
+
+    transition:
+        opacity 0.22s ease,
+        visibility 0.22s ease;
+}
+
+
+.application-modal.open {
+    opacity: 1;
+    visibility: visible;
+
+    pointer-events: auto;
+}
+
+
+/* =========================================================
+   BACKDROP
+   ========================================================= */
+
+.application-modal-backdrop {
+    position: absolute;
+    inset: 0;
+
+    background:
+        rgba(0, 0, 0, 0.78);
+
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+
+/* =========================================================
+   MODAL CARD
+   ========================================================= */
+
+.application-modal-card {
+    position: relative;
+
+    width: min(960px, 100%);
+    max-height: 92vh;
+
+    overflow-y: auto;
+
+    padding: 34px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.10);
+
+    border-radius: 26px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(22, 22, 22, 0.98),
+            rgba(8, 8, 8, 0.99)
+        );
+
+    box-shadow:
+        0 35px 100px
+        rgba(0, 0, 0, 0.72);
+
+    z-index: 1;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+.application-modal-card::-webkit-scrollbar {
+    width: 7px;
+}
+
+
+.application-modal-card::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+.application-modal-card::-webkit-scrollbar-thumb {
+    background:
+        rgba(255, 132, 31, 0.45);
+
+    border-radius: 20px;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.application-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 30px;
+
+    padding-bottom: 28px;
+
+    border-bottom:
+        1px solid
+        rgba(255, 255, 255, 0.08);
+}
+
+
+.application-modal-header h2 {
+    margin-top: 8px;
+
+    color: #ffffff;
+
+    font-size: 34px;
+
+    line-height: 1.08;
+
+    letter-spacing: -1.5px;
+}
+
+
+.application-modal-header h2 em {
+    display: inline;
+
+    font-style: normal;
+
+    background:
+        linear-gradient(
+            100deg,
+            var(--orange),
+            var(--yellow)
+        );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    color: transparent;
+}
+
+
+.application-modal-header p {
+    margin-top: 12px;
+
+    color:
+        rgba(255, 255, 255, 0.68);
+
+    font-size: 14px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   CLOSE BUTTON
+   ========================================================= */
+
+.application-modal-close {
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.12);
+
+    border-radius: 50%;
+
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    color: #ffffff;
+
+    font-family: inherit;
+
+    font-size: 24px;
+
+    cursor: pointer;
+
+    transition:
+        color 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+
+.application-modal-close:hover {
+    color: var(--orange);
+
+    border-color:
+        rgba(255, 132, 31, 0.40);
+
+    background:
+        rgba(255, 132, 31, 0.07);
+}
+
+
+/* =========================================================
+   FORM SECTIONS
+   ========================================================= */
+
+.application-form-section {
+    padding:
+        32px
+        0;
+
+    border-bottom:
+        1px solid
+        rgba(255, 255, 255, 0.07);
+}
+
+
+.application-section-heading {
+    display: flex;
+    align-items: center;
+
+    gap: 16px;
+
+    margin-bottom: 24px;
+}
+
+
+.application-section-heading > span {
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border:
+        1px solid
+        rgba(255, 132, 31, 0.32);
+
+    border-radius: 12px;
+
+    background:
+        rgba(255, 132, 31, 0.06);
+
+    color: var(--orange);
+
+    font-size: 12px;
+    font-weight: 700;
+
+    line-height: 1;
+}
+
+
+.application-section-heading > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+
+.application-section-heading small {
+    display: block;
+
+    color:
+        rgba(255, 255, 255, 0.55);
+
+    font-size: 10px;
+    font-weight: 700;
+
+    line-height: 1;
+
+    letter-spacing: 1.5px;
+}
+
+
+.application-section-heading h3 {
+    margin-top: 7px;
+
+    color: #ffffff;
+
+    font-size: 21px;
+
+    line-height: 1.1;
+}
+
+
+/* =========================================================
+   FORM GRID
+   ========================================================= */
+
+.application-form-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 18px;
+}
+
+
+.application-input-full {
+    grid-column:
+        1 / -1;
+}
+
+
+/* =========================================================
+   INPUT GROUP
+   ========================================================= */
+
+.application-input {
+    margin-bottom: 18px;
+}
+
+
+.application-input:last-child {
+    margin-bottom: 0;
+}
+
+
+.application-input > label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color:
+        rgba(255, 255, 255, 0.78);
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.application-input input,
+.application-input textarea {
+    width: 100%;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.10);
+
+    border-radius: 14px;
+
+    outline: none;
+
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    color: #ffffff;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.application-input input {
+    height: 52px;
+
+    padding:
+        0
+        15px;
+}
+
+
+.application-input textarea {
+    min-height: 125px;
+
+    padding: 15px;
+
+    resize: vertical;
+
+    line-height: 1.6;
+}
+
+
+.application-input input::placeholder,
+.application-input textarea::placeholder {
+    color:
+        rgba(255, 255, 255, 0.35);
+}
+
+
+.application-input input:focus,
+.application-input textarea:focus {
+    border-color:
+        rgba(255, 132, 31, 0.50);
+
+    background:
+        rgba(255, 132, 31, 0.035);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(255, 132, 31, 0.06);
+}
+
+
+/* READ ONLY EMAIL */
+
+.application-input input[readonly] {
+    color:
+        rgba(255, 255, 255, 0.68);
+
+    background:
+        rgba(255, 255, 255, 0.025);
+
+    cursor: not-allowed;
+}
+
+
+.application-input > small {
+    display: block;
+
+    margin-top: 7px;
+
+    color:
+        rgba(255, 255, 255, 0.50);
+
+    font-size: 11px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   ALTRIUM DATE PICKER
+   ========================================================= */
+
+.application-date-picker {
+    position: relative;
+
+    width: 100%;
+}
+
+
+/* DATE TRIGGER */
+
+.application-date-trigger {
+    width: 100%;
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding:
+        0
+        15px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.10);
+
+    border-radius: 14px;
+
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    color:
+        rgba(255, 255, 255, 0.72);
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.application-date-trigger:hover,
+.application-date-picker.open
+.application-date-trigger {
+    border-color:
+        rgba(255, 132, 31, 0.50);
+
+    background:
+        rgba(255, 132, 31, 0.035);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(255, 132, 31, 0.05);
+}
+
+
+.application-date-icon {
+    color: var(--orange);
+
+    font-size: 16px;
+}
+
+
+/* CALENDAR */
+
+.application-calendar {
+    position: absolute;
+
+    top:
+        calc(100% + 9px);
+
+    left: 0;
+
+    width: 320px;
+
+    padding: 16px;
+
+    border:
+        1px solid
+        rgba(255, 132, 31, 0.28);
+
+    border-radius: 16px;
+
+    background:
+        rgba(13, 13, 13, 0.99);
+
+    box-shadow:
+        0 25px 70px
+        rgba(0, 0, 0, 0.72);
+
+    opacity: 0;
+    visibility: hidden;
+
+    transform:
+        translateY(-6px);
+
+    pointer-events: none;
+
+    z-index: 2500;
+
+    transition:
+        opacity 0.2s ease,
+        visibility 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.application-date-picker.open
+.application-calendar {
+    opacity: 1;
+    visibility: visible;
+
+    transform:
+        translateY(0);
+
+    pointer-events: auto;
+}
+
+
+/* HEADER */
+
+.application-calendar-header {
+    display: grid;
+
+    grid-template-columns:
+        34px
+        34px
+        1fr
+        34px
+        34px;
+
+    align-items: center;
+
+    gap: 5px;
+
+    margin-bottom: 16px;
+}
+
+
+.application-calendar-header strong {
+    color: #ffffff;
+
+    text-align: center;
+
+    font-size: 14px;
+    font-weight: 700;
+}
+
+
+.application-calendar-header button {
+    width: 34px;
+    height: 34px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.10);
+
+    border-radius: 9px;
+
+    background:
+        rgba(255, 255, 255, 0.03);
+
+    color:
+        rgba(255, 255, 255, 0.72);
+
+    font-family: inherit;
+
+    font-size: 17px;
+
+    cursor: pointer;
+}
+
+
+.application-calendar-header button:hover {
+    color: var(--orange);
+
+    border-color:
+        rgba(255, 132, 31, 0.35);
+
+    background:
+        rgba(255, 132, 31, 0.05);
+}
+
+
+/* WEEKDAYS */
+
+.application-calendar-weekdays,
+.application-calendar-days {
+    display: grid;
+
+    grid-template-columns:
+        repeat(7, 1fr);
+
+    gap: 5px;
+
+    text-align: center;
+}
+
+
+.application-calendar-weekdays {
+    margin-bottom: 7px;
+}
+
+
+.application-calendar-weekdays span {
+    color:
+        rgba(255, 255, 255, 0.48);
+
+    font-size: 10px;
+    font-weight: 600;
+}
+
+
+/* DAYS */
+
+.application-calendar-day {
+    aspect-ratio: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: transparent;
+
+    color:
+        rgba(255, 255, 255, 0.76);
+
+    font-family: inherit;
+
+    font-size: 12px;
+
+    cursor: pointer;
+
+    transition:
+        color 0.2s ease,
+        background 0.2s ease;
+}
+
+
+.application-calendar-day:hover {
+    color: #111111;
+
+    background:
+        rgba(255, 132, 31, 0.85);
+}
+
+
+.application-calendar-day.selected {
+    color: #111111;
+
+    background:
+        linear-gradient(
+            100deg,
+            var(--orange),
+            var(--yellow)
+        );
+
+    font-weight: 800;
+}
+
+
+.application-calendar-day.today {
+    border:
+        1px solid
+        rgba(255, 132, 31, 0.45);
+}
+
+
+.application-calendar-day.disabled {
+    color:
+        rgba(255, 255, 255, 0.16);
+
+    cursor: not-allowed;
+}
+
+
+.application-calendar-day.disabled:hover {
+    background: transparent;
+
+    color:
+        rgba(255, 255, 255, 0.16);
+}
+
+
+/* EMPTY CALENDAR CELLS */
+
+.application-calendar-empty {
+    aspect-ratio: 1;
+}
+
+
+/* FOOTER */
+
+.application-calendar-footer {
+    display: flex;
+    justify-content: flex-end;
+
+    margin-top: 12px;
+
+    padding-top: 12px;
+
+    border-top:
+        1px solid
+        rgba(255, 255, 255, 0.07);
+}
+
+
+.application-calendar-footer button {
+    border: none;
+
+    background: transparent;
+
+    color: var(--orange);
+
+    font-family: inherit;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   LANGUAGE CHECKBOXES
+   ========================================================= */
+
+.application-language-options {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 12px;
+}
+
+
+.application-checkbox {
+    position: relative;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    gap: 10px;
+
+    min-height: 46px;
+
+    padding:
+        0
+        16px;
+
+    margin: 0;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.12);
+
+    border-radius: 13px;
+
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    color:
+        rgba(255, 255, 255, 0.82);
+
+    font-size: 13px;
+    font-weight: 500;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        color 0.2s ease;
+}
+
+
+.application-checkbox:hover {
+    border-color:
+        rgba(255, 132, 31, 0.38);
+
+    background:
+        rgba(255, 132, 31, 0.05);
+}
+
+
+.application-checkbox input {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    opacity: 0;
+
+    pointer-events: none;
+}
+
+
+.application-checkbox-box {
+    width: 18px;
+    height: 18px;
+
+    flex: 0 0 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.28);
+
+    border-radius: 5px;
+
+    background:
+        rgba(255, 255, 255, 0.02);
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.application-checkbox
+input:checked
++
+.application-checkbox-box {
+    border-color: var(--orange);
+
+    background: var(--orange);
+
+    box-shadow:
+        0 0 12px
+        rgba(255, 132, 31, 0.18);
+}
+
+
+.application-checkbox
+input:checked
++
+.application-checkbox-box::after {
+    content: "✓";
+
+    color: #111111;
+
+    font-size: 12px;
+    font-weight: 900;
+
+    line-height: 1;
+}
+
+
+/* =========================================================
+   APPLICATION DROPDOWN
+   ========================================================= */
+
+.application-job-type-dropdown {
+    width: 100%;
+}
+
+
+.application-job-type-dropdown
+.altrium-dropdown-trigger {
+    width: 100%;
+
+    min-height: 52px;
+
+    justify-content: space-between;
+
+    padding:
+        0
+        15px;
+
+    border-radius: 14px;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   CV UPLOAD
+   ========================================================= */
+
+.application-cv-upload {
+    width: 100%;
+}
+
+
+.application-cv-dropzone {
+    min-height: 180px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 28px;
+
+    border:
+        1px dashed
+        rgba(255, 132, 31, 0.38);
+
+    border-radius: 18px;
+
+    background:
+        rgba(255, 132, 31, 0.035);
+
+    text-align: center;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.application-cv-dropzone:hover {
+    border-color:
+        rgba(255, 132, 31, 0.70);
+
+    background:
+        rgba(255, 132, 31, 0.06);
+
+    transform:
+        translateY(-2px);
+}
+
+
+.application-cv-icon {
+    width: 44px;
+    height: 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 13px;
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            100deg,
+            var(--orange),
+            var(--yellow)
+        );
+
+    color: #111111;
+
+    font-size: 20px;
+    font-weight: 800;
+}
+
+
+.application-cv-dropzone strong {
+    color: #ffffff;
+
+    font-size: 15px;
+}
+
+
+.application-cv-dropzone p {
+    margin-top: 6px;
+
+    color: var(--orange);
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.application-cv-dropzone small {
+    margin-top: 8px;
+
+    color:
+        rgba(255, 255, 255, 0.55);
+
+    font-size: 11px;
+}
+
+
+.application-file-selected {
+    margin-top: 12px;
+
+    padding:
+        11px
+        14px;
+
+    border-radius: 11px;
+
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    color:
+        rgba(255, 255, 255, 0.65);
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   CONSENT
+   ========================================================= */
+
+.application-confirmation {
+    border-bottom: none;
+
+    padding-bottom: 12px;
+}
+
+
+.application-consent {
+    width: 100%;
+
+    align-items: flex-start;
+
+    padding: 18px;
+
+    line-height: 1.6;
+}
+
+
+.application-consent
+.application-checkbox-box {
+    margin-top: 2px;
+}
+
+
+/* =========================================================
+   FORM ACTIONS
+   ========================================================= */
+
+.application-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    gap: 12px;
+
+    padding-top: 25px;
+}
+
+
+.application-cancel-button,
+.application-review-button {
+    min-height: 46px;
+
+    padding:
+        0
+        20px;
+
+    border-radius: 30px;
+
+    font-family: inherit;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+
+.application-cancel-button {
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.13);
+
+    background:
+        transparent;
+
+    color:
+        rgba(255, 255, 255, 0.80);
+}
+
+
+.application-cancel-button:hover {
+    border-color:
+        rgba(255, 255, 255, 0.26);
+
+    background:
+        rgba(255, 255, 255, 0.04);
+}
+
+
+.application-review-button {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 16px;
+
+    border: none;
+
+    background:
+        linear-gradient(
+            100deg,
+            var(--orange),
+            var(--yellow)
+        );
+
+    color: #111111;
+
+    box-shadow:
+        0 14px 35px
+        rgba(255, 132, 31, 0.14);
+}
+
+
+.application-review-button:hover {
+    transform:
+        translateY(-2px);
+}
+
+
+/* =========================================================
+   APPLICATION VALIDATION
+   ========================================================= */
+
+.application-field-error {
+    border-color:
+        rgba(255, 95, 75, 0.85) !important;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(255, 95, 75, 0.08) !important;
+}
+
+
+.application-language-options.application-field-error,
+.application-consent.application-field-error {
+    padding: 10px;
+
+    border:
+        1px solid
+        rgba(255, 95, 75, 0.75);
+
+    border-radius: 14px;
+}
+
+/* =========================================================
+   APPLICATION REVIEW
+   ========================================================= */
+
+.application-review {
+    width: 100%;
+}
+
+
+/* HEADER */
+
+.application-review-header {
+    padding-bottom: 28px;
+
+    border-bottom:
+        1px solid
+        rgba(255, 255, 255, 0.08);
+}
+
+
+.application-review-header h2 {
+    margin-top: 8px;
+
+    color: #ffffff;
+
+    font-size: 34px;
+
+    line-height: 1.08;
+
+    letter-spacing: -1.5px;
+}
+
+
+.application-review-header h2 em {
+    display: inline;
+
+    font-style: normal;
+
+    background:
+        linear-gradient(
+            100deg,
+            var(--orange),
+            var(--yellow)
+        );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    color: transparent;
+}
+
+
+.application-review-header p {
+    margin-top: 12px;
+
+    max-width: 650px;
+
+    color:
+        rgba(255, 255, 255, 0.68);
+
+    font-size: 14px;
+
+    line-height: 1.7;
+}
+
+
+
+/* =========================================================
+   REVIEW SECTIONS
+   ========================================================= */
+
+.application-review-section {
+    display: grid;
+
+    grid-template-columns:
+        48px
+        1fr;
+
+    gap: 18px;
+
+    padding:
+        30px
+        0;
+
+    border-bottom:
+        1px solid
+        rgba(255, 255, 255, 0.07);
+}
+
+
+.application-review-number {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border:
+        1px solid
+        rgba(255, 132, 31, 0.30);
+
+    border-radius: 12px;
+
+    background:
+        rgba(255, 132, 31, 0.06);
+
+    color: var(--orange);
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.application-review-content > small {
+    display: block;
+
+    margin-bottom: 16px;
+
+    color:
+        rgba(255, 255, 255, 0.55);
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 1.5px;
+}
+
+
+
+/* =========================================================
+   REVIEW GRID
+   ========================================================= */
+
+.application-review-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+}
+
+
+.application-review-grid > div,
+.application-review-file {
+    padding: 16px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.08);
+
+    border-radius: 14px;
+
+    background:
+        rgba(255, 255, 255, 0.025);
+}
+
+
+.application-review-grid span,
+.application-review-file span {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color:
+        rgba(255, 255, 255, 0.52);
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+.application-review-grid strong,
+.application-review-file strong {
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    line-height: 1.5;
+
+    word-break: break-word;
+}
+
+
+
+/* =========================================================
+   LONG REVIEW CONTENT
+   ========================================================= */
+
+.application-review-long {
+    display: grid;
+
+    gap: 12px;
+}
+
+
+.application-review-long > div {
+    padding: 16px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.08);
+
+    border-radius: 14px;
+
+    background:
+        rgba(255, 255, 255, 0.025);
+}
+
+
+.application-review-long span {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color:
+        rgba(255, 255, 255, 0.52);
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+.application-review-long p {
+    color:
+        rgba(255, 255, 255, 0.84);
+
+    font-size: 14px;
+
+    line-height: 1.7;
+
+    white-space: pre-wrap;
+
+    word-break: break-word;
+}
+
+
+
+/* =========================================================
+   REVIEW CV
+   ========================================================= */
+
+.application-review-file {
+    border-color:
+        rgba(255, 132, 31, 0.18);
+
+    background:
+        rgba(255, 132, 31, 0.035);
+}
+
+
+.application-review-file strong {
+    color: var(--orange);
+}
+
+
+
+/* =========================================================
+   REVIEW ACTIONS
+   ========================================================= */
+
+.application-review-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding-top: 28px;
+}
+
+
+.application-back-button,
+.application-submit-button {
+    min-height: 46px;
+
+    padding:
+        0
+        20px;
+
+    border-radius: 30px;
+
+    font-family: inherit;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+
+.application-back-button {
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.13);
+
+    background: transparent;
+
+    color:
+        rgba(255, 255, 255, 0.82);
+}
+
+
+.application-back-button:hover {
+    border-color:
+        rgba(255, 255, 255, 0.26);
+
+    background:
+        rgba(255, 255, 255, 0.04);
+}
+
+
+.application-submit-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 16px;
+
+    border: none;
+
+    background:
+        linear-gradient(
+            100deg,
+            var(--orange),
+            var(--yellow)
+        );
+
+    color: #111111;
+
+    box-shadow:
+        0 14px 35px
+        rgba(255, 132, 31, 0.16);
+}
+
+
+.application-submit-button:hover {
+    transform:
+        translateY(-2px);
+}
+
+
+
+/* =========================================================
+   APPLICATION SUCCESS
+   ========================================================= */
+
+.application-success {
+    width: 100%;
+
+    padding:
+        35px
+        0
+        10px;
+
+    text-align: center;
+}
+
+
+.application-success-icon {
+    width: 72px;
+    height: 72px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin:
+        0
+        auto
+        24px;
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--orange),
+            var(--yellow)
+        );
+
+    color: #111111;
+
+    font-size: 30px;
+    font-weight: 900;
+
+    box-shadow:
+        0 18px 50px
+        rgba(255, 132, 31, 0.18);
+}
+
+
+.application-success h2 {
+    margin-top: 10px;
+
+    color: #ffffff;
+
+    font-size: 36px;
+
+    line-height: 1.1;
+
+    letter-spacing: -1.5px;
+}
+
+
+.application-success h2 em {
+    font-style: normal;
+
+    background:
+        linear-gradient(
+            100deg,
+            var(--orange),
+            var(--yellow)
+        );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    color: transparent;
+}
+
+
+.application-success-message {
+    max-width: 560px;
+
+    margin:
+        14px
+        auto
+        30px;
+
+    color:
+        rgba(255, 255, 255, 0.65);
+
+    font-size: 14px;
+
+    line-height: 1.7;
+}
+
+
+.application-success-card {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 12px;
+
+    margin-top: 26px;
+
+    text-align: left;
+}
+
+
+.application-success-card > div {
+    padding: 18px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.08);
+
+    border-radius: 16px;
+
+    background:
+        rgba(255, 255, 255, 0.025);
+}
+
+
+.application-success-card span {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color:
+        rgba(255, 255, 255, 0.45);
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 1px;
+}
+
+
+.application-success-card strong {
+    color: #ffffff;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+
+.application-success-reference {
+    color:
+        var(--orange) !important;
+}
+
+
+.application-success-status {
+    display: inline-flex;
+
+    padding:
+        6px
+        10px;
+
+    border:
+        1px solid
+        rgba(255, 132, 31, 0.25);
+
+    border-radius: 20px;
+
+    background:
+        rgba(255, 132, 31, 0.08);
+
+    color:
+        var(--orange) !important;
+
+    font-size: 11px !important;
+
+    text-transform: uppercase;
+}
+
+
+.application-success-actions {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 12px;
+
+    margin-top: 30px;
+}
+
+
+/* =========================================================
+   APPLIED JOB
+   ========================================================= */
+
+.jobs-card-applied {
+    padding:
+        5px
+        9px;
+
+    border:
+        1px solid
+        rgba(255, 132, 31, 0.24);
+
+    border-radius:
+        30px;
+
+    background:
+        rgba(255, 132, 31, 0.08);
+
+    color:
+        #ff841f;
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        1px;
+}
+
+
+.jobs-result-card.applied {
+    border-color:
+        rgba(255, 132, 31, 0.16);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 132, 31, 0.035),
+            rgba(255, 255, 255, 0.018)
+        );
+}
+
+
+@media (max-width: 700px) {
+
+    .application-success h2 {
+        font-size: 29px;
+    }
+
+
+    .application-success-card {
+        grid-template-columns: 1fr;
+    }
+
+
+    .application-success-actions {
+        flex-direction: column-reverse;
+    }
+
+
+    .application-success-actions button {
+        width: 100%;
+    }
+
+}
+
+
+/* =========================================================
+   REVIEW MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .application-review-header h2 {
+        font-size: 28px;
+    }
+
+
+    .application-review-section {
+        grid-template-columns: 1fr;
+    }
+
+
+    .application-review-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .application-review-actions {
+        flex-direction: column-reverse;
+    }
+
+
+    .application-back-button,
+    .application-submit-button {
+        width: 100%;
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .application-modal {
+        padding: 12px;
+    }
+
+
+    .application-modal-card {
+        max-height: 95vh;
+
+        padding: 22px;
+
+        border-radius: 20px;
+    }
+
+
+    .application-modal-header h2 {
+        font-size: 28px;
+    }
+
+
+    .application-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .application-input-full {
+        grid-column: auto;
+    }
+
+
+    .application-language-options {
+        flex-direction: column;
+    }
+
+
+    .application-checkbox {
+        width: 100%;
+    }
+
+
+    .application-form-actions {
+        flex-direction: column-reverse;
+    }
+
+
+    .application-cancel-button,
+    .application-review-button {
+        width: 100%;
+
+        justify-content: center;
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* =========================================================
