@@ -249,7 +249,64 @@ if (openCreateVacancyModalButton) {
 
     openCreateVacancyModalButton.addEventListener(
         "click",
-        openCreateVacancyModal
+        () => {
+
+            editingJobId = null;
+
+            createJobForm.reset();
+
+
+            document.getElementById(
+                "employmentTypeText"
+            ).textContent =
+                "Select employment type";
+
+
+            document.getElementById(
+                "employmentType"
+            ).value =
+                "";
+
+
+            document.getElementById(
+                "deadlineText"
+            ).textContent =
+                "Select deadline";
+
+
+            document.getElementById(
+                "applicationDeadline"
+            ).value =
+                "";
+
+
+            const modalTitle =
+                document.querySelector(
+                    "#createVacancyModal .admin-modal-header h2"
+                );
+
+
+            if (modalTitle) {
+                modalTitle.textContent =
+                    "Create job vacancy.";
+            }
+
+
+            const submitButton =
+                createJobForm.querySelector(
+                    ".admin-create-job-btn"
+                );
+
+
+            if (submitButton) {
+                submitButton.textContent =
+                    "Create vacancy";
+            }
+
+
+            openCreateVacancyModal();
+
+        }
     );
 
 }
@@ -842,7 +899,9 @@ if (createJobForm) {
                 submitButton.disabled = true;
 
                 submitButton.textContent =
-                    "Creating vacancy...";
+                    editingJobId !== null
+                        ? "Saving changes..."
+                        : "Creating vacancy...";
 
             }
 
@@ -853,10 +912,26 @@ if (createJobForm) {
                    Send to Node backend
                 ----------------------------------------- */
 
+                const isEditing =
+                    editingJobId !== null;
+
+
+                const endpoint =
+                    isEditing
+                        ? `/api/admin/jobs/${editingJobId}`
+                        : "/api/admin/jobs";
+
+
+                const method =
+                    isEditing
+                        ? "PATCH"
+                        : "POST";
+
+
                 const response = await fetch(
-                    "/api/admin/jobs",
+                    endpoint,
                     {
-                        method: "POST",
+                        method: method,
 
                         credentials: "same-origin",
 
@@ -908,11 +983,15 @@ if (createJobForm) {
 
 
                 console.log(
-                    "Vacancy created:",
+                    isEditing
+                        ? "Vacancy updated:"
+                        : "Vacancy created:",
                     data.job
                 );
 
                 await loadAdminJobs();
+
+                editingJobId = null;
 
 
                 /* -----------------------------------------
@@ -976,6 +1055,22 @@ if (createJobForm) {
 
                 }
 
+            }
+
+            const modalTitle =
+                document.querySelector(
+                    "#createVacancyModal .admin-modal-header h2"
+                );
+
+            if (modalTitle) {
+                modalTitle.textContent =
+                    "Create job vacancy.";
+            }
+
+
+            if (submitButton) {
+                submitButton.textContent =
+                    "Create vacancy";
             }
 
         }
@@ -1108,6 +1203,24 @@ async function loadAdminJobs() {
         const jobs =
             data.jobs || [];
 
+        const activeVacancies =
+            jobs.filter(
+                job => job.status === "active"
+            ).length;
+
+
+        const activeVacanciesCount =
+            document.getElementById(
+                "activeVacanciesCount"
+            );
+
+
+        if (activeVacanciesCount) {
+
+            activeVacanciesCount.textContent =
+                activeVacancies;
+
+        }
 
         /* ---------------------------------------------
            Update vacancy count
@@ -1244,10 +1357,18 @@ async function loadAdminJobs() {
 
                         <button
                             type="button"
-                            class="close-vacancy-button"
+                            class="${
+                                job.status === "closed"
+                                    ? "reopen-vacancy-button"
+                                    : "close-vacancy-button"
+                            }"
                             data-job-id="${job.id}"
                         >
-                            Close vacancy
+                            ${
+                                job.status === "closed"
+                                    ? "Reopen vacancy"
+                                    : "Close vacancy"
+                            }
                         </button>
 
 
@@ -1360,24 +1481,55 @@ async function loadAdminJobs() {
 
             vacancyList.appendChild(card);
 
-            const closeButton =
+            const statusButton =
                 card.querySelector(
-                    ".close-vacancy-button"
+                    ".close-vacancy-button, .reopen-vacancy-button"
                 );
 
 
-            if (closeButton) {
+            if (statusButton) {
 
-                closeButton.addEventListener(
+                statusButton.addEventListener(
                     "click",
                     event => {
 
                         event.preventDefault();
+                        event.stopPropagation();
 
-                        openCloseVacancyModal(
+
+                        const newStatus =
+                            job.status === "closed"
+                                ? "active"
+                                : "closed";
+
+
+                        openJobStatusModal(
                             job.id,
-                            job.job_title
+                            job.job_title,
+                            newStatus
                         );
+
+                    }
+                );
+
+            }
+
+            const editButton =
+                card.querySelector(
+                    ".edit-vacancy-button"
+                );
+
+
+            if (editButton) {
+
+                editButton.addEventListener(
+                    "click",
+                    event => {
+
+                        event.preventDefault();
+                        event.stopPropagation();
+
+                        openEditVacancyModal(job);
 
                     }
                 );
@@ -1400,7 +1552,7 @@ async function loadAdminJobs() {
 }
 
 /* =========================================================
-   CLOSE JOB VACANCY
+   CLOSE / REOPEN JOB VACANCY
    ========================================================= */
 
 const closeVacancyModal =
@@ -1424,17 +1576,39 @@ const closeVacancyBackdrop =
     );
 
 
-let selectedJobToClose = null;
+let selectedJobForStatus = null;
+
+let selectedJobNewStatus = null;
+
+let editingJobId = null;
 
 
-function openCloseVacancyModal(
+/* =========================================================
+   OPEN CLOSE / REOPEN CONFIRMATION
+   ========================================================= */
+
+function openJobStatusModal(
     jobId,
-    jobTitle
+    jobTitle,
+    newStatus
 ) {
 
-    selectedJobToClose =
+    selectedJobForStatus =
         jobId;
 
+    selectedJobNewStatus =
+        newStatus;
+
+
+    const modalTitle =
+        document.querySelector(
+            "#closeVacancyModal h2"
+        );
+
+    const modalLabel =
+        document.querySelector(
+            "#closeVacancyModal .admin-section-label"
+        );
 
     const message =
         document.getElementById(
@@ -1442,17 +1616,96 @@ function openCloseVacancyModal(
         );
 
 
-    if (message) {
+    /* ---------------------------------------------
+       REOPEN VACANCY
+    --------------------------------------------- */
 
-        message.textContent =
-            `"${jobTitle}" will be marked as closed and candidates will no longer be able to apply.`;
+    if (newStatus === "active") {
+
+        if (modalLabel) {
+            modalLabel.textContent =
+                "REOPEN VACANCY";
+        }
+
+
+        if (modalTitle) {
+            modalTitle.textContent =
+                "Reopen this position?";
+        }
+
+
+        if (message) {
+
+            message.textContent =
+                `"${jobTitle}" will become active again and candidates will be able to apply.`;
+
+        }
+
+
+        if (confirmCloseVacancy) {
+
+            confirmCloseVacancy.textContent =
+                "Reopen vacancy";
+
+            confirmCloseVacancy.classList.add(
+                "reopen-confirm"
+            );
+
+        }
+
+    }
+
+    /* ---------------------------------------------
+       CLOSE VACANCY
+    --------------------------------------------- */
+
+    else {
+
+        if (modalLabel) {
+            modalLabel.textContent =
+                "CLOSE VACANCY";
+        }
+
+
+        if (modalTitle) {
+            modalTitle.textContent =
+                "Close this position?";
+        }
+
+
+        if (message) {
+
+            message.textContent =
+                `"${jobTitle}" will be marked as closed and candidates will no longer be able to apply.`;
+
+        }
+
+
+        if (confirmCloseVacancy) {
+
+            confirmCloseVacancy.textContent =
+                "Close vacancy";
+
+            confirmCloseVacancy.classList.remove(
+                "reopen-confirm"
+            );
+
+        }
 
     }
 
 
-    closeVacancyModal?.classList.add(
-        "open"
-    );
+    /* ---------------------------------------------
+       SHOW MODAL
+    --------------------------------------------- */
+
+    if (closeVacancyModal) {
+
+        closeVacancyModal.classList.add(
+            "open"
+        );
+
+    }
 
 
     document.body.style.overflow =
@@ -1460,15 +1713,24 @@ function openCloseVacancyModal(
 }
 
 
+/* =========================================================
+   CLOSE CONFIRMATION MODAL
+   ========================================================= */
+
 function closeCloseVacancyModal() {
 
-    selectedJobToClose =
-        null;
+    selectedJobForStatus = null;
+
+    selectedJobNewStatus = null;
 
 
-    closeVacancyModal?.classList.remove(
-        "open"
-    );
+    if (closeVacancyModal) {
+
+        closeVacancyModal.classList.remove(
+            "open"
+        );
+
+    }
 
 
     document.body.style.overflow =
@@ -1476,104 +1738,300 @@ function closeCloseVacancyModal() {
 }
 
 
-cancelCloseVacancy?.addEventListener(
-    "click",
-    closeCloseVacancyModal
-);
+/* =========================================================
+   CANCEL BUTTON
+   ========================================================= */
+
+if (cancelCloseVacancy) {
+
+    cancelCloseVacancy.addEventListener(
+        "click",
+        closeCloseVacancyModal
+    );
+
+}
 
 
-closeVacancyBackdrop?.addEventListener(
-    "click",
-    closeCloseVacancyModal
-);
+/* =========================================================
+   CLICK BACKDROP
+   ========================================================= */
+
+if (closeVacancyBackdrop) {
+
+    closeVacancyBackdrop.addEventListener(
+        "click",
+        closeCloseVacancyModal
+    );
+
+}
 
 
-confirmCloseVacancy?.addEventListener(
-    "click",
-    async () => {
+/* =========================================================
+   CONFIRM STATUS CHANGE
+   ========================================================= */
 
-        if (!selectedJobToClose) {
-            return;
-        }
+if (confirmCloseVacancy) {
 
-
-        try {
-
-            confirmCloseVacancy.disabled =
-                true;
-
-            confirmCloseVacancy.textContent =
-                "Closing...";
-
-
-            const response =
-                await fetch(
-                    `/api/admin/jobs/${selectedJobToClose}/status`,
-                    {
-                        method: "PATCH",
-
-                        credentials:
-                            "same-origin",
-
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
-
-                        body:
-                            JSON.stringify({
-                                status: "closed"
-                            })
-                    }
-                );
-
-
-            const data =
-                await response.json();
-
+    confirmCloseVacancy.addEventListener(
+        "click",
+        async () => {
 
             if (
-                !response.ok ||
-                !data.success
+                !selectedJobForStatus ||
+                !selectedJobNewStatus
             ) {
 
-                console.error(
-                    data.message ||
-                    "Unable to close vacancy."
-                );
-
                 return;
+
             }
 
 
-            closeCloseVacancyModal();
+            /*
+             * Save these before closing/resetting
+             * the modal variables.
+             */
+
+            const jobId =
+                selectedJobForStatus;
+
+            const newStatus =
+                selectedJobNewStatus;
 
 
-            await loadAdminJobs();
+            try {
+
+                confirmCloseVacancy.disabled =
+                    true;
+
+
+                confirmCloseVacancy.textContent =
+                    newStatus === "active"
+                        ? "Reopening..."
+                        : "Closing...";
+
+
+                const response =
+                    await fetch(
+                        `/api/admin/jobs/${jobId}/status`,
+                        {
+                            method: "PATCH",
+
+                            credentials:
+                                "same-origin",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify({
+                                    status:
+                                        newStatus
+                                })
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    console.error(
+                        data.message ||
+                        "Unable to update vacancy status."
+                    );
+
+
+                    /*
+                     * Restore correct button text
+                     * if request failed.
+                     */
+
+                    confirmCloseVacancy.textContent =
+                        newStatus === "active"
+                            ? "Reopen vacancy"
+                            : "Close vacancy";
+
+
+                    return;
+
+                }
+
+
+                /* -----------------------------------------
+                   Close popup
+                ----------------------------------------- */
+
+                closeCloseVacancyModal();
+
+
+                /* -----------------------------------------
+                   Reload jobs from database
+                ----------------------------------------- */
+
+                await loadAdminJobs();
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Update vacancy status error:",
+                    error
+                );
+
+
+                confirmCloseVacancy.textContent =
+                    newStatus === "active"
+                        ? "Reopen vacancy"
+                        : "Close vacancy";
+
+            }
+
+            finally {
+
+                confirmCloseVacancy.disabled =
+                    false;
+
+            }
 
         }
+    );
 
-        catch (error) {
+}
 
-            console.error(
-                "Close vacancy error:",
-                error
+
+function openEditVacancyModal(job) {
+
+    editingJobId = job.id;
+
+
+    // Basic information
+
+    document.getElementById("jobTitle").value =
+        job.job_title || "";
+
+    document.getElementById("jobDepartment").value =
+        job.department || "";
+
+    document.getElementById("jobLocation").value =
+        job.location || "";
+
+    document.getElementById("jobSalary").value =
+        job.salary || "";
+
+    document.getElementById("numberOfOpenings").value =
+        job.number_of_openings || 1;
+
+
+    // Employment type
+
+    document.getElementById("employmentType").value =
+        job.employment_type || "";
+
+    document.getElementById("employmentTypeText").textContent =
+        job.employment_type || "Select employment type";
+
+
+    // Requirements
+
+    document.getElementById("experienceRequired").value =
+        job.experience_required || "";
+
+    document.getElementById("educationRequired").value =
+        job.education_required || "";
+
+    document.getElementById("jobSkills").value =
+        job.required_skills || "";
+
+
+    // Job details
+
+    document.getElementById("jobDescription").value =
+        job.description || "";
+
+    document.getElementById("jobResponsibilities").value =
+        job.responsibilities || "";
+
+
+    // Deadline
+
+    if (job.application_deadline) {
+
+        const deadline =
+            new Date(job.application_deadline);
+
+
+        const year =
+            deadline.getFullYear();
+
+        const month =
+            String(deadline.getMonth() + 1)
+                .padStart(2, "0");
+
+        const day =
+            String(deadline.getDate())
+                .padStart(2, "0");
+
+
+        document.getElementById("applicationDeadline").value =
+            `${year}-${month}-${day}`;
+
+
+        document.getElementById("deadlineText").textContent =
+            deadline.toLocaleDateString(
+                "en-GB",
+                {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric"
+                }
             );
 
-        }
+    } else {
 
-        finally {
+        document.getElementById("applicationDeadline").value =
+            "";
 
-            confirmCloseVacancy.disabled =
-                false;
-
-            confirmCloseVacancy.textContent =
-                "Close vacancy";
-
-        }
-
+        document.getElementById("deadlineText").textContent =
+            "Select deadline";
     }
-);
+
+
+    // Change popup heading
+
+    const modalTitle =
+        document.querySelector(
+            "#createVacancyModal .admin-modal-header h2"
+        );
+
+    if (modalTitle) {
+        modalTitle.textContent =
+            "Edit job vacancy.";
+    }
+
+
+    // Change submit button
+
+    const submitButton =
+        createJobForm.querySelector(
+            ".admin-create-job-btn"
+        );
+
+    if (submitButton) {
+        submitButton.textContent =
+            "Save changes";
+    }
+
+
+    openCreateVacancyModal();
+}
 
 
 /* =========================================================

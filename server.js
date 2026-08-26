@@ -381,6 +381,161 @@ app.patch(
     }
 );
 
+// ADMIN EDIT JOB VACANCY
+
+app.patch(
+    "/api/admin/jobs/:id",
+    requireAdmin,
+    async (req, res) => {
+
+        try {
+
+            const jobId =
+                req.params.id;
+
+
+            const {
+                jobTitle,
+                department,
+                location,
+                employmentType,
+                salary,
+                applicationDeadline,
+                experienceRequired,
+                educationRequired,
+                description,
+                responsibilities,
+                requiredSkills,
+                numberOfOpenings
+            } = req.body;
+
+
+            // Required fields
+            if (
+                !jobTitle ||
+                !department ||
+                !location ||
+                !employmentType ||
+                !description
+            ) {
+
+                return res.status(400).json({
+                    success: false,
+                    message:
+                        "Please complete all required job fields."
+                });
+
+            }
+
+
+            const openings =
+                Number(numberOfOpenings) || 1;
+
+
+            if (openings < 1) {
+
+                return res.status(400).json({
+                    success: false,
+                    message:
+                        "Number of openings must be at least 1."
+                });
+
+            }
+
+
+            const result =
+                await pool.query(
+                    `
+                    UPDATE jobs
+
+                    SET
+                        job_title = $1,
+                        department = $2,
+                        location = $3,
+                        employment_type = $4,
+                        salary = $5,
+                        application_deadline = $6,
+                        experience_required = $7,
+                        education_required = $8,
+                        description = $9,
+                        responsibilities = $10,
+                        required_skills = $11,
+                        number_of_openings = $12,
+                        updated_at = NOW()
+
+                    WHERE id = $13
+
+                    RETURNING *
+                    `,
+                    [
+                        jobTitle.trim(),
+
+                        department.trim(),
+
+                        location.trim(),
+
+                        employmentType.trim(),
+
+                        salary?.trim() || null,
+
+                        applicationDeadline || null,
+
+                        experienceRequired?.trim() || null,
+
+                        educationRequired?.trim() || null,
+
+                        description.trim(),
+
+                        responsibilities?.trim() || null,
+
+                        requiredSkills?.trim() || null,
+
+                        openings,
+
+                        jobId
+                    ]
+                );
+
+
+            if (result.rows.length === 0) {
+
+                return res.status(404).json({
+                    success: false,
+                    message:
+                        "Job vacancy not found."
+                });
+
+            }
+
+
+            return res.json({
+                success: true,
+                message:
+                    "Job vacancy updated successfully.",
+                job: result.rows[0]
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Edit job vacancy error:",
+                error
+            );
+
+
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Unable to update job vacancy."
+            });
+
+        }
+
+    }
+);
+
 // ================================= TEMP TEST ROUTE
 
 app.get(
@@ -398,6 +553,69 @@ app.get(
 
 // ===============================================================================
 // ROUTES ========================================================================
+
+
+/* =========================================================
+   PUBLIC JOB VACANCIES
+   ========================================================= */
+
+app.get("/api/jobs", async (req, res) => {
+
+    try {
+
+        const result = await pool.query(
+            `
+            SELECT
+                id,
+                job_title,
+                department,
+                location,
+                employment_type,
+                salary,
+                application_deadline,
+                experience_required,
+                education_required,
+                description,
+                responsibilities,
+                required_skills,
+                number_of_openings,
+                status,
+                created_at
+
+            FROM jobs
+
+            WHERE status IN ('active', 'closed')
+
+            ORDER BY created_at DESC
+            `
+        );
+
+
+        res.json({
+            success: true,
+            jobs: result.rows
+        });
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Load public jobs error:",
+            error
+        );
+
+
+        res.status(500).json({
+            success: false,
+            message:
+                "Unable to load job vacancies."
+        });
+
+    }
+
+});
+
 
 app.post(
     "/api/profile/photo",

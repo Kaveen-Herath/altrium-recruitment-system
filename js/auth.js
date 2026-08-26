@@ -976,7 +976,7 @@ if (loginForm) {
                         ) {
 
                             window.location.href =
-                                "admin-dashboard.html";
+                                "admin/admin-dashboard.html";
 
                         } else {
 

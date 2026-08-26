@@ -23,80 +23,173 @@
 
 <!-- ================= NAVBAR ================= -->
 
-<header class="navbar" id="navbar">
+<header class="navbar">
 
-    <a href="index.html">
-        <img src="assets/altrium_logoW.png" alt="Company Logo" style="height: 30px; width: auto;">
+    <!-- LOGO -->
+
+    <a
+        href="index.html"
+        class="logo"
+    >
+
+        <img
+            src="assets/altrium_logoW.png"
+            alt="Altrium"
+            style="height: 30px; width: auto;"
+        >
+
     </a>
 
-    <nav class="nav-links" id="navLinks">
-        <a href="index.html" class="active">Home</a>
-        <a href="about.html">About Altrium</a>
-        <a href="contact.html">Contact Us</a>
+
+    <!-- NAVIGATION -->
+
+    <nav class="nav-links">
+
+        <a
+            href="index.html"
+            class="nav-home active"
+        >
+            Home
+        </a>
+
+
+        <a
+            href="jobs.html"
+            class="nav-jobs"
+        >
+            Find jobs
+        </a>
+
+
+        <a
+            href="about.html"
+            class="nav-about"
+        >
+            About Altrium
+        </a>
+
+
+        <a
+            href="contact.html"
+            class="nav-contact"
+        >
+            Contact Us
+        </a>
+
+
         <a
             href="admin/admin-dashboard.html"
             id="dashboardLink"
         >
             Dashboard
         </a>
+
     </nav>
 
-    <div class="nav-right" id="navRight">
 
-        <button class="search-trigger" id="searchTrigger">
-            <span class="search-symbol">⌕</span>
-            <span>Search jobs...</span>
-        </button>
+    <!-- RIGHT SIDE -->
 
-        <div class="nav-account" id="navAccount">
-            <a href="login.html" id="signInLink">SIGN IN</a>
+    <div class="nav-right">
 
-            <a
-                href="profile.html"
-                id="profileLink"
-                class="profile-nav-icon"
-                aria-label="My Profile"
-            ></a>
+        <a
+            href="login.html"
+            id="signInLink"
+            class="signin-btn"
+        >
+            Sign in
+        </a>
 
-        </div>
 
-    </div>
+        <a
+            href="profile.html"
+            id="profileLink"
+            class="profile-nav-icon"
+            aria-label="My profile"
+        ></a>
 
-    <div class="expanded-search" id="expandedSearch">
-
-        <span class="expanded-search-icon">⌕</span>
-
-        <input
-            type="text"
-            id="searchInput"
-            placeholder="Search jobs by keyword, role, title..."
+        <div
+            class="notification-nav"
+            id="notificationNav"
         >
 
-        <button class="filter-btn" data-filter="type">
-            Type <span>⌄</span>
-        </button>
+            <button
+                type="button"
+                class="notification-trigger"
+                id="notificationTrigger"
+                aria-label="Notifications"
+            >
 
-        <button class="filter-btn" data-filter="position">
-            Position <span>⌄</span>
-        </button>
+                <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path
+                        d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"
+                    ></path>
 
-        <button class="filter-btn" data-filter="title">
-            Job title <span>⌄</span>
-        </button>
+                    <path
+                        d="M10 21h4"
+                    ></path>
+                </svg>
 
-        <button class="filter-btn" data-filter="location">
-            Location <span>⌄</span>
-        </button>
 
-        <button class="search-btn" id="searchButton">
-            Search
-        </button>
+                <span
+                    class="notification-unread-dot"
+                    id="notificationUnreadDot"
+                ></span>
 
-        <button class="close-search" id="closeSearch">
-            ×
-        </button>
+            </button>
 
-        <div class="filter-dropdown" id="filterDropdown"></div>
+
+            <div
+                class="notification-panel"
+                id="notificationPanel"
+            >
+
+                <div class="notification-panel-header">
+
+                    <div>
+                        <span>NOTIFICATIONS</span>
+
+                        <h3>
+                            Updates
+                        </h3>
+                    </div>
+
+
+                    <span
+                        class="notification-count"
+                        id="notificationCount"
+                    >
+                        0 unread
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="notification-list"
+                    id="notificationList"
+                >
+
+                    <div class="notification-empty">
+
+                        <strong>
+                            You're all caught up.
+                        </strong>
+
+                        <p>
+                            New job and application updates
+                            will appear here.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
 
     </div>
 
@@ -128,7 +221,7 @@
 
         <div class="hero-actions">
 
-            <a href="#vacancies" class="primary-btn">
+            <a href="jobs.html" class="primary-btn">
                 Explore vacancies
             </a>
 
@@ -627,6 +720,7 @@
 
 <script src="js/script.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/navbar-auth.js?v=1"></script>
 
 </body>
 </html>

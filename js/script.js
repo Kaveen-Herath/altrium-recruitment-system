@@ -160,7 +160,7 @@ async function updateNavbarAccount() {
         if (user.role === "admin") {
 
             profileLink.href =
-                "admin-dashboard.html";
+                "admin/admin-dashboard.html";
 
             profileLink.title =
                 "Admin Dashboard";

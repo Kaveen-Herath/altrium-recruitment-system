@@ -44,36 +44,179 @@
 <body>
 
 
-<!-- ================= HEADER ================= -->
+<!-- ================= NAVBAR ================= -->
 
-<header class="admin-header">
+<header class="navbar">
+
+    <!-- LOGO -->
 
     <a
         href="../index.html"
-        class="admin-logo"
+        class="logo"
     >
 
         <img
             src="../assets/altrium_logoW.png"
             alt="Altrium"
+            style="height: 30px; width: auto;"
         >
 
     </a>
 
 
-    <div class="admin-header-right">
+    <!-- NAVIGATION -->
+
+    <nav class="nav-links">
+
+        <a
+            href="../index.html"
+            class="nav-home"
+        >
+            Home
+        </a>
+
+
+        <a
+            href="../jobs.html"
+            class="nav-jobs"
+        >
+            Find jobs
+        </a>
+
+
+        <a
+            href="../about.html"
+            class="nav-about"
+        >
+            About Altrium
+        </a>
+
+
+        <a
+            href="../contact.html"
+            class="nav-contact"
+        >
+            Contact Us
+        </a>
+
+
+        <a
+            href="admin-dashboard.html"
+            id="dashboardLink"
+            class="active"
+        >
+            Dashboard
+        </a>
+
+    </nav>
+
+    <!-- RIGHT SIDE -->
+
+    <div class="nav-right">
 
         <span class="admin-role-badge">
             ADMIN
         </span>
 
-        <button
-            type="button"
-            id="adminLogoutButton"
-            class="admin-logout"
+        <a
+            href="../login.html"
+            id="signInLink"
+            class="signin-btn"
         >
-            Sign out
-        </button>
+            Sign in
+        </a>
+
+
+        <a
+            href="../profile.html"
+            id="profileLink"
+            class="profile-nav-icon"
+            aria-label="My profile"
+        ></a>
+
+        <div
+            class="notification-nav"
+            id="notificationNav"
+        >
+
+            <button
+                type="button"
+                class="notification-trigger"
+                id="notificationTrigger"
+                aria-label="Notifications"
+            >
+
+                <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path
+                        d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"
+                    ></path>
+
+                    <path
+                        d="M10 21h4"
+                    ></path>
+                </svg>
+
+
+                <span
+                    class="notification-unread-dot"
+                    id="notificationUnreadDot"
+                ></span>
+
+            </button>
+
+
+            <div
+                class="notification-panel"
+                id="notificationPanel"
+            >
+
+                <div class="notification-panel-header">
+
+                    <div>
+                        <span>NOTIFICATIONS</span>
+
+                        <h3>
+                            Updates
+                        </h3>
+                    </div>
+
+
+                    <span
+                        class="notification-count"
+                        id="notificationCount"
+                    >
+                        0 unread
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="notification-list"
+                    id="notificationList"
+                >
+
+                    <div class="notification-empty">
+
+                        <strong>
+                            You're all caught up.
+                        </strong>
+
+                        <p>
+                            New job and application updates
+                            will appear here.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
 
     </div>
 
@@ -916,7 +1059,9 @@
 
 
 
-<script src="admin-dashboard.js"></script>
+<script src="admin-dashboard.js?v=2"></script>
+<script src="../js/navbar-auth.js?v=1"></script>
+
 
 </body>
 
