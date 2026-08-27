@@ -34,34 +34,6 @@ const transporter =
 
     });
 
-if (
-    process.env.NODE_ENV !==
-    "test"
-) {
-
-    transporter
-        .verify()
-        .then(
-            () => {
-
-                console.log(
-                    "Altrium email service connected."
-                );
-
-            }
-        )
-        .catch(
-            error => {
-
-                console.error(
-                    "Altrium email connection error:",
-                    error.message
-                );
-
-            }
-        );
-
-}
 
 module.exports =
     transporter;

@@ -1076,6 +1076,82 @@ async function getStoredGoogleCalendarClient() {
 
 }
 
+/* =========================================================
+   ADMIN - TEST STORED GOOGLE CALENDAR CONNECTION
+   ========================================================= */
+
+app.get(
+    "/api/admin/google-calendar/test",
+    requireAdmin,
+    async (req, res) => {
+
+        try {
+
+            const {
+                calendar,
+                calendarId
+            } =
+                await getStoredGoogleCalendarClient();
+
+
+            await calendar.events.list({
+
+                calendarId,
+
+                maxResults:
+                    1,
+
+                singleEvents:
+                    true
+
+            });
+
+
+            return res.json({
+
+                success:
+                    true,
+
+                connected:
+                    true,
+
+                message:
+                    "Stored Google Calendar connection is working."
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Stored Google Calendar test error:",
+                error.response?.data ||
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success:
+                    false,
+
+                connected:
+                    false,
+
+                message:
+                    error.response?.data
+                        ?.error
+                        ?.message ||
+                    error.message ||
+                    "Stored Google Calendar connection failed."
+
+            });
+
+        }
+
+    }
+);
 
 /* =========================================================
    EMAIL HTML ESCAPE

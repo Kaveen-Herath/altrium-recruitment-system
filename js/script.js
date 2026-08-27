@@ -22,26 +22,45 @@ const filterDropdown =
 
 /* Open search */
 
-searchTrigger.addEventListener("click", () => {
+searchTrigger?.addEventListener(
+    "click",
+    () => {
 
-    navbar.classList.add("search-mode");
+        navbar?.classList.add(
+            "search-mode"
+        );
 
-    setTimeout(() => {
-        searchInput.focus();
-    }, 150);
 
-});
+        setTimeout(
+            () => {
+
+                searchInput?.focus();
+
+            },
+            150
+        );
+
+    }
+);
 
 
 /* Close search */
 
-closeSearch.addEventListener("click", () => {
+closeSearch?.addEventListener(
+    "click",
+    () => {
 
-    navbar.classList.remove("search-mode");
+        navbar?.classList.remove(
+            "search-mode"
+        );
 
-    filterDropdown.classList.remove("show");
 
-});
+        filterDropdown?.classList.remove(
+            "show"
+        );
+
+    }
+);
 
 
 /* Escape closes search */
@@ -365,37 +384,55 @@ document.querySelectorAll(".filter-btn")
 });
 
 
-document.addEventListener("click", () => {
+document.addEventListener(
+    "click",
+    () => {
 
-    filterDropdown
-        .classList
-        .remove("show");
+        filterDropdown
+            ?.classList
+            .remove(
+                "show"
+            );
 
-});
+    }
+);
 
 
 /* ================= SEARCH ACTION ================= */
 
 document
-    .querySelector(".search-btn")
-    .addEventListener("click", () => {
+    .querySelector(
+        ".search-btn"
+    )
+    ?.addEventListener(
+        "click",
+        () => {
 
-        const query =
-            searchInput.value.trim();
+            const query =
+                searchInput
+                    ?.value
+                    .trim() ||
+                "";
 
-        if (!query) {
 
-            searchInput.focus();
+            if (
+                !query
+            ) {
 
-            return;
+                searchInput?.focus();
+
+                return;
+
+            }
+
+
+            console.log(
+                "Homepage vacancy search:",
+                query
+            );
 
         }
-
-        alert(
-            `Searching Altrium vacancies for: ${query}`
-        );
-
-    });
+    );
 
 
 /* ================= CAREER TIPS ================= */
@@ -515,12 +552,15 @@ setInterval(() => {
 }, 6000);
 
 
-/* ================= CALENDAR ================= */
+/* =====================================================
+   HOMEPAGE CALENDAR
+   ===================================================== */
 
 const calendarDays =
     document.getElementById(
         "calendarDays"
     );
+
 
 const calendarTitle =
     document.getElementById(
@@ -530,14 +570,35 @@ const calendarTitle =
 
 function createCalendar() {
 
+    if (
+        !calendarDays ||
+        !calendarTitle
+    ) {
+
+        console.error(
+            "Homepage calendar elements could not be found.",
+            {
+                calendarDays,
+                calendarTitle
+            }
+        );
+
+        return;
+
+    }
+
+
     const today =
         new Date();
+
 
     const year =
         today.getFullYear();
 
+
     const month =
         today.getMonth();
+
 
     const currentDate =
         today.getDate();
@@ -559,57 +620,112 @@ function createCalendar() {
         ).getDate();
 
 
+
+    /* =================================================
+       MONTH TITLE
+       ================================================= */
+
     calendarTitle.textContent =
         new Intl.DateTimeFormat(
             "en-US",
             {
-                month: "long",
-                year: "numeric"
+
+                month:
+                    "long",
+
+                year:
+                    "numeric"
+
             }
-        ).format(today);
+        ).format(
+            today
+        );
 
 
-    calendarDays.innerHTML = "";
+
+    /* =================================================
+       CLEAR OLD CALENDAR
+       ================================================= */
+
+    calendarDays.innerHTML =
+        "";
 
 
-    /* Empty spaces before first day */
+
+    /* =================================================
+       EMPTY DAYS BEFORE MONTH START
+       ================================================= */
 
     for (
-        let i = 0;
-        i < firstDay;
-        i++
+        let index = 0;
+        index < firstDay;
+        index += 1
     ) {
 
-        const empty =
-            document.createElement("span");
+        const emptyDay =
+            document.createElement(
+                "span"
+            );
+
+
+        emptyDay.className =
+            "calendar-empty";
+
 
         calendarDays.appendChild(
-            empty
+            emptyDay
         );
 
     }
 
 
-    /* Days */
+
+    /* =================================================
+       DAYS OF MONTH
+       ================================================= */
 
     for (
         let day = 1;
         day <= numberOfDays;
-        day++
+        day += 1
     ) {
 
-        const date =
-            document.createElement("span");
+        const dayElement =
+            document.createElement(
+                "span"
+            );
 
-        date.textContent =
-            day;
+
+        dayElement.textContent =
+            String(
+                day
+            );
+
+
+        dayElement.dataset.date =
+            `${year}-${
+                String(
+                    month + 1
+                ).padStart(
+                    2,
+                    "0"
+                )
+            }-${
+                String(
+                    day
+                ).padStart(
+                    2,
+                    "0"
+                )
+            }`;
 
 
         if (
-            day === currentDate
+            day ===
+            currentDate
         ) {
 
-            date.classList.add(
+            dayElement.classList.add(
                 "today"
             );
 
@@ -617,10 +733,15 @@ function createCalendar() {
 
 
         calendarDays.appendChild(
-            date
+            dayElement
         );
 
     }
+
+
+    console.log(
+        `Homepage calendar rendered: ${numberOfDays} days`
+    );
 
 }
 
