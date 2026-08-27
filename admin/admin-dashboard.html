@@ -288,7 +288,7 @@
                     03
                 </span>
 
-                Applications
+                Applicants
 
             </button>
 
@@ -303,7 +303,7 @@
                     04
                 </span>
 
-                Interviews
+                Interview Sessions
 
             </button>
 
@@ -552,6 +552,9 @@
 
             <div class="applications-search-row">
 
+
+                <!-- SEARCH -->
+
                 <div class="applications-search">
 
                     <span>
@@ -564,6 +567,109 @@
                         placeholder="Search candidate, reference or job..."
                         autocomplete="off"
                     >
+
+                </div>
+
+
+
+                <!-- VACANCY FILTER -->
+
+                <div
+                    class="admin-custom-select applications-toolbar-select"
+                    id="applicationJobDropdown"
+                >
+
+                    <button
+                        type="button"
+                        class="admin-custom-select-trigger"
+                        id="applicationJobTrigger"
+                    >
+
+                        <span id="applicationJobText">
+                            All vacancies
+                        </span>
+
+                        <span class="admin-select-arrow">
+                            ↓
+                        </span>
+
+                    </button>
+
+
+                    <div
+                        class="admin-custom-select-menu"
+                        id="applicationJobMenu"
+                    ></div>
+
+                </div>
+
+
+
+                <!-- SORT -->
+
+                <div
+                    class="admin-custom-select applications-toolbar-select"
+                    id="applicationSortDropdown"
+                >
+
+                    <button
+                        type="button"
+                        class="admin-custom-select-trigger"
+                        id="applicationSortTrigger"
+                    >
+
+                        <span id="applicationSortText">
+                            Newest applications
+                        </span>
+
+                        <span class="admin-select-arrow">
+                            ↓
+                        </span>
+
+                    </button>
+
+
+                    <div
+                        class="admin-custom-select-menu"
+                        id="applicationSortMenu"
+                    >
+
+                        <button
+                            type="button"
+                            data-value="newest"
+                        >
+                            Newest applications
+                        </button>
+
+                        <button
+                            type="button"
+                            data-value="oldest"
+                        >
+                            Oldest applications
+                        </button>
+
+                        <button
+                            type="button"
+                            data-value="score_high"
+                        >
+                            Reviewer score: Highest first
+                        </button>
+
+                        <button
+                            type="button"
+                            data-value="score_low"
+                        >
+                            Reviewer score: Lowest first
+                        </button>
+
+                        <button
+                            type="button"
+                            data-value="review_progress"
+                        >
+                            Review progress
+                        </button>
+
+                    </div>
 
                 </div>
 
@@ -601,6 +707,23 @@
                     data-status="screening"
                 >
                     Screening
+                </button>
+
+                <button
+                    type="button"
+                    class="application-filter-button"
+                    data-status="under_evaluation"
+                >
+                    Under evaluation
+                </button>
+
+
+                <button
+                    type="button"
+                    class="application-filter-button"
+                    data-status="evaluation_complete"
+                >
+                    Evaluation complete
                 </button>
 
                 <button
@@ -655,6 +778,89 @@
 
 
             <!-- =====================================================
+            BULK SHORTLIST TOOLS
+            ===================================================== -->
+
+        <div
+            class="applications-selection-tools"
+            id="applicationsSelectionTools"
+        >
+
+            <div>
+
+                <span>
+                    BULK SHORTLIST
+                </span>
+
+                <strong id="applicationsEligibilityText">
+                    Select a vacancy to enable bulk shortlisting.
+                </strong>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="select-eligible-page-button"
+                id="selectEligiblePageButton"
+                hidden
+            >
+                Select eligible on page
+            </button>
+
+        </div>
+
+
+        <!-- =====================================================
+            SELECTED CANDIDATES BAR
+            ===================================================== -->
+
+        <div
+            class="applications-bulk-bar"
+            id="applicationsBulkBar"
+            hidden
+        >
+
+            <div class="applications-bulk-summary">
+
+                <span id="applicationsBulkSelectedCount">
+                    0 candidates selected
+                </span>
+
+                <strong id="applicationsBulkJobTitle">
+                    Vacancy
+                </strong>
+
+            </div>
+
+
+            <div class="applications-bulk-actions">
+
+                <button
+                    type="button"
+                    class="applications-clear-selection-button"
+                    id="clearShortlistSelectionButton"
+                >
+                    Clear selection
+                </button>
+
+
+                <button
+                    type="button"
+                    class="applications-shortlist-selected-button"
+                    id="openBulkShortlistModalButton"
+                >
+                    Shortlist selected
+                </button>
+
+            </div>
+
+        </div>
+
+
+        
+
+            <!-- =====================================================
                 APPLICATION LIST HEADING
                 ===================================================== -->
 
@@ -683,6 +889,34 @@
                 <div class="applications-loading">
                     Loading applications...
                 </div>
+
+            </div>
+
+
+            <div
+                class="applications-pagination"
+                id="applicationsPagination"
+            >
+
+                <button
+                    type="button"
+                    id="applicationsPreviousPage"
+                >
+                    Previous
+                </button>
+
+
+                <span id="applicationsPageSummary">
+                    Page 1 of 1
+                </span>
+
+
+                <button
+                    type="button"
+                    id="applicationsNextPage"
+                >
+                    Next
+                </button>
 
             </div>
 
@@ -1445,6 +1679,30 @@
                             Submitted
                         </strong>
 
+
+                        <div
+                            class="application-manager-evaluation-summary"
+                            id="managerEvaluationSummary"
+                            hidden
+                        >
+
+                            <span>
+                                EVALUATION
+                            </span>
+
+                            <strong id="managerEvaluationProgress">
+                                0 / 2 reviews
+                            </strong>
+
+                            <small
+                                id="managerEvaluationScore"
+                                hidden
+                            >
+                                —
+                            </small>
+
+                        </div>
+
                     </div>
 
 
@@ -1734,7 +1992,824 @@
 
     </div>
 
+
+        <!-- =====================================================
+            APPLICATION EVALUATION SIDE PANEL
+            ===================================================== -->
+
+        <aside
+            class="application-evaluation-panel"
+            id="applicationEvaluationPanel"
+            aria-hidden="true"
+        >
+
+
+            <!-- HEADER -->
+
+            <div class="evaluation-panel-header">
+
+                <div>
+
+                    <span class="admin-section-label">
+                        APPLICANT EVALUATION
+                    </span>
+
+                    <h2 id="evaluationCandidateName">
+                        Candidate
+                    </h2>
+
+                    <p id="evaluationJobTitle">
+                        Job position
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="admin-modal-close"
+                    id="closeApplicationEvaluationPanel"
+                    aria-label="Close evaluation"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <!-- LOADING -->
+
+            <div
+                class="evaluation-panel-loading"
+                id="evaluationPanelLoading"
+            >
+                Loading evaluation...
+            </div>
+
+
+            <!-- CONTENT -->
+
+            <div
+                class="evaluation-panel-content"
+                id="evaluationPanelContent"
+                hidden
+            >
+
+
+                <!-- =================================================
+                    REVIEW PROGRESS
+                    ================================================= -->
+
+                <section class="evaluation-progress-card">
+
+                    <div>
+
+                        <span>
+                            REVIEW PROGRESS
+                        </span>
+
+                        <strong id="evaluationProgressCount">
+                            0 / 2
+                        </strong>
+
+                    </div>
+
+
+                    <div
+                        class="evaluation-progress-status"
+                        id="evaluationProgressStatus"
+                    >
+                        Not started
+                    </div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                    COMBINED SUMMARY
+                    ================================================= -->
+
+                <section
+                    class="evaluation-combined-summary"
+                    id="evaluationCombinedSummary"
+                    hidden
+                >
+
+                    <div class="evaluation-combined-score">
+
+                        <span>
+                            COMBINED REVIEWER SCORE
+                        </span>
+
+                        <strong id="evaluationCombinedScore">
+                            —
+                        </strong>
+
+                        <small>
+                            Average across submitted recruiter reviews
+                        </small>
+
+                    </div>
+
+
+                    <div class="evaluation-combined-grid">
+
+                        <div>
+
+                            <span>
+                                JOB SKILLS
+                            </span>
+
+                            <strong id="evaluationCombinedSkills">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                EXPERIENCE
+                            </span>
+
+                            <strong id="evaluationCombinedExperience">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                QUALIFICATIONS
+                            </span>
+
+                            <strong id="evaluationCombinedQualifications">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                SUITABILITY
+                            </span>
+
+                            <strong id="evaluationCombinedSuitability">
+                                —
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="evaluation-variance-warning"
+                        id="evaluationVarianceWarning"
+                        hidden
+                    >
+
+                        <strong>
+                            Review variance
+                        </strong>
+
+                        <p>
+                            Reviewer scores differ significantly.
+                            Additional review may be useful before
+                            making a shortlist decision.
+                        </p>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                    EXISTING REVIEWS
+                    ================================================= -->
+
+                <section class="evaluation-panel-section">
+
+                    <div class="evaluation-panel-section-heading">
+
+                        <span>
+                            REVIEWERS
+                        </span>
+
+                        <h3>
+                            Evaluation history
+                        </h3>
+
+                    </div>
+
+
+                    <div
+                        class="evaluation-reviewer-list"
+                        id="evaluationReviewerList"
+                    ></div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                    CURRENT RECRUITER FORM
+                    ================================================= -->
+
+                <form id="applicationEvaluationForm">
+
+
+                    <section
+                        class="evaluation-panel-section"
+                        id="evaluationFormSection"
+                    >
+
+                        <div class="evaluation-panel-section-heading">
+
+                            <span id="evaluationFormLabel">
+                                YOUR EVALUATION
+                            </span>
+
+                            <h3>
+                                Rate this applicant
+                            </h3>
+
+                        </div>
+
+
+
+                        <!-- =========================================
+                            TECHNICAL SKILLS
+                            ========================================= -->
+
+                        <div class="evaluation-criterion">
+
+                            <div class="evaluation-criterion-heading">
+
+                                <div>
+
+                                    <strong>
+                                        Job / technical skills
+                                    </strong>
+
+                                    <p>
+                                        Match between the candidate's
+                                        job-related skills and the vacancy.
+                                    </p>
+
+                                </div>
+
+
+                                <span
+                                    class="evaluation-selected-score"
+                                    id="evaluationTechnicalSelected"
+                                >
+                                    —
+                                </span>
+
+                            </div>
+
+
+                            <div
+                                class="evaluation-score-options"
+                                data-evaluation-field="technicalSkillsRating"
+                            ></div>
+
+
+                            <textarea
+                                id="evaluationTechnicalNote"
+                                class="evaluation-evidence-input"
+                                placeholder="Optional evidence from the CV, experience or projects..."
+                            ></textarea>
+
+                        </div>
+
+
+
+                        <!-- =========================================
+                            EXPERIENCE
+                            ========================================= -->
+
+                        <div class="evaluation-criterion">
+
+                            <div class="evaluation-criterion-heading">
+
+                                <div>
+
+                                    <strong>
+                                        Relevant experience
+                                    </strong>
+
+                                    <p>
+                                        Relevance and strength of previous
+                                        job or project experience.
+                                    </p>
+
+                                </div>
+
+
+                                <span
+                                    class="evaluation-selected-score"
+                                    id="evaluationExperienceSelected"
+                                >
+                                    —
+                                </span>
+
+                            </div>
+
+
+                            <div
+                                class="evaluation-score-options"
+                                data-evaluation-field="relevantExperienceRating"
+                            ></div>
+
+
+                            <textarea
+                                id="evaluationExperienceNote"
+                                class="evaluation-evidence-input"
+                                placeholder="Optional evidence supporting this score..."
+                            ></textarea>
+
+                        </div>
+
+
+
+                        <!-- =========================================
+                            QUALIFICATIONS
+                            ========================================= -->
+
+                        <div class="evaluation-criterion">
+
+                            <div class="evaluation-criterion-heading">
+
+                                <div>
+
+                                    <strong>
+                                        Qualifications
+                                    </strong>
+
+                                    <p>
+                                        Relevant education, certifications
+                                        or demonstrated equivalent knowledge.
+                                    </p>
+
+                                </div>
+
+
+                                <span
+                                    class="evaluation-selected-score"
+                                    id="evaluationQualificationsSelected"
+                                >
+                                    —
+                                </span>
+
+                            </div>
+
+
+                            <div
+                                class="evaluation-score-options"
+                                data-evaluation-field="qualificationsRating"
+                            ></div>
+
+
+                            <textarea
+                                id="evaluationQualificationsNote"
+                                class="evaluation-evidence-input"
+                                placeholder="Optional evidence supporting this score..."
+                            ></textarea>
+
+                        </div>
+
+
+
+                        <!-- =========================================
+                            SUITABILITY
+                            ========================================= -->
+
+                        <div class="evaluation-criterion">
+
+                            <div class="evaluation-criterion-heading">
+
+                                <div>
+
+                                    <strong>
+                                        Overall suitability
+                                    </strong>
+
+                                    <p>
+                                        Overall job-related fit based on
+                                        the application information reviewed.
+                                    </p>
+
+                                </div>
+
+
+                                <span
+                                    class="evaluation-selected-score"
+                                    id="evaluationSuitabilitySelected"
+                                >
+                                    —
+                                </span>
+
+                            </div>
+
+
+                            <div
+                                class="evaluation-score-options"
+                                data-evaluation-field="overallSuitabilityRating"
+                            ></div>
+
+
+                            <textarea
+                                id="evaluationSuitabilityNote"
+                                class="evaluation-evidence-input"
+                                placeholder="Optional evidence supporting this score..."
+                            ></textarea>
+
+                        </div>
+
+
+
+                        <!-- =========================================
+                            CURRENT REVIEWER SCORE
+                            ========================================= -->
+
+                        <div class="evaluation-my-score">
+
+                            <span>
+                                YOUR REVIEWER SCORE
+                            </span>
+
+                            <strong id="evaluationMyScore">
+                                — / 10
+                            </strong>
+
+                            <p>
+                                Automatically calculated from the
+                                four evaluation criteria.
+                            </p>
+
+                        </div>
+
+
+                        <!-- =========================================
+                            FEEDBACK
+                            ========================================= -->
+
+                        <div class="evaluation-feedback-field">
+
+                            <label for="evaluationFeedback">
+                                FEEDBACK
+                            </label>
+
+                            
+
+
+                            <textarea
+                                id="evaluationFeedback"
+                                placeholder="Summarize your assessment of this applicant..."
+                                required
+                            ></textarea>
+
+                        </div>
+
+
+                        <p
+                            class="evaluation-form-message"
+                            id="evaluationFormMessage"
+                            hidden
+                        ></p>
+
+
+                        <div class="evaluation-form-actions">
+
+                            <button
+                                type="button"
+                                class="admin-cancel-button"
+                                id="cancelApplicationEvaluation"
+                            >
+                                Close evaluation
+                            </button>
+
+
+                            <button
+                                type="submit"
+                                class="evaluation-save-button"
+                                id="saveApplicationEvaluation"
+                            >
+                                Submit evaluation
+                            </button>
+
+                        </div>
+
+                    </section>
+
+                </form>
+
+
+
+                <!-- =================================================
+                    READ ONLY MESSAGE
+                    ================================================= -->
+
+                <div
+                    class="evaluation-readonly-message"
+                    id="evaluationReadonlyMessage"
+                    hidden
+                >
+
+                    Evaluation information is read-only.
+
+                </div>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+
+    <!-- =====================================================
+        REJECT APPLICATION CONFIRMATION MODAL
+        ===================================================== -->
+
+<div
+    class="admin-modal"
+    id="rejectApplicationModal"
+>
+
+    <div
+        class="admin-modal-backdrop"
+        id="rejectApplicationBackdrop"
+    ></div>
+
+
+    <div class="reject-application-modal-card">
+
+        <div class="reject-application-icon">
+            !
+        </div>
+
+
+        <span class="admin-section-label">
+            REJECT APPLICATION
+        </span>
+
+
+        <h2>
+            Reject this application?
+        </h2>
+
+
+        <p class="reject-application-description">
+
+            This candidate will no longer continue
+            in the recruitment process.
+
+            This action cannot be reversed.
+
+        </p>
+
+
+        <div class="reject-application-summary">
+
+            <div>
+
+                <span>
+                    CANDIDATE
+                </span>
+
+                <strong id="rejectApplicationCandidate">
+                    Candidate
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    POSITION
+                </span>
+
+                <strong id="rejectApplicationPosition">
+                    Vacancy
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="reject-application-warning">
+
+            <strong>
+                Important
+            </strong>
+
+            <p>
+                The application status will be changed to
+                rejected and the candidate will be notified
+                through Altrium.
+            </p>
+
+        </div>
+
+
+        <div class="reject-application-actions">
+
+            <button
+                type="button"
+                class="admin-cancel-button"
+                id="cancelRejectApplication"
+            >
+                Cancel
+            </button>
+
+
+            <button
+                type="button"
+                class="confirm-reject-application-button"
+                id="confirmRejectApplication"
+            >
+                Reject application
+            </button>
+
+        </div>
+
+    </div>
+
 </div>
+
+<!-- =====================================================
+     BULK SHORTLIST CONFIRMATION
+     ===================================================== -->
+
+<div
+    class="admin-modal"
+    id="bulkShortlistModal"
+>
+
+    <div
+        class="admin-modal-backdrop"
+        id="bulkShortlistBackdrop"
+    ></div>
+
+
+    <div class="bulk-shortlist-modal-card">
+
+
+        <div class="bulk-shortlist-modal-header">
+
+            <div>
+
+                <span class="admin-section-label">
+                    BULK SHORTLIST
+                </span>
+
+                <h2>
+                    Shortlist selected candidates?
+                </h2>
+
+                <p id="bulkShortlistModalSubtitle">
+                    Review the selected applicants before confirming.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="admin-modal-close"
+                id="closeBulkShortlistModal"
+                aria-label="Close"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="bulk-shortlist-summary">
+
+            <div>
+
+                <span>
+                    VACANCY
+                </span>
+
+                <strong id="bulkShortlistJobTitle">
+                    Vacancy
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    SELECTED
+                </span>
+
+                <strong id="bulkShortlistCandidateCount">
+                    0 candidates
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    EVALUATION
+                </span>
+
+                <strong>
+                    Required reviews complete
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="bulk-shortlist-candidate-heading">
+
+            <span>
+                SELECTED CANDIDATES
+            </span>
+
+            <strong id="bulkShortlistListCount">
+                0 selected
+            </strong>
+
+        </div>
+
+
+        <div
+            class="bulk-shortlist-candidate-list"
+            id="bulkShortlistCandidateList"
+        ></div>
+
+
+        <div class="bulk-shortlist-warning">
+
+            <strong>
+                Confirm shortlist decision
+            </strong>
+
+            <p>
+                These applications will move to the Shortlisted
+                stage. Their completed evaluations will be locked
+                and each candidate will receive an Altrium update.
+            </p>
+
+        </div>
+
+
+        <p
+            class="bulk-shortlist-message"
+            id="bulkShortlistMessage"
+            hidden
+        ></p>
+
+
+        <div class="bulk-shortlist-actions">
+
+            <button
+                type="button"
+                class="admin-cancel-button"
+                id="cancelBulkShortlist"
+            >
+                Cancel
+            </button>
+
+
+            <button
+                type="button"
+                class="confirm-bulk-shortlist-button"
+                id="confirmBulkShortlist"
+            >
+                Shortlist candidates
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     CREATE INTERVIEW SESSION MODAL
+     ===================================================== -->
 
 
 <!-- =====================================================

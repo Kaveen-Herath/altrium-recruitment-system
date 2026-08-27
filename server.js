@@ -15,6 +15,21 @@ const { google } =
 
 app.use(express.json()); // allows Express to read that information.
 
+const isProduction =
+    process.env.NODE_ENV ===
+    "production";
+
+
+if (
+    isProduction
+) {
+
+    app.set(
+        "trust proxy",
+        1
+    );
+
+}
 
 app.use(
     session({
@@ -28,11 +43,20 @@ app.use(
         resave: false,
         saveUninitialized: false,
 
-        cookie: {
+       cookie: {
             httpOnly: true,
-            secure: false,
-            sameSite: "lax",
-            maxAge: 1000 * 60 * 60 * 24
+
+            secure:
+                isProduction,
+
+            sameSite:
+                "lax",
+
+            maxAge:
+                1000 *
+                60 *
+                60 *
+                24
         }
     })
 );
@@ -1086,6 +1110,528 @@ function escapeEmailHtml(value) {
 
 }
 
+
+/* =========================================================
+   SEND SHORTLISTED CANDIDATE EMAIL
+   ========================================================= */
+
+async function sendShortlistedCandidateEmail({
+
+    candidateName,
+    candidateEmail,
+
+    applicationId,
+    applicationReference,
+
+    jobTitle
+
+}) {
+
+    if (
+        !candidateEmail
+    ) {
+
+        return null;
+
+    }
+
+
+    const ALTRIUM_LOGO_URL =
+        process.env
+            .ALTRIUM_EMAIL_LOGO_URL ||
+        "";
+
+
+    const APP_BASE_URL =
+        process.env.APP_BASE_URL ||
+        "http://localhost:3000";
+
+
+    const safeCandidateName =
+        escapeEmailHtml(
+            candidateName ||
+            "Candidate"
+        );
+
+
+    const safeJobTitle =
+        escapeEmailHtml(
+            jobTitle ||
+            "Position"
+        );
+
+
+    const safeReference =
+        escapeEmailHtml(
+            applicationReference ||
+            ""
+        );
+
+
+    const progressUrl =
+        `${APP_BASE_URL}/application-progress.html?id=${applicationId}`;
+
+
+    const safeProgressUrl =
+        escapeEmailHtml(
+            progressUrl
+        );
+
+
+    const emailInfo =
+        await transporter.sendMail({
+
+            from:
+                `"Altrium" <${process.env.EMAIL_FROM}>`,
+
+
+            to:
+                candidateEmail,
+
+
+            subject:
+                `You've been shortlisted for ${jobTitle} | Altrium`,
+
+
+            text: `
+
+Hi ${candidateName},
+
+Good news — your application for ${jobTitle} has been shortlisted.
+
+Application reference:
+${applicationReference}
+
+Your application is moving forward in the Altrium recruitment process.
+
+If you are selected for an interview session, the interview date, time, type, and meeting or location details will be shared with you by email and through your Altrium application progress page.
+
+View your application progress:
+${progressUrl}
+
+Please keep an eye on your email and Altrium notifications for further updates.
+
+Best regards,
+Altrium Recruitment
+
+            `.trim(),
+
+
+            html: `
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Application shortlisted
+    </title>
+
+</head>
+
+
+<body
+    style="
+        margin:0;
+        padding:0;
+        background:#080808;
+        font-family:Arial,Helvetica,sans-serif;
+        color:#ffffff;
+    "
+>
+
+    <table
+        role="presentation"
+        width="100%"
+        cellspacing="0"
+        cellpadding="0"
+
+        style="
+            width:100%;
+            background:#080808;
+            padding:42px 18px;
+        "
+    >
+
+        <tr>
+
+            <td align="center">
+
+
+                <table
+                    role="presentation"
+                    width="100%"
+                    cellspacing="0"
+                    cellpadding="0"
+
+                    style="
+                        width:100%;
+                        max-width:650px;
+                        background:#101010;
+                        border:1px solid rgba(255,255,255,0.08);
+                        border-radius:24px;
+                        overflow:hidden;
+                    "
+                >
+
+
+                    <!-- HEADER -->
+
+                    <tr>
+
+                        <td
+                            style="
+                                padding:30px 36px;
+                                border-bottom:1px solid rgba(255,255,255,0.07);
+                            "
+                        >
+
+                            ${
+                                ALTRIUM_LOGO_URL
+
+                                    ? `
+
+                                        <img
+                                            src="${
+                                                escapeEmailHtml(
+                                                    ALTRIUM_LOGO_URL
+                                                )
+                                            }"
+                                            alt="Altrium"
+                                            style="
+                                                display:block;
+                                                height:34px;
+                                                width:auto;
+                                            "
+                                        >
+
+                                    `
+
+                                    : `
+
+                                        <div
+                                            style="
+                                                color:#ffffff;
+                                                font-size:24px;
+                                                font-weight:800;
+                                            "
+                                        >
+                                            Altrium
+                                        </div>
+
+                                    `
+                            }
+
+                        </td>
+
+                    </tr>
+
+
+
+                    <!-- HERO -->
+
+                    <tr>
+
+                        <td
+                            style="
+                                padding:38px 36px 30px;
+                            "
+                        >
+
+                            <div
+                                style="
+                                    color:#999999;
+                                    font-size:11px;
+                                    font-weight:800;
+                                    letter-spacing:1.8px;
+                                    text-transform:uppercase;
+                                    margin-bottom:13px;
+                                "
+                            >
+                                Application update
+                            </div>
+
+
+                            <h1
+                                style="
+                                    margin:0 0 18px;
+                                    color:#ffffff;
+                                    font-size:38px;
+                                    line-height:1.12;
+                                    font-weight:800;
+                                "
+                            >
+
+                                You've been
+
+                                <span
+                                    style="
+                                        color:#ff841f;
+                                    "
+                                >
+                                    shortlisted.
+                                </span>
+
+                            </h1>
+
+
+                            <p
+                                style="
+                                    margin:0;
+                                    color:#cfcfcf;
+                                    font-size:16px;
+                                    line-height:1.8;
+                                "
+                            >
+
+                                Hi
+
+                                <strong
+                                    style="
+                                        color:#ffffff;
+                                    "
+                                >
+                                    ${safeCandidateName}
+                                </strong>,
+
+                                <br><br>
+
+                                Good news — your application for
+
+                                <strong
+                                    style="
+                                        color:#ffffff;
+                                    "
+                                >
+                                    ${safeJobTitle}
+                                </strong>
+
+                                has been shortlisted and is moving
+                                forward in our recruitment process.
+
+                            </p>
+
+                        </td>
+
+                    </tr>
+
+
+
+                    <!-- APPLICATION REFERENCE -->
+
+                    <tr>
+
+                        <td
+                            style="
+                                padding:0 36px 26px;
+                            "
+                        >
+
+                            <div
+                                style="
+                                    padding:22px 24px;
+                                    background:rgba(255,132,31,0.06);
+                                    border:1px solid rgba(255,132,31,0.22);
+                                    border-radius:18px;
+                                "
+                            >
+
+                                <div
+                                    style="
+                                        color:#8f8f8f;
+                                        font-size:11px;
+                                        font-weight:800;
+                                        letter-spacing:1.4px;
+                                        text-transform:uppercase;
+                                        margin-bottom:8px;
+                                    "
+                                >
+                                    Application reference
+                                </div>
+
+
+                                <div
+                                    style="
+                                        color:#ff9633;
+                                        font-size:18px;
+                                        font-weight:800;
+                                    "
+                                >
+                                    ${safeReference}
+                                </div>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+
+                    <!-- NEXT STEP -->
+
+                    <tr>
+
+                        <td
+                            style="
+                                padding:0 36px 26px;
+                            "
+                        >
+
+                            <div
+                                style="
+                                    padding:20px 22px;
+                                    background:#151515;
+                                    border-left:3px solid #ff841f;
+                                    border-radius:0 16px 16px 0;
+                                "
+                            >
+
+                                <div
+                                    style="
+                                        color:#8f8f8f;
+                                        font-size:11px;
+                                        font-weight:800;
+                                        letter-spacing:1.4px;
+                                        text-transform:uppercase;
+                                        margin-bottom:9px;
+                                    "
+                                >
+                                    What happens next
+                                </div>
+
+
+                                <div
+                                    style="
+                                        color:#d4d4d4;
+                                        font-size:14px;
+                                        line-height:1.75;
+                                    "
+                                >
+
+                                    If an interview is scheduled,
+                                    Altrium will send you the date,
+                                    time, interview type and meeting
+                                    or location details.
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+
+                    <!-- PROGRESS BUTTON -->
+
+                    <tr>
+
+                        <td
+                            style="
+                                padding:0 36px 34px;
+                            "
+                        >
+
+                            <a
+                                href="${safeProgressUrl}"
+
+                                style="
+                                    display:inline-block;
+                                    padding:14px 24px;
+                                    border-radius:999px;
+                                    background:linear-gradient(
+                                        90deg,
+                                        #ff841f,
+                                        #ffc14d
+                                    );
+                                    color:#111111;
+                                    text-decoration:none;
+                                    font-size:14px;
+                                    font-weight:800;
+                                "
+                            >
+                                View application progress
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+
+
+                    <!-- FOOTER -->
+
+                    <tr>
+
+                        <td
+                            style="
+                                padding:25px 36px 32px;
+                                border-top:1px solid rgba(255,255,255,0.07);
+                            "
+                        >
+
+                            <p
+                                style="
+                                    margin:0;
+                                    color:#818181;
+                                    font-size:13px;
+                                    line-height:1.7;
+                                "
+                            >
+
+                                Please keep an eye on your email
+                                and Altrium notifications for further updates.
+
+                                <br><br>
+
+                                Altrium Recruitment Team
+
+                            </p>
+
+                        </td>
+
+                    </tr>
+
+
+                </table>
+
+            </td>
+
+        </tr>
+
+    </table>
+
+</body>
+
+</html>
+
+            `
+
+        });
+
+
+    console.log(
+        "Shortlisted email sent:",
+        emailInfo.messageId,
+        "to:",
+        candidateEmail
+    );
+
+
+    return emailInfo;
+
+}
 
 
 /* =========================================================
@@ -3912,7 +4458,9 @@ app.post(
 
 
 
-const PORT = 3000; // Creates the backend application
+const PORT =
+    process.env.PORT ||
+    3000;
 
 // Allow Express to serve our frontend files
 app.use(express.static(__dirname));
@@ -4028,59 +4576,535 @@ app.post("/api/auth/register", async (req, res) => {
       ]
       );
 
-      await transporter.sendMail({
-    from: `"Altrium" <${process.env.EMAIL_FROM}>`,
 
-    to: cleanEmail,
+/* =========================================================
+   SEND BRANDED EMAIL VERIFICATION OTP
+   ========================================================= */
 
-    subject: "Verify your Altrium account",
+const ALTRIUM_LOGO_URL =
+    process.env.ALTRIUM_EMAIL_LOGO_URL;
+
+
+const safeVerificationFirstName =
+    escapeEmailHtml(
+        firstName.trim()
+    );
+
+
+await transporter.sendMail({
+
+    from:
+        `"Altrium" <${process.env.EMAIL_FROM}>`,
+
+    to:
+        cleanEmail,
+
+    subject:
+        "Your Altrium verification code",
+
+    text: `
+Hi ${firstName.trim()},
+
+Welcome to Altrium.
+
+Use the verification code below to complete your account:
+
+${verificationCode}
+
+This code expires in 10 minutes.
+
+For your security, do not share this verification code with anyone.
+
+If you did not create an Altrium account, you can safely ignore this email.
+
+Altrium Recruitment Team
+    `.trim(),
 
     html: `
-        <div style="
-            font-family: Arial, sans-serif;
-            max-width: 520px;
-            margin: auto;
-            padding: 32px;
-        ">
+<!DOCTYPE html>
 
-            <h2>
-                Verify your email
-            </h2>
+<html lang="en">
 
-            <p>
-                Welcome to Altrium.
-            </p>
+<head>
 
-            <p>
-                Use the verification code below
-                to complete your account:
-            </p>
+    <meta charset="UTF-8">
 
-            <div style="
-                font-size: 32px;
-                font-weight: 700;
-                letter-spacing: 8px;
-                margin: 28px 0;
-            ">
-                ${verificationCode}
-            </div>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-            <p>
-                This code expires in 10 minutes.
-            </p>
+    <title>
+        Verify your Altrium account
+    </title>
 
-            <p style="
-                color: #777;
-                font-size: 12px;
-                margin-top: 30px;
-            ">
-                If you did not create an Altrium
-                account, you can ignore this email.
-            </p>
+</head>
 
-        </div>
+
+<body
+    style="
+        margin:0;
+        padding:0;
+        background:#080808;
+        font-family:Arial,Helvetica,sans-serif;
+        color:#ffffff;
+    "
+>
+
+    <table
+        role="presentation"
+        width="100%"
+        cellspacing="0"
+        cellpadding="0"
+
+        style="
+            width:100%;
+            background:#080808;
+            padding:42px 18px;
+        "
+    >
+
+        <tr>
+
+            <td align="center">
+
+                <table
+                    role="presentation"
+                    width="100%"
+                    cellspacing="0"
+                    cellpadding="0"
+
+                    style="
+                        width:100%;
+                        max-width:640px;
+                        background:#101010;
+                        border:1px solid rgba(255,255,255,0.08);
+                        border-radius:24px;
+                        overflow:hidden;
+                    "
+                >
+
+
+                    <!-- =====================================
+                         HEADER
+                         ===================================== -->
+
+                    <tr>
+
+                        <td
+                            style="
+                                padding:30px 36px;
+                                border-bottom:1px solid rgba(255,255,255,0.07);
+                            "
+                        >
+
+                            ${
+                                ALTRIUM_LOGO_URL
+                                    ? `
+
+                                        <img
+                                            src="${escapeEmailHtml(
+                                                ALTRIUM_LOGO_URL
+                                            )}"
+                                            alt="Altrium"
+                                            style="
+                                                display:block;
+                                                height:34px;
+                                                width:auto;
+                                            "
+                                        >
+
+                                    `
+                                    : `
+
+                                        <div
+                                            style="
+                                                color:#ffffff;
+                                                font-size:24px;
+                                                font-weight:800;
+                                            "
+                                        >
+                                            Altrium
+                                        </div>
+
+                                    `
+                            }
+
+                        </td>
+
+                    </tr>
+
+
+
+                    <!-- =====================================
+                         HERO
+                         ===================================== -->
+
+                    <tr>
+
+                        <td
+                            style="
+                                padding:38px 36px 28px;
+                            "
+                        >
+
+                            <div
+                                style="
+                                    color:#999999;
+                                    font-size:11px;
+                                    font-weight:800;
+                                    letter-spacing:1.8px;
+                                    text-transform:uppercase;
+                                    margin-bottom:14px;
+                                "
+                            >
+                                Email verification
+                            </div>
+
+
+                            <h1
+                                style="
+                                    margin:0 0 18px;
+                                    color:#ffffff;
+                                    font-size:38px;
+                                    line-height:1.12;
+                                    font-weight:800;
+                                "
+                            >
+                                Verify your
+
+                                <span
+                                    style="
+                                        color:#ff841f;
+                                    "
+                                >
+                                    email.
+                                </span>
+
+                            </h1>
+
+
+                            <p
+                                style="
+                                    margin:0;
+                                    color:#cfcfcf;
+                                    font-size:16px;
+                                    line-height:1.8;
+                                "
+                            >
+
+                                Hi
+
+                                <strong
+                                    style="
+                                        color:#ffffff;
+                                    "
+                                >
+                                    ${safeVerificationFirstName}
+                                </strong>,
+
+                                <br><br>
+
+                                Welcome to Altrium.
+
+                                Use the verification code below
+                                to complete your account setup.
+
+                            </p>
+
+                        </td>
+
+                    </tr>
+
+
+
+                    <!-- =====================================
+                         OTP CARD
+                         ===================================== -->
+
+                    <tr>
+
+                        <td
+                            style="
+                                padding:0 36px 26px;
+                            "
+                        >
+
+                            <table
+                                role="presentation"
+                                width="100%"
+                                cellspacing="0"
+                                cellpadding="0"
+
+                                style="
+                                    width:100%;
+                                    background:linear-gradient(
+                                        145deg,
+                                        rgba(255,132,31,0.11),
+                                        rgba(255,132,31,0.035)
+                                    );
+                                    border:1px solid rgba(255,132,31,0.25);
+                                    border-radius:18px;
+                                "
+                            >
+
+                                <tr>
+
+                                    <td
+                                        align="center"
+
+                                        style="
+                                            padding:30px 24px;
+                                        "
+                                    >
+
+                                        <div
+                                            style="
+                                                color:#ff9a35;
+                                                font-size:11px;
+                                                font-weight:800;
+                                                letter-spacing:1.6px;
+                                                text-transform:uppercase;
+                                                margin-bottom:16px;
+                                            "
+                                        >
+                                            Your verification code
+                                        </div>
+
+
+                                        <div
+                                            style="
+                                                color:#ffffff;
+                                                font-size:38px;
+                                                line-height:1;
+                                                font-weight:800;
+                                                letter-spacing:10px;
+                                                white-space:nowrap;
+                                                margin-left:10px;
+                                            "
+                                        >
+                                            ${verificationCode}
+                                        </div>
+
+
+                                        <div
+                                            style="
+                                                margin-top:18px;
+                                                color:#a7a7a7;
+                                                font-size:13px;
+                                                line-height:1.6;
+                                            "
+                                        >
+                                            This code expires in
+
+                                            <strong
+                                                style="
+                                                    color:#ffffff;
+                                                "
+                                            >
+                                                10 minutes
+                                            </strong>.
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                            </table>
+
+                        </td>
+
+                    </tr>
+
+
+
+                    <!-- =====================================
+                         SECURITY NOTICE
+                         ===================================== -->
+
+                    <tr>
+
+                        <td
+                            style="
+                                padding:0 36px 26px;
+                            "
+                        >
+
+                            <div
+                                style="
+                                    padding:20px 22px;
+                                    background:#151515;
+                                    border-left:3px solid #ff841f;
+                                    border-radius:0 16px 16px 0;
+                                "
+                            >
+
+                                <div
+                                    style="
+                                        color:#8f8f8f;
+                                        font-size:11px;
+                                        font-weight:800;
+                                        letter-spacing:1.4px;
+                                        text-transform:uppercase;
+                                        margin-bottom:9px;
+                                    "
+                                >
+                                    Security reminder
+                                </div>
+
+
+                                <div
+                                    style="
+                                        color:#d1d1d1;
+                                        font-size:14px;
+                                        line-height:1.75;
+                                    "
+                                >
+                                    Never share this verification code
+                                    with anyone.
+
+                                    Altrium will never ask you to send
+                                    your verification code by email,
+                                    message, or phone.
+                                </div>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+
+                    <!-- =====================================
+                         NEXT STEP
+                         ===================================== -->
+
+                    <tr>
+
+                        <td
+                            style="
+                                padding:0 36px 32px;
+                            "
+                        >
+
+                            <table
+                                role="presentation"
+                                width="100%"
+                                cellspacing="0"
+                                cellpadding="0"
+
+                                style="
+                                    background:#151515;
+                                    border:1px solid rgba(255,255,255,0.07);
+                                    border-radius:16px;
+                                "
+                            >
+
+                                <tr>
+
+                                    <td
+                                        style="
+                                            padding:20px 22px;
+                                        "
+                                    >
+
+                                        <div
+                                            style="
+                                                color:#8f8f8f;
+                                                font-size:11px;
+                                                font-weight:800;
+                                                letter-spacing:1.4px;
+                                                text-transform:uppercase;
+                                                margin-bottom:8px;
+                                            "
+                                        >
+                                            Next step
+                                        </div>
+
+
+                                        <div
+                                            style="
+                                                color:#d7d7d7;
+                                                font-size:14px;
+                                                line-height:1.7;
+                                            "
+                                        >
+                                            Return to the Altrium verification
+                                            window and enter the six-digit code
+                                            shown above.
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                            </table>
+
+                        </td>
+
+                    </tr>
+
+
+
+                    <!-- =====================================
+                         FOOTER
+                         ===================================== -->
+
+                    <tr>
+
+                        <td
+                            style="
+                                padding:25px 36px 32px;
+                                border-top:1px solid rgba(255,255,255,0.07);
+                            "
+                        >
+
+                            <p
+                                style="
+                                    margin:0 0 12px;
+                                    color:#999999;
+                                    font-size:13px;
+                                    line-height:1.7;
+                                "
+                            >
+                                If you did not create an Altrium account,
+                                you can safely ignore this email.
+                            </p>
+
+
+                            <p
+                                style="
+                                    margin:0;
+                                    color:#707070;
+                                    font-size:13px;
+                                    line-height:1.7;
+                                "
+                            >
+                                Altrium Recruitment Team
+                            </p>
+
+                        </td>
+
+                    </tr>
+
+
+                </table>
+
+            </td>
+
+        </tr>
+
+    </table>
+
+</body>
+
+</html>
     `
+
 });
+
+      
 
     // 6. Send success response
       res.status(201).json({
@@ -7237,6 +8261,7 @@ app.get(
 
 /* =========================================================
    ADMIN - LOAD APPLICATIONS
+   SCALABLE FILTERING + EVALUATION SUMMARY
    ========================================================= */
 
 app.get(
@@ -7246,55 +8271,657 @@ app.get(
 
         try {
 
+            /* =================================================
+               QUERY PARAMETERS
+               ================================================= */
+
+            const search =
+                String(
+                    req.query.search ||
+                    ""
+                )
+                .trim();
+
+
+            const stage =
+                String(
+                    req.query.stage ||
+                    "all"
+                )
+                .trim()
+                .toLowerCase();
+
+
+            const sort =
+                String(
+                    req.query.sort ||
+                    "newest"
+                )
+                .trim()
+                .toLowerCase();
+
+
+            const requestedJobId =
+                req.query.jobId;
+
+
+            const jobId =
+                requestedJobId &&
+                requestedJobId !== "all"
+                    ? Number(
+                        requestedJobId
+                    )
+                    : null;
+
+
+            let page =
+                Number(
+                    req.query.page
+                ) ||
+                1;
+
+
+            let limit =
+                Number(
+                    req.query.limit
+                ) ||
+                25;
+
+
+            page =
+                Math.max(
+                    1,
+                    page
+                );
+
+
+            limit =
+                Math.min(
+                    50,
+                    Math.max(
+                        10,
+                        limit
+                    )
+                );
+
+
+            const offset =
+                (
+                    page -
+                    1
+                ) *
+                limit;
+
+
+
+            /* =================================================
+               VALID STAGES
+               ================================================= */
+
+            const allowedStages = [
+
+                "all",
+
+                "submitted",
+
+                "screening",
+
+                "under_evaluation",
+
+                "evaluation_complete",
+
+                "shortlisted",
+
+                "interview",
+
+                "offer",
+
+                "hired",
+
+                "rejected",
+
+                "withdrawn"
+
+            ];
+
+
+            const safeStage =
+                allowedStages.includes(
+                    stage
+                )
+                    ? stage
+                    : "all";
+
+
+
+            /* =================================================
+               SORTING
+
+               IMPORTANT:
+               SQL is selected from our own map.
+               User input is never pasted directly.
+               ================================================= */
+
+            const sortMap = {
+
+                newest:
+                    `
+                    applied_at DESC,
+                    id DESC
+                    `,
+
+                oldest:
+                    `
+                    applied_at ASC,
+                    id ASC
+                    `,
+
+                score_high:
+                    `
+                    average_rating DESC NULLS LAST,
+                    applied_at ASC,
+                    id ASC
+                    `,
+
+                score_low:
+                    `
+                    average_rating ASC NULLS LAST,
+                    applied_at ASC,
+                    id ASC
+                    `,
+
+                review_progress:
+                    `
+                    review_count DESC,
+                    average_rating DESC NULLS LAST,
+                    applied_at ASC
+                    `
+
+            };
+
+
+            const orderBy =
+                sortMap[
+                    sort
+                ] ||
+                sortMap.newest;
+
+
+
+            /* =================================================
+               LOAD FILTERED PAGE
+               ================================================= */
+
             const result =
+                await pool.query(
+                    `
+                    WITH application_base AS (
+
+                        SELECT
+
+                            a.id,
+
+                            a.application_reference,
+
+                            a.status,
+
+                            a.applied_at,
+
+                            a.updated_at,
+
+                            a.current_version_number,
+
+                            a.is_locked,
+
+                            a.candidate_id,
+
+                            a.job_id,
+
+
+                            av.first_name,
+
+                            av.last_name,
+
+                            av.email,
+
+                            av.phone_number,
+
+                            av.job_title_snapshot,
+
+                            av.department_snapshot,
+
+
+                            j.location,
+
+                            j.employment_type,
+
+                            j.number_of_openings,
+
+                            j.required_reviewers,
+
+
+                            COALESCE(
+                                evaluation_summary.review_count,
+                                0
+                            )::INT
+                                AS review_count,
+
+
+                            evaluation_summary.average_rating
+
+
+                        FROM applications a
+
+
+                        INNER JOIN application_versions av
+
+                            ON av.application_id =
+                                a.id
+
+                            AND av.version_number =
+                                a.current_version_number
+
+
+                        INNER JOIN jobs j
+
+                            ON j.id =
+                                a.job_id
+
+
+                        LEFT JOIN LATERAL (
+
+                            SELECT
+
+                                COUNT(
+                                    DISTINCT e.reviewer_id
+                                )::INT
+                                    AS review_count,
+
+
+                                ROUND(
+                                    AVG(
+                                        e.reviewer_score
+                                    ),
+                                    2
+                                )
+                                    AS average_rating
+
+
+                            FROM application_evaluations e
+
+
+                            WHERE
+                                e.application_id =
+                                a.id
+
+                        ) evaluation_summary
+
+                            ON TRUE
+
+
+                        WHERE
+
+                            (
+                                $1 = ''
+
+                                OR
+
+                                a.application_reference
+                                    ILIKE
+                                    '%' || $1 || '%'
+
+                                OR
+
+                                av.first_name
+                                    ILIKE
+                                    '%' || $1 || '%'
+
+                                OR
+
+                                av.last_name
+                                    ILIKE
+                                    '%' || $1 || '%'
+
+                                OR
+
+                                (
+                                    COALESCE(
+                                        av.first_name,
+                                        ''
+                                    )
+                                    ||
+                                    ' '
+                                    ||
+                                    COALESCE(
+                                        av.last_name,
+                                        ''
+                                    )
+                                )
+                                    ILIKE
+                                    '%' || $1 || '%'
+
+                                OR
+
+                                av.email
+                                    ILIKE
+                                    '%' || $1 || '%'
+
+                                OR
+
+                                av.job_title_snapshot
+                                    ILIKE
+                                    '%' || $1 || '%'
+
+                                OR
+
+                                av.department_snapshot
+                                    ILIKE
+                                    '%' || $1 || '%'
+
+                                OR
+
+                                j.location
+                                    ILIKE
+                                    '%' || $1 || '%'
+                            )
+
+
+                            AND
+
+                            (
+                                $2::BIGINT IS NULL
+
+                                OR
+
+                                a.job_id =
+                                    $2
+                            )
+
+                    ),
+
+
+                    application_staged AS (
+
+                        SELECT
+
+                            *,
+
+
+                            CASE
+
+                                WHEN
+                                    status =
+                                    'screening'
+
+                                    AND
+                                    review_count =
+                                    0
+
+                                THEN
+                                    'screening'
+
+
+                                WHEN
+                                    status =
+                                    'screening'
+
+                                    AND
+                                    review_count >
+                                    0
+
+                                    AND
+                                    review_count <
+                                    required_reviewers
+
+                                THEN
+                                    'under_evaluation'
+
+
+                                WHEN
+                                    status =
+                                    'screening'
+
+                                    AND
+                                    review_count >=
+                                    required_reviewers
+
+                                THEN
+                                    'evaluation_complete'
+
+
+                                ELSE
+                                    status
+
+                            END
+                                AS management_stage
+
+
+                        FROM application_base
+
+                    ),
+
+
+                    application_ranked AS (
+
+                        SELECT
+
+                            *,
+
+
+                            DENSE_RANK()
+                            OVER (
+
+                                PARTITION BY
+                                    job_id
+
+                                ORDER BY
+
+                                    CASE
+
+                                        WHEN
+                                            management_stage =
+                                            'evaluation_complete'
+
+                                        THEN
+                                            average_rating
+
+                                        ELSE
+                                            NULL
+
+                                    END
+                                    DESC
+                                    NULLS LAST
+
+                            )
+                                AS score_rank
+
+
+                        FROM application_staged
+
+                    ),
+
+
+                    application_filtered AS (
+
+                        SELECT
+                            *
+
+                        FROM application_ranked
+
+                        WHERE
+
+                            (
+                                $3 =
+                                'all'
+
+                                OR
+
+                                management_stage =
+                                $3
+                            )
+
+                    )
+
+
+                    SELECT
+
+                        *,
+
+                        COUNT(*)
+                        OVER ()
+                            AS filtered_total
+
+
+                    FROM application_filtered
+
+
+                    ORDER BY
+                        ${orderBy}
+
+
+                    LIMIT $4
+
+                    OFFSET $5
+                    `,
+                    [
+
+                        search,
+
+                        Number.isInteger(
+                            jobId
+                        )
+                            ? jobId
+                            : null,
+
+                        safeStage,
+
+                        limit,
+
+                        offset
+
+                    ]
+                );
+
+
+
+            /* =================================================
+               AVAILABLE VACANCY FILTER OPTIONS
+
+               Only vacancies that actually have applicants.
+               ================================================= */
+
+            const jobOptionsResult =
                 await pool.query(
                     `
                     SELECT
 
-                        a.id,
-                        a.application_reference,
-                        a.status,
-                        a.applied_at,
-                        a.updated_at,
-                        a.current_version_number,
-                        a.is_locked,
+                        j.id,
 
-                        a.candidate_id,
-                        a.job_id,
+                        j.job_title,
 
-                        av.first_name,
-                        av.last_name,
-                        av.email,
-                        av.phone_number,
+                        j.number_of_openings,
 
-                        av.job_title_snapshot,
-                        av.department_snapshot,
-
-                        j.location,
-                        j.employment_type
-
-                    FROM applications a
+                        COUNT(
+                            a.id
+                        )::INT
+                            AS applicant_count
 
 
-                    INNER JOIN application_versions av
-                        ON av.application_id = a.id
-                        AND av.version_number =
-                            a.current_version_number
+                    FROM jobs j
 
 
-                    INNER JOIN jobs j
-                        ON j.id = a.job_id
+                    INNER JOIN applications a
+
+                        ON a.job_id =
+                            j.id
+
+
+                    GROUP BY
+
+                        j.id,
+
+                        j.job_title,
+
+                        j.number_of_openings
 
 
                     ORDER BY
-                        a.applied_at DESC
+
+                        j.job_title ASC
                     `
                 );
 
 
+
+            /* =================================================
+               DASHBOARD APPLICATION STATS
+               ================================================= */
+
+            const statsResult =
+                await pool.query(
+                    `
+                    SELECT
+
+                        COUNT(*)::INT
+                            AS total_applications,
+
+
+                        COUNT(*)
+                        FILTER (
+                            WHERE
+                                status =
+                                'submitted'
+                        )::INT
+                            AS waiting_review,
+
+
+                        COUNT(*)
+                        FILTER (
+                            WHERE
+                                status =
+                                'interview'
+                        )::INT
+                            AS interviews
+
+
+                    FROM applications
+                    `
+                );
+
+
+            const stats =
+                statsResult.rows[0];
+
+
+            const filteredTotal =
+                result.rows.length
+                    ? Number(
+                        result.rows[0]
+                            .filtered_total
+                    )
+                    : 0;
+
+
+            const totalPages =
+                Math.max(
+                    1,
+                    Math.ceil(
+                        filteredTotal /
+                        limit
+                    )
+                );
+
+
+
+            /* =================================================
+               RESPONSE
+               ================================================= */
+
             return res.json({
 
-                success: true,
+                success:
+                    true,
+
 
                 applications:
                     result.rows.map(
@@ -7310,18 +8937,25 @@ app.get(
                             status:
                                 application.status,
 
+                            managementStage:
+                                application
+                                    .management_stage,
+
                             appliedAt:
-                                application.applied_at,
+                                application
+                                    .applied_at,
 
                             updatedAt:
-                                application.updated_at,
+                                application
+                                    .updated_at,
 
                             currentVersion:
                                 application
                                     .current_version_number,
 
                             isLocked:
-                                application.is_locked,
+                                application
+                                    .is_locked,
 
 
                             candidate: {
@@ -7339,7 +8973,8 @@ app.get(
                                         .last_name,
 
                                 email:
-                                    application.email,
+                                    application
+                                        .email,
 
                                 phoneNumber:
                                     application
@@ -7351,7 +8986,8 @@ app.get(
                             job: {
 
                                 id:
-                                    application.job_id,
+                                    application
+                                        .job_id,
 
                                 title:
                                     application
@@ -7362,16 +8998,160 @@ app.get(
                                         .department_snapshot,
 
                                 location:
-                                    application.location,
+                                    application
+                                        .location,
 
                                 employmentType:
                                     application
-                                        .employment_type
+                                        .employment_type,
+
+                                numberOfOpenings:
+                                    Number(
+                                        application
+                                            .number_of_openings
+                                    ) ||
+                                    1
+
+                            },
+
+
+                            evaluation: {
+
+                                reviewCount:
+                                    Number(
+                                        application
+                                            .review_count
+                                    ) ||
+                                    0,
+
+                                requiredReviewers:
+                                    Number(
+                                        application
+                                            .required_reviewers
+                                    ) ||
+                                    2,
+
+                                averageRating:
+                                    application
+                                        .average_rating ===
+                                        null
+
+                                        ? null
+
+                                        : Number(
+                                            application
+                                                .average_rating
+                                        ),
+
+                                isComplete:
+                                    application
+                                        .management_stage ===
+                                        "evaluation_complete",
+
+                                stage:
+                                    application
+                                        .management_stage,
+
+                                isHighestRating:
+
+                                    application
+                                        .management_stage ===
+                                        "evaluation_complete"
+
+                                    &&
+
+                                    Number(
+                                        application
+                                            .score_rank
+                                    ) ===
+                                    1
 
                             }
 
                         })
-                    )
+                    ),
+
+
+                pagination: {
+
+                    page,
+
+                    limit,
+
+                    total:
+                        filteredTotal,
+
+                    totalPages,
+
+                    hasPrevious:
+                        page >
+                        1,
+
+                    hasNext:
+                        page <
+                        totalPages
+
+                },
+
+
+                filters: {
+
+                    jobs:
+                        jobOptionsResult
+                            .rows
+                            .map(
+                                job => ({
+
+                                    id:
+                                        job.id,
+
+                                    title:
+                                        job.job_title,
+
+                                    openings:
+                                        Number(
+                                            job
+                                                .number_of_openings
+                                        ) ||
+                                        1,
+
+                                    applicantCount:
+                                        Number(
+                                            job
+                                                .applicant_count
+                                        ) ||
+                                        0
+
+                                })
+                            )
+
+                },
+
+
+                stats: {
+
+                    totalApplications:
+                        Number(
+                            stats
+                                .total_applications
+                        ) ||
+                        0,
+
+                    waitingReview:
+                        Number(
+                            stats
+                                .waiting_review
+                        ) ||
+                        0,
+
+                    interviews:
+                        Number(
+                            stats
+                                .interviews
+                        ) ||
+                        0
+
+                }
 
             });
 
@@ -7387,7 +9167,8 @@ app.get(
 
             return res.status(500).json({
 
-                success: false,
+                success:
+                    false,
 
                 message:
                     "Unable to load applications."
@@ -7767,6 +9548,2793 @@ app.get(
 
 
 /* =========================================================
+   ADMIN - LOAD APPLICATION EVALUATIONS
+   ========================================================= */
+
+app.get(
+    "/api/admin/applications/:id/evaluations",
+    requireAdmin,
+    async (req, res) => {
+
+        try {
+
+            const applicationId =
+                req.params.id;
+
+
+            /* =================================================
+               LOAD APPLICATION
+               ================================================= */
+
+            const applicationResult =
+                await pool.query(
+                    `
+                    SELECT
+
+                        a.id,
+                        a.application_reference,
+                        a.status,
+                        a.is_locked,
+                        a.job_id,
+
+                        j.job_title,
+                        j.required_reviewers,
+
+                        av.first_name,
+                        av.last_name
+
+                    FROM applications a
+
+
+                    INNER JOIN jobs j
+
+                        ON j.id =
+                            a.job_id
+
+
+                    INNER JOIN application_versions av
+
+                        ON av.application_id =
+                            a.id
+
+                        AND av.version_number =
+                            a.current_version_number
+
+
+                    WHERE
+                        a.id = $1
+                    `,
+                    [
+                        applicationId
+                    ]
+                );
+
+
+            if (
+                applicationResult.rows.length ===
+                0
+            ) {
+
+                return res.status(404).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Application not found."
+
+                });
+
+            }
+
+
+            const application =
+                applicationResult.rows[0];
+
+
+
+            /* =================================================
+               LOAD EVALUATIONS
+               ================================================= */
+
+            const evaluationResult =
+                await pool.query(
+                    `
+                    SELECT
+
+                        e.id,
+                        e.application_id,
+                        e.reviewer_id,
+
+                        e.technical_skills_rating,
+                        e.relevant_experience_rating,
+                        e.qualifications_rating,
+                        e.overall_suitability_rating,
+
+                        e.technical_skills_note,
+                        e.relevant_experience_note,
+                        e.qualifications_note,
+                        e.overall_suitability_note,
+
+                        e.feedback,
+                        e.reviewer_score,
+
+                        e.submitted_at,
+                        e.updated_at,
+                        e.locked_at,
+
+                        u.first_name
+                            AS reviewer_first_name,
+
+                        u.last_name
+                            AS reviewer_last_name,
+
+                        u.email
+                            AS reviewer_email
+
+                    FROM application_evaluations e
+
+
+                    INNER JOIN users u
+
+                        ON u.id =
+                            e.reviewer_id
+
+
+                    WHERE
+                        e.application_id = $1
+
+
+                    ORDER BY
+
+                        e.submitted_at ASC,
+
+                        e.id ASC
+                    `,
+                    [
+                        applicationId
+                    ]
+                );
+
+
+            const evaluations =
+                evaluationResult.rows;
+
+
+            const requiredReviewers =
+                Number(
+                    application
+                        .required_reviewers
+                ) ||
+                2;
+
+
+            const reviewCount =
+                evaluations.length;
+
+
+            const isComplete =
+                reviewCount >=
+                requiredReviewers;
+
+
+
+            /* =================================================
+               CURRENT RECRUITER'S EVALUATION
+               ================================================= */
+
+            const myEvaluation =
+                evaluations.find(
+                    evaluation =>
+                        String(
+                            evaluation
+                                .reviewer_id
+                        ) ===
+                        String(
+                            req.session.userId
+                        )
+                ) ||
+                null;
+
+
+
+            /* =================================================
+               CALCULATE COMBINED SCORE
+               ================================================= */
+
+            const scores =
+                evaluations.map(
+                    evaluation =>
+                        Number(
+                            evaluation
+                                .reviewer_score
+                        )
+                );
+
+
+            const averageRating =
+                scores.length
+
+                    ? Number(
+                        (
+                            scores.reduce(
+                                (
+                                    total,
+                                    score
+                                ) =>
+                                    total +
+                                    score,
+                                0
+                            )
+                            /
+                            scores.length
+                        )
+                        .toFixed(
+                            2
+                        )
+                    )
+
+                    : null;
+
+
+
+            /* =================================================
+               CRITERION AVERAGES
+               ================================================= */
+
+            function calculateAverage(
+                field
+            ) {
+
+                if (
+                    evaluations.length ===
+                    0
+                ) {
+
+                    return null;
+
+                }
+
+
+                const values =
+                    evaluations.map(
+                        evaluation =>
+                            Number(
+                                evaluation[
+                                    field
+                                ]
+                            )
+                    );
+
+
+                return Number(
+                    (
+                        values.reduce(
+                            (
+                                total,
+                                value
+                            ) =>
+                                total +
+                                value,
+                            0
+                        )
+                        /
+                        values.length
+                    )
+                    .toFixed(
+                        2
+                    )
+                );
+
+            }
+
+
+
+            /* =================================================
+               REVIEWER DISAGREEMENT
+               ================================================= */
+
+            let scoreDifference =
+                null;
+
+
+            let significantDifference =
+                false;
+
+
+            if (
+                scores.length >=
+                2
+            ) {
+
+                scoreDifference =
+                    Number(
+                        (
+                            Math.max(
+                                ...scores
+                            )
+                            -
+                            Math.min(
+                                ...scores
+                            )
+                        )
+                        .toFixed(
+                            2
+                        )
+                    );
+
+
+                /*
+                    Three or more points between
+                    reviewers is treated as a
+                    significant difference.
+
+                    This NEVER automatically
+                    rejects or shortlists anyone.
+                */
+
+                significantDifference =
+                    scoreDifference >=
+                    3;
+
+            }
+
+
+
+            /* =================================================
+               CAN CURRENT RECRUITER REVIEW?
+               ================================================= */
+
+            const canCurrentReviewerEvaluate =
+
+                application.status ===
+                    "screening"
+
+                &&
+
+                !application.is_locked
+
+                &&
+
+                (
+                    myEvaluation !==
+                        null
+
+                    ||
+
+                    reviewCount <
+                        requiredReviewers
+                );
+
+
+
+            /* =================================================
+               MAP REVIEWS
+               ================================================= */
+
+            const mappedEvaluations =
+                evaluations.map(
+                    evaluation => ({
+
+                        id:
+                            evaluation.id,
+
+
+                        reviewer: {
+
+                            id:
+                                evaluation
+                                    .reviewer_id,
+
+                            firstName:
+                                evaluation
+                                    .reviewer_first_name,
+
+                            lastName:
+                                evaluation
+                                    .reviewer_last_name,
+
+                            email:
+                                evaluation
+                                    .reviewer_email
+
+                        },
+
+
+                        isMine:
+                            String(
+                                evaluation
+                                    .reviewer_id
+                            ) ===
+                            String(
+                                req.session.userId
+                            ),
+
+
+                        ratings: {
+
+                            technicalSkills:
+                                Number(
+                                    evaluation
+                                        .technical_skills_rating
+                                ),
+
+                            relevantExperience:
+                                Number(
+                                    evaluation
+                                        .relevant_experience_rating
+                                ),
+
+                            qualifications:
+                                Number(
+                                    evaluation
+                                        .qualifications_rating
+                                ),
+
+                            overallSuitability:
+                                Number(
+                                    evaluation
+                                        .overall_suitability_rating
+                                )
+
+                        },
+
+
+                        evidenceNotes: {
+
+                            technicalSkills:
+                                evaluation
+                                    .technical_skills_note,
+
+                            relevantExperience:
+                                evaluation
+                                    .relevant_experience_note,
+
+                            qualifications:
+                                evaluation
+                                    .qualifications_note,
+
+                            overallSuitability:
+                                evaluation
+                                    .overall_suitability_note
+
+                        },
+
+
+                        feedback:
+                            evaluation
+                                .feedback,
+
+
+                        reviewerScore:
+                            Number(
+                                evaluation
+                                    .reviewer_score
+                            ),
+
+
+                        submittedAt:
+                            evaluation
+                                .submitted_at,
+
+
+                        updatedAt:
+                            evaluation
+                                .updated_at,
+
+
+                        locked:
+                            Boolean(
+                                evaluation
+                                    .locked_at
+                            )
+
+                    })
+                );
+
+
+
+            /* =================================================
+               RESPONSE
+               ================================================= */
+
+            return res.json({
+
+                success:
+                    true,
+
+
+                evaluation: {
+
+                    application: {
+
+                        id:
+                            application.id,
+
+                        reference:
+                            application
+                                .application_reference,
+
+                        status:
+                            application.status,
+
+
+                        candidateName:
+                            `${
+                                application
+                                    .first_name ||
+                                ""
+                            } ${
+                                application
+                                    .last_name ||
+                                ""
+                            }`
+                            .trim() ||
+                            "Candidate",
+
+
+                        job: {
+
+                            id:
+                                application
+                                    .job_id,
+
+                            title:
+                                application
+                                    .job_title
+
+                        }
+
+                    },
+
+
+                    progress: {
+
+                        reviewCount,
+
+                        requiredReviewers,
+
+                        isComplete,
+
+                        stage:
+                            reviewCount ===
+                                0
+
+                                ? "not_started"
+
+                                : isComplete
+
+                                    ? "complete"
+
+                                    : "under_evaluation"
+
+                    },
+
+
+                    combined: {
+
+                        averageRating,
+
+
+                        criteria: {
+
+                            technicalSkills:
+                                calculateAverage(
+                                    "technical_skills_rating"
+                                ),
+
+                            relevantExperience:
+                                calculateAverage(
+                                    "relevant_experience_rating"
+                                ),
+
+                            qualifications:
+                                calculateAverage(
+                                    "qualifications_rating"
+                                ),
+
+                            overallSuitability:
+                                calculateAverage(
+                                    "overall_suitability_rating"
+                                )
+
+                        },
+
+
+                        scoreDifference,
+
+                        significantDifference
+
+                    },
+
+
+                    canCurrentReviewerEvaluate,
+
+
+                    currentReviewerHasEvaluation:
+                        myEvaluation !==
+                        null,
+
+
+                    evaluations:
+                        mappedEvaluations
+
+                }
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Load application evaluations error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success:
+                    false,
+
+                message:
+                    "Unable to load application evaluations."
+
+            });
+
+        }
+
+    }
+);
+
+
+
+/* =========================================================
+   ADMIN - CREATE / UPDATE MY APPLICATION EVALUATION
+   ========================================================= */
+
+app.put(
+    "/api/admin/applications/:id/evaluation",
+    requireAdmin,
+    async (req, res) => {
+
+        const client =
+            await pool.connect();
+
+
+        try {
+
+            const applicationId =
+                req.params.id;
+
+
+            const {
+
+                technicalSkillsRating,
+                relevantExperienceRating,
+                qualificationsRating,
+                overallSuitabilityRating,
+
+                technicalSkillsNote,
+                relevantExperienceNote,
+                qualificationsNote,
+                overallSuitabilityNote,
+
+                feedback
+
+            } =
+                req.body;
+
+
+
+            /* =================================================
+               NORMALIZE RATINGS
+               ================================================= */
+
+            const ratings = {
+
+                technicalSkills:
+                    Number(
+                        technicalSkillsRating
+                    ),
+
+                relevantExperience:
+                    Number(
+                        relevantExperienceRating
+                    ),
+
+                qualifications:
+                    Number(
+                        qualificationsRating
+                    ),
+
+                overallSuitability:
+                    Number(
+                        overallSuitabilityRating
+                    )
+
+            };
+
+
+
+            /* =================================================
+               VALIDATE RATINGS
+               ================================================= */
+
+            const invalidRating =
+                Object
+                    .values(
+                        ratings
+                    )
+                    .some(
+                        rating =>
+
+                            !Number.isInteger(
+                                rating
+                            )
+
+                            ||
+
+                            rating <
+                                1
+
+                            ||
+
+                            rating >
+                                10
+                    );
+
+
+            if (
+                invalidRating
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Every evaluation rating must be a whole number from 1 to 10."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               VALIDATE FEEDBACK
+               ================================================= */
+
+            const cleanFeedback =
+                String(
+                    feedback ||
+                    ""
+                )
+                .trim();
+
+
+            if (
+                !cleanFeedback
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Please provide evaluation feedback."
+
+                });
+
+            }
+
+
+
+            await client.query(
+                "BEGIN"
+            );
+
+
+
+            /* =================================================
+               LOCK APPLICATION
+               ================================================= */
+
+            const applicationResult =
+                await client.query(
+                    `
+                    SELECT
+
+                        a.id,
+                        a.status,
+                        a.is_locked,
+
+                        j.required_reviewers
+
+                    FROM applications a
+
+
+                    INNER JOIN jobs j
+
+                        ON j.id =
+                            a.job_id
+
+
+                    WHERE
+                        a.id = $1
+
+
+                    FOR UPDATE
+                    `,
+                    [
+                        applicationId
+                    ]
+                );
+
+
+            if (
+                applicationResult.rows.length ===
+                0
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(404).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Application not found."
+
+                });
+
+            }
+
+
+            const application =
+                applicationResult.rows[0];
+
+
+
+            /* =================================================
+               ONLY SCREENING APPLICATIONS CAN BE EVALUATED
+               ================================================= */
+
+            if (
+                application.status !==
+                "screening"
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(409).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Only applications in Screening can be evaluated."
+
+                });
+
+            }
+
+
+
+            if (
+                application.is_locked
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(409).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "This application is locked."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               CHECK MY EXISTING REVIEW
+               ================================================= */
+
+            const existingResult =
+                await client.query(
+                    `
+                    SELECT *
+
+                    FROM application_evaluations
+
+                    WHERE
+                        application_id = $1
+
+                    AND
+                        reviewer_id = $2
+
+                    FOR UPDATE
+                    `,
+                    [
+                        applicationId,
+                        req.session.userId
+                    ]
+                );
+
+
+            const existingEvaluation =
+                existingResult.rows[0] ||
+                null;
+
+
+
+            /* =================================================
+               CHECK REVIEW CAPACITY
+
+               Same reviewer can edit their own
+               review.
+
+               A new reviewer cannot create an
+               extra review after the required
+               number is already complete.
+               ================================================= */
+
+            if (
+                !existingEvaluation
+            ) {
+
+                const reviewCountResult =
+                    await client.query(
+                        `
+                        SELECT
+                            COUNT(*)::INT
+                                AS review_count
+
+                        FROM application_evaluations
+
+                        WHERE
+                            application_id = $1
+                        `,
+                        [
+                            applicationId
+                        ]
+                    );
+
+
+                const reviewCount =
+                    Number(
+                        reviewCountResult
+                            .rows[0]
+                            .review_count
+                    ) ||
+                    0;
+
+
+                const requiredReviewers =
+                    Number(
+                        application
+                            .required_reviewers
+                    ) ||
+                    2;
+
+
+                if (
+                    reviewCount >=
+                    requiredReviewers
+                ) {
+
+                    await client.query(
+                        "ROLLBACK"
+                    );
+
+
+                    return res.status(409).json({
+
+                        success:
+                            false,
+
+                        message:
+                            "The required number of evaluations has already been completed."
+
+                    });
+
+                }
+
+            }
+
+
+
+            let savedEvaluation;
+
+            let activityType;
+
+            let activityTitle;
+
+
+
+            /* =================================================
+               UPDATE EXISTING EVALUATION
+               ================================================= */
+
+            if (
+                existingEvaluation
+            ) {
+
+                if (
+                    existingEvaluation
+                        .locked_at
+                ) {
+
+                    await client.query(
+                        "ROLLBACK"
+                    );
+
+
+                    return res.status(409).json({
+
+                        success:
+                            false,
+
+                        message:
+                            "This evaluation is locked and can no longer be edited."
+
+                    });
+
+                }
+
+
+
+                /* =============================================
+                   SAVE OLD VERSION TO AUDIT HISTORY
+                   ============================================= */
+
+                await client.query(
+                    `
+                    INSERT INTO application_evaluation_history (
+
+                        evaluation_id,
+                        application_id,
+                        reviewer_id,
+
+                        technical_skills_rating,
+                        relevant_experience_rating,
+                        qualifications_rating,
+                        overall_suitability_rating,
+
+                        technical_skills_note,
+                        relevant_experience_note,
+                        qualifications_note,
+                        overall_suitability_note,
+
+                        feedback,
+                        reviewer_score,
+
+                        change_type,
+                        changed_at
+
+                    )
+
+                    SELECT
+
+                        id,
+                        application_id,
+                        reviewer_id,
+
+                        technical_skills_rating,
+                        relevant_experience_rating,
+                        qualifications_rating,
+                        overall_suitability_rating,
+
+                        technical_skills_note,
+                        relevant_experience_note,
+                        qualifications_note,
+                        overall_suitability_note,
+
+                        recommendation,
+                        feedback,
+                        reviewer_score,
+
+                        'updated',
+                        NOW()
+
+                    FROM application_evaluations
+
+                    WHERE
+                        id = $1
+                    `,
+                    [
+                        existingEvaluation.id
+                    ]
+                );
+
+
+
+                const updateResult =
+                    await client.query(
+                        `
+                        UPDATE application_evaluations
+
+                        SET
+
+                            technical_skills_rating =
+                                $1,
+
+                            relevant_experience_rating =
+                                $2,
+
+                            qualifications_rating =
+                                $3,
+
+                            overall_suitability_rating =
+                                $4,
+
+                            technical_skills_note =
+                                $5,
+
+                            relevant_experience_note =
+                                $6,
+
+                            qualifications_note =
+                                $7,
+
+                            overall_suitability_note =
+                                $8,
+
+                            feedback =
+                                $9
+
+                            updated_at =
+                                NOW()
+
+                        WHERE
+                            id = $11
+
+                        RETURNING *
+                        `,
+                        [
+
+                            ratings
+                                .technicalSkills,
+
+                            ratings
+                                .relevantExperience,
+
+                            ratings
+                                .qualifications,
+
+                            ratings
+                                .overallSuitability,
+
+
+                            String(
+                                technicalSkillsNote ||
+                                ""
+                            )
+                            .trim() ||
+                            null,
+
+
+                            String(
+                                relevantExperienceNote ||
+                                ""
+                            )
+                            .trim() ||
+                            null,
+
+
+                            String(
+                                qualificationsNote ||
+                                ""
+                            )
+                            .trim() ||
+                            null,
+
+
+                            String(
+                                overallSuitabilityNote ||
+                                ""
+                            )
+                            .trim() ||
+                            null,
+
+                            cleanFeedback,
+
+                            existingEvaluation.id
+
+                        ]
+                    );
+
+
+                savedEvaluation =
+                    updateResult.rows[0];
+
+
+                activityType =
+                    "evaluation_updated";
+
+
+                activityTitle =
+                    "Evaluation updated";
+
+            }
+
+
+
+            /* =================================================
+               CREATE NEW EVALUATION
+               ================================================= */
+
+            else {
+
+                const insertResult =
+                    await client.query(
+                        `
+                        INSERT INTO application_evaluations (
+
+                            application_id,
+                            reviewer_id,
+
+                            technical_skills_rating,
+                            relevant_experience_rating,
+                            qualifications_rating,
+                            overall_suitability_rating,
+
+                            technical_skills_note,
+                            relevant_experience_note,
+                            qualifications_note,
+                            overall_suitability_note,
+
+                            feedback
+
+                        )
+
+                        VALUES (
+
+                            $1,
+                            $2,
+
+                            $3,
+                            $4,
+                            $5,
+                            $6,
+
+                            $7,
+                            $8,
+                            $9,
+                            $10,
+
+                            $11
+
+                        )
+
+                        RETURNING *
+                        `,
+                        [
+
+                            applicationId,
+                            req.session.userId,
+
+                            ratings
+                                .technicalSkills,
+
+                            ratings
+                                .relevantExperience,
+
+                            ratings
+                                .qualifications,
+
+                            ratings
+                                .overallSuitability,
+
+
+                            String(
+                                technicalSkillsNote ||
+                                ""
+                            )
+                            .trim() ||
+                            null,
+
+
+                            String(
+                                relevantExperienceNote ||
+                                ""
+                            )
+                            .trim() ||
+                            null,
+
+
+                            String(
+                                qualificationsNote ||
+                                ""
+                            )
+                            .trim() ||
+                            null,
+
+
+                            String(
+                                overallSuitabilityNote ||
+                                ""
+                            )
+                            .trim() ||
+                            null,
+
+
+                            cleanFeedback
+
+                        ]
+                    );
+
+
+                savedEvaluation =
+                    insertResult.rows[0];
+
+
+                /* =============================================
+                   RECORD CREATED VERSION
+                   ============================================= */
+
+                await client.query(
+                    `
+                    INSERT INTO application_evaluation_history (
+
+                        evaluation_id,
+                        application_id,
+                        reviewer_id,
+
+                        technical_skills_rating,
+                        relevant_experience_rating,
+                        qualifications_rating,
+                        overall_suitability_rating,
+
+                        technical_skills_note,
+                        relevant_experience_note,
+                        qualifications_note,
+                        overall_suitability_note,
+
+                        feedback,
+                        reviewer_score,
+
+                        change_type
+
+                    )
+
+                    VALUES (
+
+                        $1,
+                        $2,
+                        $3,
+
+                        $4,
+                        $5,
+                        $6,
+                        $7,
+
+                        $8,
+                        $9,
+                        $10,
+                        $11,
+
+                        $12,
+                        $13,
+
+                        'created'
+
+                    )
+                    `,
+                    [
+
+                        savedEvaluation.id,
+
+                        applicationId,
+
+                        req.session.userId,
+
+
+                        savedEvaluation
+                            .technical_skills_rating,
+
+                        savedEvaluation
+                            .relevant_experience_rating,
+
+                        savedEvaluation
+                            .qualifications_rating,
+
+                        savedEvaluation
+                            .overall_suitability_rating,
+
+
+                        savedEvaluation
+                            .technical_skills_note,
+
+                        savedEvaluation
+                            .relevant_experience_note,
+
+                        savedEvaluation
+                            .qualifications_note,
+
+                        savedEvaluation
+                            .overall_suitability_note,
+
+
+                        savedEvaluation
+                            .feedback,
+
+                        savedEvaluation
+                            .reviewer_score
+
+                    ]
+                );
+
+
+                activityType =
+                    "evaluation_submitted";
+
+
+                activityTitle =
+                    "Evaluation submitted";
+
+            }
+
+
+
+            /* =================================================
+               INTERNAL APPLICATION ACTIVITY
+
+               Candidate is NOT notified.
+               ================================================= */
+
+            await client.query(
+                `
+                INSERT INTO application_activity (
+
+                    application_id,
+                    performed_by,
+                    activity_type,
+                    title,
+                    description
+
+                )
+
+                VALUES (
+                    $1,
+                    $2,
+                    $3,
+                    $4,
+                    $5
+                )
+                `,
+                [
+
+                    applicationId,
+
+                    req.session.userId,
+
+                    activityType,
+
+                    activityTitle,
+
+                    `Reviewer score: ${savedEvaluation.reviewer_score}/10`
+
+                ]
+            );
+
+
+
+            /* =================================================
+               UPDATED SUMMARY
+               ================================================= */
+
+            const summaryResult =
+                await client.query(
+                    `
+                    SELECT
+
+                        COUNT(*)::INT
+                            AS review_count,
+
+                        ROUND(
+                            AVG(
+                                reviewer_score
+                            ),
+                            2
+                        )
+                            AS average_rating
+
+                    FROM application_evaluations
+
+                    WHERE
+                        application_id = $1
+                    `,
+                    [
+                        applicationId
+                    ]
+                );
+
+
+            const reviewCount =
+                Number(
+                    summaryResult
+                        .rows[0]
+                        .review_count
+                ) ||
+                0;
+
+
+            const requiredReviewers =
+                Number(
+                    application
+                        .required_reviewers
+                ) ||
+                2;
+
+
+            const averageRating =
+                summaryResult
+                    .rows[0]
+                    .average_rating ===
+                    null
+
+                    ? null
+
+                    : Number(
+                        summaryResult
+                            .rows[0]
+                            .average_rating
+                    );
+
+
+
+            await client.query(
+                "COMMIT"
+            );
+
+
+
+            /* =================================================
+               RESPONSE
+               ================================================= */
+
+            return res.json({
+
+                success:
+                    true,
+
+
+                message:
+                    existingEvaluation
+
+                        ? "Evaluation updated successfully."
+
+                        : "Evaluation submitted successfully.",
+
+
+                evaluation: {
+
+                    id:
+                        savedEvaluation.id,
+
+                    applicationId:
+                        savedEvaluation
+                            .application_id,
+
+                    reviewerId:
+                        savedEvaluation
+                            .reviewer_id,
+
+
+                    ratings: {
+
+                        technicalSkills:
+                            Number(
+                                savedEvaluation
+                                    .technical_skills_rating
+                            ),
+
+                        relevantExperience:
+                            Number(
+                                savedEvaluation
+                                    .relevant_experience_rating
+                            ),
+
+                        qualifications:
+                            Number(
+                                savedEvaluation
+                                    .qualifications_rating
+                            ),
+
+                        overallSuitability:
+                            Number(
+                                savedEvaluation
+                                    .overall_suitability_rating
+                            )
+
+                    },
+
+
+                    reviewerScore:
+                        Number(
+                            savedEvaluation
+                                .reviewer_score
+                        ),
+
+
+                    feedback:
+                        savedEvaluation
+                            .feedback,
+
+
+                    reviewCount,
+
+                    requiredReviewers,
+
+                    isComplete:
+                        reviewCount >=
+                        requiredReviewers,
+
+                    averageRating
+
+                }
+
+            });
+
+        }
+
+        catch (error) {
+
+            try {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+            }
+
+            catch (rollbackError) {
+
+                console.error(
+                    "Evaluation rollback error:",
+                    rollbackError
+                );
+
+            }
+
+
+            /*
+                This can happen if two requests race
+                to create the same recruiter's review.
+            */
+
+            if (
+                error.code ===
+                "23505"
+            ) {
+
+                return res.status(409).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "You already have an evaluation for this application."
+
+                });
+
+            }
+
+
+            console.error(
+                "Save application evaluation error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success:
+                    false,
+
+                message:
+                    "Unable to save the evaluation."
+
+            });
+
+        }
+
+        finally {
+
+            client.release();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   ADMIN - BULK SHORTLIST APPLICATIONS
+   ========================================================= */
+
+app.post(
+    "/api/admin/applications/bulk-shortlist",
+    requireAdmin,
+    async (req, res) => {
+
+        const client =
+            await pool.connect();
+
+
+        try {
+
+            const jobId =
+                Number(
+                    req.body.jobId
+                );
+
+
+            const requestedIds =
+                Array.isArray(
+                    req.body.applicationIds
+                )
+                    ? req.body.applicationIds
+                    : [];
+
+
+            /* =================================================
+               CLEAN APPLICATION IDS
+               ================================================= */
+
+            const applicationIds = [
+
+                ...new Set(
+
+                    requestedIds
+
+                        .map(
+                            value =>
+                                Number(
+                                    value
+                                )
+                        )
+
+                        .filter(
+                            value =>
+                                Number.isInteger(
+                                    value
+                                )
+                                &&
+                                value >
+                                0
+                        )
+
+                )
+
+            ];
+
+
+
+            /* =================================================
+               BASIC VALIDATION
+               ================================================= */
+
+            if (
+                !Number.isInteger(
+                    jobId
+                )
+                ||
+                jobId <=
+                    0
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Please select a valid vacancy before shortlisting candidates."
+
+                });
+
+            }
+
+
+            if (
+                applicationIds.length ===
+                0
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Please select at least one candidate to shortlist."
+
+                });
+
+            }
+
+
+            /*
+                Safety limit for one request.
+
+                This does NOT limit how many
+                applicants Altrium can store.
+
+                It only prevents one accidental
+                giant bulk request.
+            */
+
+            if (
+                applicationIds.length >
+                250
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "You can shortlist up to 250 candidates in one batch."
+
+                });
+
+            }
+
+
+
+            await client.query(
+                "BEGIN"
+            );
+
+
+
+            /* =================================================
+               VERIFY VACANCY
+               ================================================= */
+
+            const jobResult =
+                await client.query(
+                    `
+                    SELECT
+
+                        id,
+                        job_title,
+                        required_reviewers
+
+                    FROM jobs
+
+                    WHERE id = $1
+                    `,
+                    [
+                        jobId
+                    ]
+                );
+
+
+            if (
+                jobResult.rows.length ===
+                0
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(404).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "The selected vacancy could not be found."
+
+                });
+
+            }
+
+
+            const job =
+                jobResult.rows[0];
+
+
+
+            /* =================================================
+               LOCK ALL SELECTED APPLICATIONS
+
+               IMPORTANT:
+               The filter intentionally does NOT
+               restrict job_id here.
+
+               We load every supplied ID first so
+               we can detect mixed-vacancy requests.
+               ================================================= */
+
+            const applicationResult =
+                await client.query(
+                    `
+                    SELECT
+
+                        a.id,
+
+                        a.application_reference,
+
+                        a.candidate_id,
+
+                        a.job_id,
+
+                        a.status,
+
+                        a.is_locked,
+
+
+                        u.first_name
+                            AS candidate_first_name,
+
+                        u.last_name
+                            AS candidate_last_name,
+
+                        u.email
+                            AS candidate_email
+
+
+                    FROM applications a
+
+
+                    INNER JOIN users u
+
+                        ON u.id =
+                            a.candidate_id
+
+
+                    WHERE
+
+                        a.id =
+                        ANY(
+                            $1::BIGINT[]
+                        )
+
+
+                    ORDER BY
+                        a.id ASC
+
+
+                    FOR UPDATE OF a
+                    `,
+                    [
+                        applicationIds
+                    ]
+                );
+
+
+            const applications =
+                applicationResult.rows;
+
+
+
+            /* =================================================
+               EVERY APPLICATION MUST EXIST
+               ================================================= */
+
+            if (
+                applications.length !==
+                applicationIds.length
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(409).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "One or more selected applications no longer exist. Refresh the Applicants page and try again."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               EVERY APPLICATION MUST BELONG
+               TO THE SAME SELECTED VACANCY
+               ================================================= */
+
+            const wrongVacancyApplication =
+                applications.find(
+                    application =>
+                        Number(
+                            application.job_id
+                        ) !==
+                        jobId
+                );
+
+
+            if (
+                wrongVacancyApplication
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(409).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Bulk shortlisting can only contain candidates from one vacancy."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               APPLICATIONS MUST STILL BE SCREENING
+               ================================================= */
+
+            const invalidStatusApplication =
+                applications.find(
+                    application =>
+                        application.status !==
+                        "screening"
+                );
+
+
+            if (
+                invalidStatusApplication
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(409).json({
+
+                    success:
+                        false,
+
+                    message:
+                        `Application ${invalidStatusApplication.application_reference} is no longer eligible for shortlisting. Refresh the applicant list and review the selection.`
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               LOCKED APPLICATIONS CANNOT CHANGE
+               ================================================= */
+
+            const lockedApplication =
+                applications.find(
+                    application =>
+                        Boolean(
+                            application.is_locked
+                        )
+                );
+
+
+            if (
+                lockedApplication
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(409).json({
+
+                    success:
+                        false,
+
+                    message:
+                        `Application ${lockedApplication.application_reference} is locked and cannot be shortlisted.`
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               LOAD EVALUATION COUNTS
+
+               Distinct reviewer IDs are counted.
+               One recruiter can never count twice.
+               ================================================= */
+
+            const evaluationResult =
+                await client.query(
+                    `
+                    SELECT
+
+                        a.id
+                            AS application_id,
+
+
+                        j.required_reviewers,
+
+
+                        COUNT(
+                            DISTINCT e.reviewer_id
+                        )::INT
+                            AS review_count,
+
+
+                        ROUND(
+                            AVG(
+                                e.reviewer_score
+                            ),
+                            2
+                        )
+                            AS average_rating
+
+
+                    FROM applications a
+
+
+                    INNER JOIN jobs j
+
+                        ON j.id =
+                            a.job_id
+
+
+                    LEFT JOIN application_evaluations e
+
+                        ON e.application_id =
+                            a.id
+
+
+                    WHERE
+
+                        a.id =
+                        ANY(
+                            $1::BIGINT[]
+                        )
+
+
+                    GROUP BY
+
+                        a.id,
+
+                        j.required_reviewers
+                    `,
+                    [
+                        applicationIds
+                    ]
+                );
+
+
+
+            const evaluationMap =
+                new Map(
+                    evaluationResult
+                        .rows
+                        .map(
+                            evaluation => [
+
+                                String(
+                                    evaluation
+                                        .application_id
+                                ),
+
+                                evaluation
+
+                            ]
+                        )
+                );
+
+
+
+            /* =================================================
+               VERIFY REQUIRED REVIEWS
+               ================================================= */
+
+            const incompleteApplication =
+                applications.find(
+                    application => {
+
+                        const evaluation =
+                            evaluationMap.get(
+                                String(
+                                    application.id
+                                )
+                            );
+
+
+                        const reviewCount =
+                            Number(
+                                evaluation
+                                    ?.review_count
+                            ) ||
+                            0;
+
+
+                        const requiredReviewers =
+                            Number(
+                                evaluation
+                                    ?.required_reviewers
+                            ) ||
+                            Number(
+                                job.required_reviewers
+                            ) ||
+                            2;
+
+
+                        return (
+                            reviewCount <
+                            requiredReviewers
+                        );
+
+                    }
+                );
+
+
+            if (
+                incompleteApplication
+            ) {
+
+                const evaluation =
+                    evaluationMap.get(
+                        String(
+                            incompleteApplication.id
+                        )
+                    );
+
+
+                const reviewCount =
+                    Number(
+                        evaluation
+                            ?.review_count
+                    ) ||
+                    0;
+
+
+                const requiredReviewers =
+                    Number(
+                        evaluation
+                            ?.required_reviewers
+                    ) ||
+                    Number(
+                        job.required_reviewers
+                    ) ||
+                    2;
+
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(409).json({
+
+                    success:
+                        false,
+
+                    message:
+                        `Application ${incompleteApplication.application_reference} has only ${reviewCount} of ${requiredReviewers} required evaluations.`
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               MOVE ALL APPLICATIONS TO SHORTLISTED
+               ================================================= */
+
+            await client.query(
+                `
+                UPDATE applications
+
+                SET
+
+                    status =
+                        'shortlisted',
+
+                    updated_at =
+                        NOW()
+
+                WHERE
+
+                    id =
+                    ANY(
+                        $1::BIGINT[]
+                    )
+                `,
+                [
+                    applicationIds
+                ]
+            );
+
+
+
+            /* =================================================
+               LOCK ALL COMPLETED EVALUATIONS
+
+               Evaluation evidence is preserved
+               once the shortlist decision is made.
+               ================================================= */
+
+            await client.query(
+                `
+                UPDATE application_evaluations
+
+                SET
+
+                    locked_at =
+                        COALESCE(
+                            locked_at,
+                            NOW()
+                        )
+
+                WHERE
+
+                    application_id =
+                    ANY(
+                        $1::BIGINT[]
+                    )
+                `,
+                [
+                    applicationIds
+                ]
+            );
+
+
+
+            /* =================================================
+               STATUS HISTORY
+               ================================================= */
+
+            await client.query(
+                `
+                INSERT INTO application_status_history (
+
+                    application_id,
+
+                    previous_status,
+
+                    new_status,
+
+                    changed_by,
+
+                    status_note
+
+                )
+
+
+                SELECT
+
+                    id,
+
+                    'screening',
+
+                    'shortlisted',
+
+                    $2,
+
+                    'Candidate shortlisted through bulk shortlist review.'
+
+
+                FROM applications
+
+
+                WHERE
+
+                    id =
+                    ANY(
+                        $1::BIGINT[]
+                    )
+                `,
+                [
+                    applicationIds,
+                    req.session.userId
+                ]
+            );
+
+
+
+            /* =================================================
+               APPLICATION ACTIVITY
+               ================================================= */
+
+            await client.query(
+                `
+                INSERT INTO application_activity (
+
+                    application_id,
+
+                    performed_by,
+
+                    activity_type,
+
+                    title,
+
+                    description
+
+                )
+
+
+                SELECT
+
+                    id,
+
+                    $2,
+
+                    'status_change',
+
+                    'Candidate shortlisted',
+
+                    'Screening → shortlisted through bulk shortlist review.'
+
+
+                FROM applications
+
+
+                WHERE
+
+                    id =
+                    ANY(
+                        $1::BIGINT[]
+                    )
+                `,
+                [
+                    applicationIds,
+                    req.session.userId
+                ]
+            );
+
+
+
+            /* =================================================
+               CANDIDATE NOTIFICATIONS
+               ================================================= */
+
+            await client.query(
+                `
+                INSERT INTO notifications (
+
+                    user_id,
+
+                    notification_type,
+
+                    title,
+
+                    message,
+
+                    application_id,
+
+                    job_id,
+
+                    action_url
+
+                )
+
+
+                SELECT
+
+                    a.candidate_id,
+
+                    'application_shortlisted',
+
+                    'You''ve been shortlisted',
+
+                    'Your application for '
+                        ||
+                    j.job_title
+                        ||
+                    ' has been shortlisted and is moving forward.',
+
+                    a.id,
+
+                    a.job_id,
+
+                    '/application-progress.html?id='
+                        ||
+                    a.id::TEXT
+
+
+                FROM applications a
+
+
+                INNER JOIN jobs j
+
+                    ON j.id =
+                        a.job_id
+
+
+                WHERE
+
+                    a.id =
+                    ANY(
+                        $1::BIGINT[]
+                    )
+                `,
+                [
+                    applicationIds
+                ]
+            );
+
+
+
+            /* =================================================
+               COMMIT DATABASE CHANGES
+
+               Everything above is all-or-nothing.
+               ================================================= */
+
+            await client.query(
+                "COMMIT"
+            );
+
+
+
+            /* =================================================
+               SEND EMAILS AFTER COMMIT
+
+               Email failure must NOT undo a valid
+               recruitment decision.
+
+               Process in small batches so a large
+               shortlist does not hammer the mail
+               provider all at once.
+               ================================================= */
+
+            let emailsSent =
+                0;
+
+
+            let emailsFailed =
+                0;
+
+
+            const emailBatchSize =
+                5;
+
+
+            for (
+                let start = 0;
+
+                start <
+                applications.length;
+
+                start +=
+                emailBatchSize
+            ) {
+
+                const batch =
+                    applications.slice(
+                        start,
+                        start +
+                        emailBatchSize
+                    );
+
+
+                const results =
+                    await Promise.allSettled(
+
+                        batch.map(
+                            application => {
+
+                                const candidateName =
+                                    `${
+                                        application
+                                            .candidate_first_name ||
+                                        ""
+                                    } ${
+                                        application
+                                            .candidate_last_name ||
+                                        ""
+                                    }`
+                                    .trim() ||
+                                    "Candidate";
+
+
+                                return sendShortlistedCandidateEmail({
+
+                                    candidateName,
+
+                                    candidateEmail:
+                                        application
+                                            .candidate_email,
+
+                                    applicationId:
+                                        application.id,
+
+                                    applicationReference:
+                                        application
+                                            .application_reference,
+
+                                    jobTitle:
+                                        job.job_title
+
+                                });
+
+                            }
+                        )
+
+                    );
+
+
+                results.forEach(
+                    result => {
+
+                        if (
+                            result.status ===
+                            "fulfilled"
+                        ) {
+
+                            emailsSent +=
+                                1;
+
+                        }
+
+                        else {
+
+                            emailsFailed +=
+                                1;
+
+
+                            console.error(
+                                "Bulk shortlist email error:",
+                                result.reason
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+
+
+
+            /* =================================================
+               RESPONSE
+               ================================================= */
+
+            return res.json({
+
+                success:
+                    true,
+
+
+                message:
+                    `${applications.length} ${
+                        applications.length ===
+                        1
+                            ? "candidate has"
+                            : "candidates have"
+                    } been shortlisted successfully.`,
+
+
+                shortlist: {
+
+                    job: {
+
+                        id:
+                            job.id,
+
+                        title:
+                            job.job_title
+
+                    },
+
+
+                    count:
+                        applications.length,
+
+
+                    applicationIds:
+                        applications.map(
+                            application =>
+                                application.id
+                        ),
+
+
+                    emails: {
+
+                        sent:
+                            emailsSent,
+
+                        failed:
+                            emailsFailed
+
+                    }
+
+                }
+
+            });
+
+        }
+
+        catch (error) {
+
+            try {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+            }
+
+            catch (rollbackError) {
+
+                /*
+                    ROLLBACK can fail here if the
+                    transaction already committed.
+
+                    That is harmless.
+                */
+
+            }
+
+
+            console.error(
+                "Bulk shortlist error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success:
+                    false,
+
+                message:
+                    "Unable to shortlist the selected candidates."
+
+            });
+
+        }
+
+        finally {
+
+            client.release();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
    ADMIN - CHANGE APPLICATION STATUS
    ========================================================= */
 
@@ -7849,6 +12417,7 @@ app.patch(
                         a.is_locked,
 
                         j.job_title,
+                        j.required_reviewers,
 
                         u.email AS candidate_email,
                         u.first_name AS candidate_first_name
@@ -8054,6 +12623,76 @@ app.patch(
             }
 
 
+/* =================================================
+   SHORTLISTING REQUIRES COMPLETED EVALUATIONS
+   ================================================= */
+
+if (
+    newStatus ===
+    "shortlisted"
+) {
+
+    const evaluationCountResult =
+        await client.query(
+            `
+            SELECT
+                COUNT(
+                    DISTINCT reviewer_id
+                )::INT
+                    AS review_count
+
+            FROM application_evaluations
+
+            WHERE
+                application_id = $1
+            `,
+            [
+                applicationId
+            ]
+        );
+
+
+    const reviewCount =
+        Number(
+            evaluationCountResult
+                .rows[0]
+                .review_count
+        ) ||
+        0;
+
+
+    const requiredReviewers =
+        Number(
+            application
+                .required_reviewers
+        ) ||
+        2;
+
+
+    if (
+        reviewCount <
+        requiredReviewers
+    ) {
+
+        await client.query(
+            "ROLLBACK"
+        );
+
+
+        return res.status(409).json({
+
+            success:
+                false,
+
+            message:
+                `This application requires ${requiredReviewers} completed evaluations before it can be shortlisted. Currently ${reviewCount} of ${requiredReviewers} are complete.`
+
+        });
+
+    }
+
+}
+
 
             /* =================================================
                STATUS INFORMATION
@@ -8162,6 +12801,36 @@ app.patch(
                 ]
             );
 
+                
+             /* =================================================
+                LOCK EVALUATIONS AFTER SHORTLISTING
+                ================================================= */
+
+                if (
+                    newStatus ===
+                    "shortlisted"
+                ) {
+
+                    await client.query(
+                        `
+                        UPDATE application_evaluations
+
+                        SET
+                            locked_at =
+                                COALESCE(
+                                    locked_at,
+                                    NOW()
+                                )
+
+                        WHERE
+                            application_id = $1
+                        `,
+                        [
+                            applicationId
+                        ]
+                    );
+
+                }
 
 
             /* =================================================
@@ -11410,10 +16079,11 @@ app.patch(
 
 app.listen(
     PORT,
+    "0.0.0.0",
     () => {
 
         console.log(
-            `Server running on http://localhost:${PORT}`
+            `Altrium server running on port ${PORT}`
         );
 
     }
