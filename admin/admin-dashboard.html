@@ -35,7 +35,7 @@
     <!-- Admin styles -->
     <link
         rel="stylesheet"
-        href="admin-dashboard.css"
+        href="admin-dashboard.css?v=6"
     >
 
 </head>
@@ -114,7 +114,10 @@
 
     <div class="nav-right">
 
-        <span class="admin-role-badge">
+        <span
+            class="admin-role-badge"
+            id="adminRoleBadge"
+        >
             ADMIN
         </span>
 
@@ -231,7 +234,16 @@
 
     <!-- SIDEBAR -->
 
-    <aside class="admin-sidebar">
+    <!-- SIDEBAR -->
+
+<aside class="admin-sidebar">
+
+
+    <!-- =====================================================
+         RECRUITMENT PANEL
+         ===================================================== -->
+
+    <div class="admin-sidebar-card">
 
         <div class="admin-sidebar-heading">
 
@@ -240,7 +252,7 @@
             </span>
 
             <strong>
-                System Panel
+                Recruitment Panel
             </strong>
 
         </div>
@@ -309,7 +321,144 @@
 
         </nav>
 
-    </aside>
+    </div>
+
+
+
+    <!-- =====================================================
+         SYSTEM ADMIN ONLY
+         ===================================================== -->
+
+    <div
+        class="admin-sidebar-card system-sidebar-card"
+        id="systemPanelNavigation"
+        hidden
+    >
+
+        <div class="admin-sidebar-heading system-sidebar-heading">
+
+            <span>
+                ALTRIUM SYSTEM
+            </span>
+
+            <strong>
+                System Panel
+            </strong>
+
+        </div>
+
+
+        <nav class="admin-navigation">
+
+            <button
+                type="button"
+                class="admin-nav-item system-panel-nav-item"
+                data-section="system-overview"
+            >
+
+                <span class="admin-nav-number">
+                    05
+                </span>
+
+                Overview
+
+            </button>
+
+
+            <button
+                type="button"
+                class="admin-nav-item system-panel-nav-item"
+                data-section="system-users"
+            >
+
+                <span class="admin-nav-number">
+                    06
+                </span>
+
+                Users
+
+            </button>
+
+
+            <button
+                type="button"
+                class="admin-nav-item system-panel-nav-item"
+                data-section="system-roles"
+            >
+
+                <span class="admin-nav-number">
+                    07
+                </span>
+
+                Roles & Permissions
+
+            </button>
+
+
+            <button
+                type="button"
+                class="admin-nav-item system-panel-nav-item"
+                data-section="system-vacancies"
+            >
+
+                <span class="admin-nav-number">
+                    08
+                </span>
+
+                Vacancy Oversight
+
+            </button>
+
+
+            <button
+                type="button"
+                class="admin-nav-item system-panel-nav-item"
+                data-section="system-audit"
+            >
+
+                <span class="admin-nav-number">
+                    09
+                </span>
+
+                Audit Logs
+
+            </button>
+
+
+            <button
+                type="button"
+                class="admin-nav-item system-panel-nav-item"
+                data-section="system-security"
+            >
+
+                <span class="admin-nav-number">
+                    10
+                </span>
+
+                Sessions & Security
+
+            </button>
+
+
+            <button
+                type="button"
+                class="admin-nav-item system-panel-nav-item"
+                data-section="system-settings"
+            >
+
+                <span class="admin-nav-number">
+                    11
+                </span>
+
+                System Settings
+
+            </button>
+
+        </nav>
+
+    </div>
+
+</aside>
 
 
 
@@ -1003,6 +1152,1159 @@
 
         </section>
 
+        <!-- =====================================================
+            SYSTEM ADMIN - OVERVIEW
+            ===================================================== -->
+
+        <section
+            class="admin-section system-admin-section"
+            id="system-overview"
+        >
+
+            <div class="system-page-heading">
+
+                <div>
+
+                    <span class="system-section-label">
+                        SYSTEM PANEL
+                    </span>
+
+                    <h1>
+                        System
+                        <em>overview.</em>
+                    </h1>
+
+                    <p>
+                        Central administration for Altrium users,
+                        roles, security, auditing and system operations.
+                    </p>
+
+                </div>
+
+
+                <div class="system-access-badge">
+
+                    <span>
+                        ACCESS LEVEL
+                    </span>
+
+                    <strong>
+                        SYSTEM ADMIN
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="system-overview-notice">
+
+                <div class="system-overview-notice-mark">
+                    S
+                </div>
+
+
+                <div>
+
+                    <span>
+                        SYSTEM ADMINISTRATION
+                    </span>
+
+                    <h2>
+                        Full system management.
+                    </h2>
+
+                    <p>
+                        This area is restricted to System Admin accounts.
+                        The modules below will provide centralized control
+                        over Altrium's users, permissions, vacancies,
+                        audit history and security.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="system-module-grid">
+
+
+                <article class="system-module-card">
+
+                    <span>
+                        01
+                    </span>
+
+                    <h3>
+                        Users
+                    </h3>
+
+                    <p>
+                        View accounts, account status,
+                        roles and user activity.
+                    </p>
+
+                </article>
+
+
+                <article class="system-module-card">
+
+                    <span>
+                        02
+                    </span>
+
+                    <h3>
+                        Roles & Permissions
+                    </h3>
+
+                    <p>
+                        Create roles and control
+                        access to Altrium capabilities.
+                    </p>
+
+                </article>
+
+
+                <article class="system-module-card">
+
+                    <span>
+                        03
+                    </span>
+
+                    <h3>
+                        Vacancy Oversight
+                    </h3>
+
+                    <p>
+                        Inspect vacancy ownership,
+                        creators and system-level history.
+                    </p>
+
+                </article>
+
+
+                <article class="system-module-card">
+
+                    <span>
+                        04
+                    </span>
+
+                    <h3>
+                        Audit Logs
+                    </h3>
+
+                    <p>
+                        Review important actions
+                        performed throughout Altrium.
+                    </p>
+
+                </article>
+
+
+                <article class="system-module-card">
+
+                    <span>
+                        05
+                    </span>
+
+                    <h3>
+                        Sessions & Security
+                    </h3>
+
+                    <p>
+                        Inspect and eventually revoke
+                        authenticated user sessions.
+                    </p>
+
+                </article>
+
+
+                <article class="system-module-card">
+
+                    <span>
+                        06
+                    </span>
+
+                    <h3>
+                        System Settings
+                    </h3>
+
+                    <p>
+                        Manage safe system-level
+                        configuration and controls.
+                    </p>
+
+                </article>
+
+
+            </div>
+
+        </section>
+
+
+
+<!-- =====================================================
+     SYSTEM PANEL - USERS
+     ===================================================== -->
+
+<section
+    class="admin-section system-admin-section"
+    id="system-users"
+>
+
+<div class="system-users-heading">
+
+    <div>
+
+        <span class="system-section-label">
+            SYSTEM PANEL / USERS
+        </span>
+
+        <h1>
+            Manage your
+            <em>team.</em>
+        </h1>
+
+        <p>
+            Manage internal Altrium team members
+            and inspect registered candidate accounts.
+        </p>
+
+    </div>
+
+
+    <button
+        type="button"
+        class="system-add-team-member-button"
+        id="openAddTeamMemberModal"
+    >
+
+        <span>
+            +
+        </span>
+
+        Add Team Member
+
+    </button>
+
+</div>
+
+
+<!-- =====================================================
+     MANAGE TEAM MEMBER MODAL
+     ===================================================== -->
+
+<div
+    class="admin-modal"
+    id="manageTeamMemberModal"
+>
+
+    <div
+        class="admin-modal-backdrop"
+        id="manageTeamMemberBackdrop"
+    ></div>
+
+
+    <div class="system-manage-member-modal-card">
+
+
+        <div class="admin-modal-header">
+
+            <div>
+
+                <span class="system-section-label">
+                    TEAM MANAGEMENT
+                </span>
+
+                <h2 id="manageTeamMemberName">
+                    Team member
+                </h2>
+
+                <p>
+                    Review this account and manage
+                    its Altrium access level.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="admin-modal-close"
+                id="closeManageTeamMemberModal"
+                aria-label="Close"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+
+        <!-- =================================================
+             ACCOUNT DETAILS
+             ================================================= -->
+
+        <div class="system-managed-member-summary">
+
+
+            <div>
+
+                <span>
+                    EMAIL
+                </span>
+
+                <strong id="manageTeamMemberEmail">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    PHONE
+                </span>
+
+                <strong id="manageTeamMemberPhone">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    CURRENT ACCESS
+                </span>
+
+                <strong id="manageTeamMemberCurrentRole">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    JOINED
+                </span>
+
+                <strong id="manageTeamMemberJoined">
+                    —
+                </strong>
+
+            </div>
+
+        </div>
+
+
+
+        <form id="manageTeamMemberForm">
+
+
+            <div class="system-manage-role-section">
+
+                <div class="system-manage-role-heading">
+
+                    <span>
+                        PRIMARY ACCESS ROLE
+                    </span>
+
+                    <h3>
+                        Change access level
+                    </h3>
+
+                    <p>
+                        This controls whether the team member has
+                        Recruitment Panel access only or full
+                        System Panel access.
+                    </p>
+
+                </div>
+
+
+
+                <div class="admin-input admin-input-full">
+
+                    <label>
+                        Access role
+                    </label>
+
+
+                    <div
+                        class="admin-custom-select"
+                        id="manageTeamMemberRoleDropdown"
+                    >
+
+                        <button
+                            type="button"
+                            class="admin-custom-select-trigger"
+                            id="manageTeamMemberRoleTrigger"
+                        >
+
+                            <span id="manageTeamMemberRoleText">
+                                Select access role
+                            </span>
+
+                            <span class="admin-select-arrow">
+                                ↓
+                            </span>
+
+                        </button>
+
+
+                        <div
+                            class="admin-custom-select-menu"
+                            id="manageTeamMemberRoleMenu"
+                        >
+
+                            <button
+                                type="button"
+                                data-value="admin"
+                            >
+                                System Manager
+                            </button>
+
+
+                            <button
+                                type="button"
+                                data-value="system_admin"
+                            >
+                                System Admin
+                            </button>
+
+                        </div>
+
+
+                        <input
+                            type="hidden"
+                            id="manageTeamMemberRole"
+                        >
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="system-role-security-note">
+
+                    <strong>
+                        Access change
+                    </strong>
+
+                    <p>
+                        Changing this role signs the team member
+                        out of their existing Altrium sessions.
+                        They can immediately sign back in with
+                        their normal account credentials.
+                    </p>
+
+                </div>
+
+
+                <div
+                    class="system-self-role-note"
+                    id="systemSelfRoleNote"
+                    hidden
+                >
+
+                    Your own System Admin access cannot be changed
+                    from this control.
+
+                </div>
+
+
+                <p
+                    class="system-team-member-message"
+                    id="manageTeamMemberMessage"
+                    hidden
+                ></p>
+
+            </div>
+
+
+
+            <div class="admin-modal-actions">
+
+                <button
+                    type="button"
+                    class="admin-cancel-button"
+                    id="cancelManageTeamMember"
+                >
+                    Cancel
+                </button>
+
+
+                <button
+                    type="submit"
+                    class="system-update-team-role-button"
+                    id="updateTeamMemberRoleButton"
+                >
+                    Update Access Role
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+    <!-- =================================================
+         USER STATS
+         ================================================= -->
+
+    <div class="system-user-stats">
+
+        <article>
+
+            <span>
+                TEAM MEMBERS
+            </span>
+
+            <strong id="systemTeamMemberCount">
+                0
+            </strong>
+
+            <p>
+                Internal Altrium team accounts
+            </p>
+
+        </article>
+
+
+        <article>
+
+            <span>
+                SYSTEM MANAGERS
+            </span>
+
+            <strong id="systemManagerCount">
+                0
+            </strong>
+
+            <p>
+                Recruitment management accounts
+            </p>
+
+        </article>
+
+
+        <article>
+
+            <span>
+                SYSTEM ADMINS
+            </span>
+
+            <strong id="systemAdminCount">
+                0
+            </strong>
+
+            <p>
+                Full system access
+            </p>
+
+        </article>
+
+
+        <article>
+
+            <span>
+                CANDIDATES
+            </span>
+
+            <strong id="systemCandidateCount">
+                0
+            </strong>
+
+            <p>
+                Registered candidate accounts
+            </p>
+
+        </article>
+
+    </div>
+
+
+
+    <!-- =================================================
+         DIRECTORY TOOLBAR
+         ================================================= -->
+
+    <div class="system-users-toolbar">
+
+
+        <div
+            class="system-user-groups"
+            id="systemUserGroups"
+        >
+
+            <button
+                type="button"
+                class="system-user-group-button active"
+                data-user-group="team"
+            >
+                Team Members
+            </button>
+
+
+            <button
+                type="button"
+                class="system-user-group-button"
+                data-user-group="candidates"
+            >
+                Candidates
+            </button>
+
+
+            <button
+                type="button"
+                class="system-user-group-button"
+                data-user-group="all"
+            >
+                All Users
+            </button>
+
+        </div>
+
+
+
+        <div class="system-user-search">
+
+            <span>
+                ⌕
+            </span>
+
+            <input
+                type="text"
+                id="systemUserSearch"
+                placeholder="Search name, email or phone..."
+                autocomplete="off"
+            >
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         LIST HEADING
+         ================================================= -->
+
+    <div class="system-users-list-heading">
+
+        <div>
+
+            <span id="systemUsersListLabel">
+                TEAM MEMBERS
+            </span>
+
+            <strong id="systemUsersResultCount">
+                0 users
+            </strong>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         USER DIRECTORY
+         ================================================= -->
+
+    <div
+        class="system-users-list"
+        id="systemUsersList"
+    >
+
+        <div class="system-users-loading">
+            Loading users...
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         PAGINATION
+         ================================================= -->
+
+    <div
+        class="system-users-pagination"
+        id="systemUsersPagination"
+        hidden
+    >
+
+        <button
+            type="button"
+            id="systemUsersPreviousPage"
+        >
+            Previous
+        </button>
+
+
+        <span id="systemUsersPageSummary">
+            Page 1 of 1
+        </span>
+
+
+        <button
+            type="button"
+            id="systemUsersNextPage"
+        >
+            Next
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ADD TEAM MEMBER MODAL
+     ===================================================== -->
+
+<div
+    class="admin-modal"
+    id="addTeamMemberModal"
+>
+
+    <div
+        class="admin-modal-backdrop"
+        id="addTeamMemberBackdrop"
+    ></div>
+
+
+    <div class="system-team-member-modal-card">
+
+
+        <div class="admin-modal-header">
+
+            <div>
+
+                <span class="system-section-label">
+                    TEAM MANAGEMENT
+                </span>
+
+                <h2>
+                    Add team member.
+                </h2>
+
+                <p>
+                    Create an internal Altrium account
+                    and assign its initial role.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="admin-modal-close"
+                id="closeAddTeamMemberModal"
+                aria-label="Close"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+
+        <form id="addTeamMemberForm">
+
+
+            <div class="admin-form-grid">
+
+
+                <div class="admin-input">
+
+                    <label for="teamMemberFirstName">
+                        First name *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="teamMemberFirstName"
+                        placeholder="First name"
+                        autocomplete="off"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="admin-input">
+
+                    <label for="teamMemberLastName">
+                        Last name *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="teamMemberLastName"
+                        placeholder="Last name"
+                        autocomplete="off"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="admin-input">
+
+                    <label for="teamMemberEmail">
+                        Email address *
+                    </label>
+
+                    <input
+                        type="email"
+                        id="teamMemberEmail"
+                        placeholder="name@company.com"
+                        autocomplete="off"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="admin-input">
+
+                    <label for="teamMemberPhone">
+                        Phone number *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="teamMemberPhone"
+                        placeholder="+94..."
+                        autocomplete="off"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 ROLE
+                 ================================================= -->
+
+            <div class="admin-input admin-input-full">
+
+                <label>
+                    Initial role *
+                </label>
+
+
+                <div
+                    class="admin-custom-select"
+                    id="teamMemberRoleDropdown"
+                >
+
+                    <button
+                        type="button"
+                        class="admin-custom-select-trigger"
+                        id="teamMemberRoleTrigger"
+                    >
+
+                        <span id="teamMemberRoleText">
+                            Select team role
+                        </span>
+
+                        <span class="admin-select-arrow">
+                            ↓
+                        </span>
+
+                    </button>
+
+
+                    <div
+                        class="admin-custom-select-menu"
+                        id="teamMemberRoleMenu"
+                    >
+
+                        <button
+                            type="button"
+                            data-value="admin"
+                        >
+                            System Manager
+                        </button>
+
+
+                        <button
+                            type="button"
+                            data-value="hr_manager"
+                        >
+                            HR Manager
+                        </button>
+
+
+                        <button
+                            type="button"
+                            data-value="hr_recruiter"
+                        >
+                            HR / Recruiter
+                        </button>
+
+
+                        <button
+                            type="button"
+                            data-value="interviewer"
+                        >
+                            Interviewer
+                        </button>
+
+
+                        <button
+                            type="button"
+                            data-value="system_admin"
+                        >
+                            System Admin
+                        </button>
+
+                    </div>
+
+
+                    <input
+                        type="hidden"
+                        id="teamMemberRole"
+                    >
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 TEMP PASSWORD
+                 ================================================= -->
+
+            <div class="admin-input admin-input-full">
+
+                <label for="teamMemberTemporaryPassword">
+                    Temporary password *
+                </label>
+
+                <input
+                    type="password"
+                    id="teamMemberTemporaryPassword"
+                    placeholder="Minimum 8 characters"
+                    autocomplete="new-password"
+                    required
+                >
+
+                <small>
+                    Give this password securely to the team member.
+                    They can change it later using Altrium's password
+                    reset flow.
+                </small>
+
+            </div>
+
+
+
+            <div class="system-team-role-note">
+
+                <strong>
+                    System Manager
+                </strong>
+
+                <p>
+                    General recruitment management access.
+                </p>
+
+
+                <strong>
+                    HR Manager
+                </strong>
+
+                <p>
+                    Full recruitment management across vacancies,
+                    applicants, evaluations and interviews.
+                </p>
+
+
+                <strong>
+                    HR / Recruiter
+                </strong>
+
+                <p>
+                    Applicant management, evaluations and interview
+                    coordination with vacancy viewing access.
+                </p>
+
+
+                <strong>
+                    Interviewer
+                </strong>
+
+                <p>
+                    Can review applicants, view interview sessions
+                    and submit evaluations without recruitment
+                    management authority.
+                </p>
+
+
+                <strong>
+                    System Admin
+                </strong>
+
+                <p>
+                    Full Altrium administration including
+                    System Panel access.
+                </p>
+
+            </div>
+
+
+
+            <p
+                class="system-team-member-message"
+                id="addTeamMemberMessage"
+                hidden
+            ></p>
+
+
+
+            <div class="admin-modal-actions">
+
+                <button
+                    type="button"
+                    class="admin-cancel-button"
+                    id="cancelAddTeamMember"
+                >
+                    Cancel
+                </button>
+
+
+                <button
+                    type="submit"
+                    class="system-create-team-member-button"
+                    id="createTeamMemberButton"
+                >
+                    Create Team Member
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+        <section
+            class="admin-section system-admin-section"
+            id="system-roles"
+        >
+
+            <div class="admin-placeholder">
+
+                <h2>
+                    Roles & Permissions
+                </h2>
+
+                <p>
+                    Role and permission management will be added here.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <section
+            class="admin-section system-admin-section"
+            id="system-vacancies"
+        >
+
+            <div class="admin-placeholder">
+
+                <h2>
+                    Vacancy Oversight
+                </h2>
+
+                <p>
+                    System-wide vacancy oversight will be added here.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <section
+            class="admin-section system-admin-section"
+            id="system-audit"
+        >
+
+            <div class="admin-placeholder">
+
+                <h2>
+                    Audit Logs
+                </h2>
+
+                <p>
+                    Altrium audit history will be displayed here.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <section
+            class="admin-section system-admin-section"
+            id="system-security"
+        >
+
+            <div class="admin-placeholder">
+
+                <h2>
+                    Sessions & Security
+                </h2>
+
+                <p>
+                    Session and security controls will be added here.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <section
+            class="admin-section system-admin-section"
+            id="system-settings"
+        >
+
+            <div class="admin-placeholder">
+
+                <h2>
+                    System Settings
+                </h2>
+
+                <p>
+                    Safe system configuration will be managed here.
+                </p>
+
+            </div>
+
+        </section>
 
     </main>
 
@@ -3858,7 +5160,7 @@
 </div>
 
 
-<script src="admin-dashboard.js?v=2"></script>
+<script src="admin-dashboard.js?v=6"></script>
 <script src="../js/navbar-auth.js?v=1"></script>
 
 </body>

@@ -72,6 +72,59 @@ let adminApplicationStats = {
 let applicationSearchTimer =
     null;
 
+
+/* =========================================================
+   SYSTEM USERS STATE
+   ========================================================= */
+
+let systemUsersGroup =
+    "team";
+
+
+let systemUsersSearch =
+    "";
+
+
+let systemUsersPage =
+    1;
+
+
+const systemUsersLimit =
+    20;
+
+
+let systemUsersSearchTimer =
+    null;
+
+
+let systemUsersPagination = {
+
+    page:
+        1,
+
+    total:
+        0,
+
+    totalPages:
+        1,
+
+    hasPrevious:
+        false,
+
+    hasNext:
+        false
+
+};
+
+let loadedSystemUsers =
+    [];
+
+
+let currentManagedTeamMember =
+    null;
+
+
+
 /* =========================================================
    BULK SHORTLIST STATE
    ========================================================= */
@@ -499,9 +552,16 @@ async function verifyAdmin() {
         }
 
 
+        const allowedAdminRoles = [
+            "admin",
+            "system_admin"
+        ];
+
+
         if (
-            data.user.role !==
-            "admin"
+            !allowedAdminRoles.includes(
+                data.user.role
+            )
         ) {
 
             window.location.href =
@@ -512,16 +572,109 @@ async function verifyAdmin() {
         }
 
 
+        /* =============================================
+           SMALL ROLE BADGE BESIDE PROFILE IMAGE
+           ============================================= */
+
+        const roleBadge =
+            document.querySelector(
+                ".admin-role-badge"
+            );
+
+
+        if (
+            roleBadge
+        ) {
+
+            if (
+                data.user.role ===
+                "system_admin"
+            ) {
+
+                roleBadge.textContent =
+                    "SYSTEM ADMIN";
+
+                roleBadge.classList.add(
+                    "system-admin-role-badge"
+                );
+
+            }
+
+            else {
+
+                roleBadge.textContent =
+                    "ADMIN";
+
+                roleBadge.classList.remove(
+                    "system-admin-role-badge"
+                );
+
+            }
+
+        }
+
+/* =============================================
+   SYSTEM PANEL VISIBILITY
+   ============================================= */
+
+const systemPanelNavigation =
+    document.getElementById(
+        "systemPanelNavigation"
+    );
+
+
+const systemAdminSections =
+    document.querySelectorAll(
+        ".system-admin-section"
+    );
+
+
+const isSystemAdmin =
+    data.user.role ===
+    "system_admin";
+
+
+if (
+    systemPanelNavigation
+) {
+
+    systemPanelNavigation.hidden =
+        !isSystemAdmin;
+
+}
+
+
+systemAdminSections.forEach(
+    section => {
+
+        if (
+            !isSystemAdmin
+        ) {
+
+            section.classList.remove(
+                "active"
+            );
+
+        }
+
+    }
+);
+
         console.log(
             "Admin verified:",
-            data.user.email
+            data.user.email,
+            data.user.role
         );
 
 
         await Promise.all([
+
             loadAdminJobs(),
+
             loadAdminApplications(),
+
             loadAdminInterviewSessions()
+
         ]);
 
     }
@@ -569,6 +722,28 @@ adminNavItems.forEach(
                 const target =
                     item.dataset.section;
 
+
+                if (
+                    target?.startsWith(
+                        "system-"
+                    )
+                ) {
+
+                    const systemPanelNavigation =
+                        document.getElementById(
+                            "systemPanelNavigation"
+                        );
+
+
+                    if (
+                        systemPanelNavigation?.hidden
+                    ) {
+
+                        return;
+
+                    }
+
+                }
 
                 adminNavItems.forEach(
                     navItem => {
@@ -5379,7 +5554,7 @@ confirmBulkShortlistButton
 
         }
     );
-    
+
 
 /* =========================================================
    APPLICATION PAGINATION
@@ -12508,6 +12683,2346 @@ document.addEventListener(
     }
 );
 
+
+/* =========================================================
+   SYSTEM PANEL - USER DIRECTORY
+   ========================================================= */
+
+function getSystemUserRoleClass(
+    role
+) {
+
+    if (
+        role ===
+        "system_admin"
+    ) {
+
+        return "system-admin";
+
+    }
+
+
+    if (
+        role ===
+        "admin"
+    ) {
+
+        return "system-manager";
+
+    }
+
+
+    return "candidate";
+
+}
+
+
+
+/* =========================================================
+   USER NAME INITIALS
+   ========================================================= */
+
+function getSystemUserInitials(
+    user
+) {
+
+    const first =
+        String(
+            user.firstName ||
+            ""
+        )
+        .trim()
+        .charAt(
+            0
+        );
+
+
+    const last =
+        String(
+            user.lastName ||
+            ""
+        )
+        .trim()
+        .charAt(
+            0
+        );
+
+
+    return (
+        `${first}${last}`
+        .toUpperCase()
+        ||
+        "U"
+    );
+
+}
+
+
+
+/* =========================================================
+   RENDER USER STATS
+   ========================================================= */
+
+function renderSystemUserStats(
+    stats = {}
+) {
+
+    const values = {
+
+        systemTeamMemberCount:
+            stats.teamMembers,
+
+        systemManagerCount:
+            stats.systemManagers,
+
+        systemAdminCount:
+            stats.systemAdmins,
+
+        systemCandidateCount:
+            stats.candidates
+
+    };
+
+
+    Object.entries(
+        values
+    )
+    .forEach(
+        ([
+            id,
+            value
+        ]) => {
+
+            const element =
+                document.getElementById(
+                    id
+                );
+
+
+            if (
+                element
+            ) {
+
+                element.textContent =
+                    Number(
+                        value
+                    ) ||
+                    0;
+
+            }
+
+        }
+    );
+
+}
+
+
+
+/* =========================================================
+   RENDER SYSTEM USERS
+   ========================================================= */
+
+function renderSystemUsers(
+    users
+) {
+
+    const list =
+        document.getElementById(
+            "systemUsersList"
+        );
+
+
+    const resultCount =
+        document.getElementById(
+            "systemUsersResultCount"
+        );
+
+
+    const listLabel =
+        document.getElementById(
+            "systemUsersListLabel"
+        );
+
+
+    if (
+        !list
+    ) {
+
+        return;
+
+    }
+
+
+
+    const labels = {
+
+        team:
+            "TEAM MEMBERS",
+
+        candidates:
+            "CANDIDATES",
+
+        all:
+            "ALL USERS"
+
+    };
+
+
+    if (
+        listLabel
+    ) {
+
+        listLabel.textContent =
+            labels[
+                systemUsersGroup
+            ]
+            ||
+            "USERS";
+
+    }
+
+
+
+    const total =
+        Number(
+            systemUsersPagination.total
+        ) ||
+        0;
+
+
+    if (
+        resultCount
+    ) {
+
+        resultCount.textContent =
+            `${total} ${
+                total ===
+                    1
+
+                    ? "user"
+
+                    : "users"
+            }`;
+
+    }
+
+
+
+    list.innerHTML =
+        "";
+
+
+    if (
+        !Array.isArray(
+            users
+        )
+        ||
+        users.length ===
+            0
+    ) {
+
+        list.innerHTML = `
+
+            <div class="system-users-empty">
+
+                <strong>
+                    No users found.
+                </strong>
+
+                <p>
+                    Try changing the current user group
+                    or search query.
+                </p>
+
+            </div>
+
+        `;
+
+
+        return;
+
+    }
+
+
+
+    users.forEach(
+        user => {
+
+            const row =
+                document.createElement(
+                    "article"
+                );
+
+
+            row.className =
+                "system-user-row";
+
+
+            const fullName =
+                `${
+                    user.firstName ||
+                    ""
+                } ${
+                    user.lastName ||
+                    ""
+                }`
+                .trim()
+                ||
+                "Unnamed user";
+
+
+            const roleClass =
+                getSystemUserRoleClass(
+                    user.role
+                );
+
+
+            const isTeamMember =
+                [
+                    "admin",
+                    "system_admin"
+                ]
+                .includes(
+                    user.role
+                );
+
+
+            const photoHTML =
+                user.profilePicture
+
+                    ? `
+
+                        <img
+                            src="${escapeHTML(
+                                user.profilePicture
+                            )}"
+                            alt=""
+                        >
+
+                    `
+
+                    : `
+
+                        <span>
+                            ${escapeHTML(
+                                getSystemUserInitials(
+                                    user
+                                )
+                            )}
+                        </span>
+
+                    `;
+
+
+
+            row.innerHTML = `
+
+                <div class="system-user-identity">
+
+                    <div class="system-user-avatar">
+
+                        ${photoHTML}
+
+                    </div>
+
+
+                    <div class="system-user-name">
+
+                        <div>
+
+                            <strong>
+
+                                ${escapeHTML(
+                                    fullName
+                                )}
+
+                            </strong>
+
+
+                            ${
+                                user.isCurrentUser
+
+                                    ? `
+
+                                        <span class="system-user-you">
+                                            YOU
+                                        </span>
+
+                                    `
+
+                                    : ""
+                            }
+
+                        </div>
+
+
+                        <p>
+
+                            ${escapeHTML(
+                                user.email ||
+                                "No email"
+                            )}
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="system-user-contact">
+
+                    <span>
+                        PHONE
+                    </span>
+
+                    <strong>
+
+                        ${escapeHTML(
+                            user.phoneNumber ||
+                            "Not provided"
+                        )}
+
+                    </strong>
+
+                </div>
+
+
+
+                <div class="system-user-role-column">
+
+                    <span
+                        class="
+                            system-user-role
+                            ${roleClass}
+                        "
+                    >
+
+                        ${escapeHTML(
+                            user.roleName ||
+                            user.role
+                        )}
+
+                    </span>
+
+                </div>
+
+
+
+                <div class="system-user-account">
+
+                    <span
+                        class="
+                            system-user-verification
+                            ${
+                                user.emailVerified
+                                    ? "verified"
+                                    : "unverified"
+                            }
+                        "
+                    >
+
+                        ${
+                            user.emailVerified
+                                ? "Verified"
+                                : "Unverified"
+                        }
+
+                    </span>
+
+
+                    <small>
+
+                        Joined
+                        ${escapeHTML(
+                            formatReviewDate(
+                                user.createdAt
+                            )
+                        )}
+
+                    </small>
+
+
+                    ${
+                        isTeamMember
+
+                            ? `
+
+                                <button
+                                    type="button"
+                                    class="system-manage-user-button"
+                                >
+                                    Manage Team Member
+                                </button>
+
+                            `
+
+                            : ""
+                    }
+
+                </div>
+
+            `;
+
+
+
+            const manageButton =
+                row.querySelector(
+                    ".system-manage-user-button"
+                );
+
+
+            manageButton
+                ?.addEventListener(
+                    "click",
+                    () => {
+
+                        openManageTeamMemberModal(
+                            user
+                        );
+
+                    }
+                );
+
+
+            list.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+
+/* =========================================================
+   RENDER USER PAGINATION
+   ========================================================= */
+
+function renderSystemUsersPagination() {
+
+    const container =
+        document.getElementById(
+            "systemUsersPagination"
+        );
+
+
+    const previousButton =
+        document.getElementById(
+            "systemUsersPreviousPage"
+        );
+
+
+    const nextButton =
+        document.getElementById(
+            "systemUsersNextPage"
+        );
+
+
+    const summary =
+        document.getElementById(
+            "systemUsersPageSummary"
+        );
+
+
+    if (
+        !container ||
+        !previousButton ||
+        !nextButton ||
+        !summary
+    ) {
+
+        return;
+
+    }
+
+
+    const total =
+        Number(
+            systemUsersPagination.total
+        ) ||
+        0;
+
+
+    if (
+        total ===
+        0
+    ) {
+
+        container.hidden =
+            true;
+
+
+        return;
+
+    }
+
+
+    container.hidden =
+        false;
+
+
+    previousButton.disabled =
+        !systemUsersPagination
+            .hasPrevious;
+
+
+    nextButton.disabled =
+        !systemUsersPagination
+            .hasNext;
+
+
+    summary.textContent =
+        `Page ${
+            systemUsersPagination.page
+        } of ${
+            systemUsersPagination.totalPages
+        }`;
+
+}
+
+
+
+/* =========================================================
+   LOAD SYSTEM USERS
+   ========================================================= */
+
+async function loadSystemUsers() {
+
+    const list =
+        document.getElementById(
+            "systemUsersList"
+        );
+
+
+    if (
+        !list
+    ) {
+
+        return;
+
+    }
+
+
+    list.innerHTML = `
+
+        <div class="system-users-loading">
+
+            Loading users...
+
+        </div>
+
+    `;
+
+
+    try {
+
+        const parameters =
+            new URLSearchParams({
+
+                group:
+                    systemUsersGroup,
+
+                search:
+                    systemUsersSearch,
+
+                page:
+                    String(
+                        systemUsersPage
+                    ),
+
+                limit:
+                    String(
+                        systemUsersLimit
+                    )
+
+            });
+
+
+        const response =
+            await fetch(
+                `/api/system/users?${parameters.toString()}`,
+                {
+
+                    method:
+                        "GET",
+
+                    credentials:
+                        "same-origin"
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load users."
+            );
+
+        }
+
+
+        systemUsersPagination = {
+
+            page:
+                Number(
+                    data.pagination
+                        ?.page
+                ) ||
+                1,
+
+            total:
+                Number(
+                    data.pagination
+                        ?.total
+                ) ||
+                0,
+
+            totalPages:
+                Number(
+                    data.pagination
+                        ?.totalPages
+                ) ||
+                1,
+
+            hasPrevious:
+                Boolean(
+                    data.pagination
+                        ?.hasPrevious
+                ),
+
+            hasNext:
+                Boolean(
+                    data.pagination
+                        ?.hasNext
+                )
+
+        };
+
+
+        renderSystemUserStats(
+            data.stats ||
+            {}
+        );
+
+
+        loadedSystemUsers =
+            Array.isArray(
+                data.users
+            )
+                ? data.users
+                : [];
+
+
+        renderSystemUsers(
+            loadedSystemUsers
+        );
+
+
+        renderSystemUsersPagination();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Load System Users error:",
+            error
+        );
+
+
+        list.innerHTML = `
+
+            <div class="system-users-error">
+
+                <strong>
+                    Unable to load users.
+                </strong>
+
+                <p>
+                    ${escapeHTML(
+                        error.message ||
+                        "Please try again."
+                    )}
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   USER GROUP TABS
+   ========================================================= */
+
+document
+    .querySelectorAll(
+        ".system-user-group-button"
+    )
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    systemUsersGroup =
+                        button.dataset
+                            .userGroup ||
+                        "team";
+
+
+                    systemUsersPage =
+                        1;
+
+
+                    document
+                        .querySelectorAll(
+                            ".system-user-group-button"
+                        )
+                        .forEach(
+                            item => {
+
+                                item.classList.remove(
+                                    "active"
+                                );
+
+                            }
+                        );
+
+
+                    button.classList.add(
+                        "active"
+                    );
+
+
+                    loadSystemUsers();
+
+                }
+            );
+
+        }
+    );
+
+
+
+/* =========================================================
+   USER SEARCH
+   ========================================================= */
+
+document
+    .getElementById(
+        "systemUserSearch"
+    )
+    ?.addEventListener(
+        "input",
+        event => {
+
+            clearTimeout(
+                systemUsersSearchTimer
+            );
+
+
+            systemUsersSearchTimer =
+                setTimeout(
+                    () => {
+
+                        systemUsersSearch =
+                            event.target.value
+                                .trim();
+
+
+                        systemUsersPage =
+                            1;
+
+
+                        loadSystemUsers();
+
+                    },
+                    300
+                );
+
+        }
+    );
+
+
+
+/* =========================================================
+   USER PAGINATION
+   ========================================================= */
+
+document
+    .getElementById(
+        "systemUsersPreviousPage"
+    )
+    ?.addEventListener(
+        "click",
+        () => {
+
+            if (
+                !systemUsersPagination
+                    .hasPrevious
+            ) {
+
+                return;
+
+            }
+
+
+            systemUsersPage =
+                Math.max(
+                    1,
+                    systemUsersPage -
+                    1
+                );
+
+
+            loadSystemUsers();
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "systemUsersNextPage"
+    )
+    ?.addEventListener(
+        "click",
+        () => {
+
+            if (
+                !systemUsersPagination
+                    .hasNext
+            ) {
+
+                return;
+
+            }
+
+
+            systemUsersPage +=
+                1;
+
+
+            loadSystemUsers();
+
+        }
+    );
+
+
+
+/* =========================================================
+   LOAD USERS WHEN SYSTEM USERS PAGE OPENS
+   ========================================================= */
+
+document
+    .querySelector(
+        '[data-section="system-users"]'
+    )
+    ?.addEventListener(
+        "click",
+        () => {
+
+            loadSystemUsers();
+
+        }
+    );
+
+
+/* =========================================================
+   SYSTEM PANEL - ADD TEAM MEMBER
+   ========================================================= */
+
+const addTeamMemberModal =
+    document.getElementById(
+        "addTeamMemberModal"
+    );
+
+
+const addTeamMemberBackdrop =
+    document.getElementById(
+        "addTeamMemberBackdrop"
+    );
+
+
+const openAddTeamMemberModalButton =
+    document.getElementById(
+        "openAddTeamMemberModal"
+    );
+
+
+const closeAddTeamMemberModalButton =
+    document.getElementById(
+        "closeAddTeamMemberModal"
+    );
+
+
+const cancelAddTeamMemberButton =
+    document.getElementById(
+        "cancelAddTeamMember"
+    );
+
+
+const addTeamMemberForm =
+    document.getElementById(
+        "addTeamMemberForm"
+    );
+
+
+const addTeamMemberMessage =
+    document.getElementById(
+        "addTeamMemberMessage"
+    );
+
+
+const createTeamMemberButton =
+    document.getElementById(
+        "createTeamMemberButton"
+    );
+
+
+const teamMemberRoleDropdown =
+    document.getElementById(
+        "teamMemberRoleDropdown"
+    );
+
+
+const teamMemberRoleTrigger =
+    document.getElementById(
+        "teamMemberRoleTrigger"
+    );
+
+
+const teamMemberRoleMenu =
+    document.getElementById(
+        "teamMemberRoleMenu"
+    );
+
+
+const teamMemberRoleText =
+    document.getElementById(
+        "teamMemberRoleText"
+    );
+
+
+const teamMemberRoleInput =
+    document.getElementById(
+        "teamMemberRole"
+    );
+
+
+
+/* =========================================================
+   OPEN MODAL
+   ========================================================= */
+
+function openAddTeamMemberModal() {
+
+    if (
+        !addTeamMemberModal
+    ) {
+
+        return;
+
+    }
+
+
+    addTeamMemberForm
+        ?.reset();
+
+
+    if (
+        teamMemberRoleInput
+    ) {
+
+        teamMemberRoleInput.value =
+            "";
+
+    }
+
+
+    if (
+        teamMemberRoleText
+    ) {
+
+        teamMemberRoleText.textContent =
+            "Select team role";
+
+    }
+
+
+    teamMemberRoleMenu
+        ?.querySelectorAll(
+            "button"
+        )
+        .forEach(
+            button => {
+
+                button.classList.remove(
+                    "selected"
+                );
+
+            }
+        );
+
+
+    if (
+        addTeamMemberMessage
+    ) {
+
+        addTeamMemberMessage.hidden =
+            true;
+
+
+        addTeamMemberMessage.textContent =
+            "";
+
+
+        addTeamMemberMessage
+            .classList
+            .remove(
+                "error"
+            );
+
+    }
+
+
+    addTeamMemberModal.classList.add(
+        "open"
+    );
+
+
+    document.body.style.overflow =
+        "hidden";
+
+}
+
+
+
+/* =========================================================
+   CLOSE MODAL
+   ========================================================= */
+
+function closeAddTeamMemberModal() {
+
+    addTeamMemberModal
+        ?.classList
+        .remove(
+            "open"
+        );
+
+
+    teamMemberRoleDropdown
+        ?.classList
+        .remove(
+            "open"
+        );
+
+
+    document.body.style.overflow =
+        "";
+
+}
+
+
+
+/* =========================================================
+   MODAL EVENTS
+   ========================================================= */
+
+openAddTeamMemberModalButton
+    ?.addEventListener(
+        "click",
+        openAddTeamMemberModal
+    );
+
+
+closeAddTeamMemberModalButton
+    ?.addEventListener(
+        "click",
+        closeAddTeamMemberModal
+    );
+
+
+cancelAddTeamMemberButton
+    ?.addEventListener(
+        "click",
+        closeAddTeamMemberModal
+    );
+
+
+addTeamMemberBackdrop
+    ?.addEventListener(
+        "click",
+        closeAddTeamMemberModal
+    );
+
+
+
+/* =========================================================
+   ROLE DROPDOWN
+   ========================================================= */
+
+teamMemberRoleTrigger
+    ?.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+
+            closeAllAdminCustomSelects(
+                teamMemberRoleDropdown
+            );
+
+
+            teamMemberRoleDropdown
+                ?.classList
+                .toggle(
+                    "open"
+                );
+
+        }
+    );
+
+
+teamMemberRoleMenu
+    ?.querySelectorAll(
+        "button"
+    )
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                event => {
+
+                    event.stopPropagation();
+
+
+                    const value =
+                        button.dataset
+                            .value;
+
+
+                    const label =
+                        button.textContent
+                            .trim();
+
+
+                    if (
+                        teamMemberRoleInput
+                    ) {
+
+                        teamMemberRoleInput.value =
+                            value;
+
+                    }
+
+
+                    if (
+                        teamMemberRoleText
+                    ) {
+
+                        teamMemberRoleText.textContent =
+                            label;
+
+                    }
+
+
+                    teamMemberRoleMenu
+                        .querySelectorAll(
+                            "button"
+                        )
+                        .forEach(
+                            item => {
+
+                                item.classList.remove(
+                                    "selected"
+                                );
+
+                            }
+                        );
+
+
+                    button.classList.add(
+                        "selected"
+                    );
+
+
+                    teamMemberRoleDropdown
+                        ?.classList
+                        .remove(
+                            "open"
+                        );
+
+                }
+            );
+
+        }
+    );
+
+
+
+/* =========================================================
+   CREATE TEAM MEMBER
+   ========================================================= */
+
+addTeamMemberForm
+    ?.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+
+            const firstName =
+                document
+                    .getElementById(
+                        "teamMemberFirstName"
+                    )
+                    ?.value
+                    .trim()
+                ||
+                "";
+
+
+            const lastName =
+                document
+                    .getElementById(
+                        "teamMemberLastName"
+                    )
+                    ?.value
+                    .trim()
+                ||
+                "";
+
+
+            const email =
+                document
+                    .getElementById(
+                        "teamMemberEmail"
+                    )
+                    ?.value
+                    .trim()
+                ||
+                "";
+
+
+            const phoneNumber =
+                document
+                    .getElementById(
+                        "teamMemberPhone"
+                    )
+                    ?.value
+                    .trim()
+                ||
+                "";
+
+
+            const role =
+                teamMemberRoleInput
+                    ?.value
+                ||
+                "";
+
+
+            const temporaryPassword =
+                document
+                    .getElementById(
+                        "teamMemberTemporaryPassword"
+                    )
+                    ?.value
+                ||
+                "";
+
+
+
+            if (
+                !firstName ||
+                !lastName ||
+                !email ||
+                !phoneNumber ||
+                !role ||
+                !temporaryPassword
+            ) {
+
+                if (
+                    addTeamMemberMessage
+                ) {
+
+                    addTeamMemberMessage.textContent =
+                        "Please complete all team member fields.";
+
+
+                    addTeamMemberMessage
+                        .classList
+                        .add(
+                            "error"
+                        );
+
+
+                    addTeamMemberMessage.hidden =
+                        false;
+
+                }
+
+
+                return;
+
+            }
+
+
+
+            if (
+                temporaryPassword.length <
+                8
+            ) {
+
+                if (
+                    addTeamMemberMessage
+                ) {
+
+                    addTeamMemberMessage.textContent =
+                        "Temporary password must be at least 8 characters long.";
+
+
+                    addTeamMemberMessage
+                        .classList
+                        .add(
+                            "error"
+                        );
+
+
+                    addTeamMemberMessage.hidden =
+                        false;
+
+                }
+
+
+                return;
+
+            }
+
+
+
+            try {
+
+                if (
+                    createTeamMemberButton
+                ) {
+
+                    createTeamMemberButton.disabled =
+                        true;
+
+
+                    createTeamMemberButton.textContent =
+                        "Creating...";
+
+                }
+
+
+                if (
+                    addTeamMemberMessage
+                ) {
+
+                    addTeamMemberMessage.hidden =
+                        true;
+
+
+                    addTeamMemberMessage
+                        .classList
+                        .remove(
+                            "error"
+                        );
+
+                }
+
+
+                const response =
+                    await fetch(
+                        "/api/system/users/team",
+                        {
+
+                            method:
+                                "POST",
+
+                            credentials:
+                                "same-origin",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    firstName,
+
+                                    lastName,
+
+                                    email,
+
+                                    phoneNumber,
+
+                                    role,
+
+                                    temporaryPassword
+
+                                })
+
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    throw new Error(
+                        data.message ||
+                        "Unable to create team member."
+                    );
+
+                }
+
+
+
+                /* =============================================
+                   REFRESH USER DIRECTORY
+                   ============================================= */
+
+                systemUsersGroup =
+                    "team";
+
+
+                systemUsersPage =
+                    1;
+
+
+                document
+                    .querySelectorAll(
+                        ".system-user-group-button"
+                    )
+                    .forEach(
+                        button => {
+
+                            button.classList.toggle(
+
+                                "active",
+
+                                button.dataset
+                                    .userGroup ===
+                                    "team"
+
+                            );
+
+                        }
+                    );
+
+
+                await loadSystemUsers();
+
+
+
+                /* =============================================
+                   SUCCESS
+                   ============================================= */
+
+                closeAddTeamMemberModal();
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Create team member error:",
+                    error
+                );
+
+
+                if (
+                    addTeamMemberMessage
+                ) {
+
+                    addTeamMemberMessage.textContent =
+                        error.message ||
+                        "Unable to create team member.";
+
+
+                    addTeamMemberMessage
+                        .classList
+                        .add(
+                            "error"
+                        );
+
+
+                    addTeamMemberMessage.hidden =
+                        false;
+
+                }
+
+            }
+
+            finally {
+
+                if (
+                    createTeamMemberButton
+                ) {
+
+                    createTeamMemberButton.disabled =
+                        false;
+
+
+                    createTeamMemberButton.textContent =
+                        "Create Team Member";
+
+                }
+
+            }
+
+        }
+    );
+
+
+/* =========================================================
+   SYSTEM PANEL - MANAGE TEAM MEMBER
+   ========================================================= */
+
+const manageTeamMemberModal =
+    document.getElementById(
+        "manageTeamMemberModal"
+    );
+
+
+const manageTeamMemberBackdrop =
+    document.getElementById(
+        "manageTeamMemberBackdrop"
+    );
+
+
+const closeManageTeamMemberModalButton =
+    document.getElementById(
+        "closeManageTeamMemberModal"
+    );
+
+
+const cancelManageTeamMemberButton =
+    document.getElementById(
+        "cancelManageTeamMember"
+    );
+
+
+const manageTeamMemberForm =
+    document.getElementById(
+        "manageTeamMemberForm"
+    );
+
+
+const manageTeamMemberRoleDropdown =
+    document.getElementById(
+        "manageTeamMemberRoleDropdown"
+    );
+
+
+const manageTeamMemberRoleTrigger =
+    document.getElementById(
+        "manageTeamMemberRoleTrigger"
+    );
+
+
+const manageTeamMemberRoleMenu =
+    document.getElementById(
+        "manageTeamMemberRoleMenu"
+    );
+
+
+const manageTeamMemberRoleText =
+    document.getElementById(
+        "manageTeamMemberRoleText"
+    );
+
+
+const manageTeamMemberRoleInput =
+    document.getElementById(
+        "manageTeamMemberRole"
+    );
+
+
+const manageTeamMemberMessage =
+    document.getElementById(
+        "manageTeamMemberMessage"
+    );
+
+
+const updateTeamMemberRoleButton =
+    document.getElementById(
+        "updateTeamMemberRoleButton"
+    );
+
+
+const systemSelfRoleNote =
+    document.getElementById(
+        "systemSelfRoleNote"
+    );
+
+
+
+/* =========================================================
+   ROLE LABEL
+   ========================================================= */
+
+function getSystemAccessRoleLabel(
+    role
+) {
+
+    const labels = {
+
+        admin:
+            "System Manager",
+
+        system_admin:
+            "System Admin"
+
+    };
+
+
+    return labels[
+        role
+    ]
+    ||
+    role
+    ||
+    "Unknown";
+
+}
+
+
+
+/* =========================================================
+   OPEN MANAGE TEAM MEMBER
+   ========================================================= */
+
+function openManageTeamMemberModal(
+    user
+) {
+
+    if (
+        !manageTeamMemberModal ||
+        !user
+    ) {
+
+        return;
+
+    }
+
+
+    currentManagedTeamMember =
+        user;
+
+    const assignedRole =
+        user.assignedRole ||
+        user.role;
+
+
+    const fullName =
+        `${
+            user.firstName ||
+            ""
+        } ${
+            user.lastName ||
+            ""
+        }`
+        .trim()
+        ||
+        "Team member";
+
+
+    setReviewText(
+        "manageTeamMemberName",
+        fullName
+    );
+
+
+    setReviewText(
+        "manageTeamMemberEmail",
+        user.email
+    );
+
+
+    setReviewText(
+        "manageTeamMemberPhone",
+        user.phoneNumber
+    );
+
+
+    setReviewText(
+        "manageTeamMemberCurrentRole",
+        user.roleName
+        ||
+        getSystemAccessRoleLabel(
+            assignedRole
+        )
+    );
+
+
+    setReviewText(
+        "manageTeamMemberJoined",
+        formatReviewDate(
+            user.createdAt
+        )
+    );
+
+
+    if (
+        manageTeamMemberRoleInput
+    ) {
+
+        manageTeamMemberRoleInput.value =
+            assignedRole;
+
+    }
+
+
+    if (
+        manageTeamMemberRoleText
+    ) {
+
+        manageTeamMemberRoleText.textContent =
+            getSystemAccessRoleLabel(
+                user.role
+            );
+
+    }
+
+
+
+    manageTeamMemberRoleMenu
+        ?.querySelectorAll(
+            "button"
+        )
+        .forEach(
+            button => {
+
+                button.classList.toggle(
+
+                    "selected",
+
+                    button.dataset.value ===
+                        assignedRole
+
+                );
+
+            }
+        );
+
+
+
+    const isCurrentUser =
+        Boolean(
+            user.isCurrentUser
+        );
+
+
+    if (
+        manageTeamMemberRoleTrigger
+    ) {
+
+        manageTeamMemberRoleTrigger.disabled =
+            isCurrentUser;
+
+    }
+
+
+    if (
+        updateTeamMemberRoleButton
+    ) {
+
+        updateTeamMemberRoleButton.disabled =
+            isCurrentUser;
+
+
+        updateTeamMemberRoleButton.textContent =
+            "Update Access Role";
+
+    }
+
+
+    if (
+        systemSelfRoleNote
+    ) {
+
+        systemSelfRoleNote.hidden =
+            !isCurrentUser;
+
+    }
+
+
+    if (
+        manageTeamMemberMessage
+    ) {
+
+        manageTeamMemberMessage.hidden =
+            true;
+
+
+        manageTeamMemberMessage.textContent =
+            "";
+
+
+        manageTeamMemberMessage
+            .classList
+            .remove(
+                "error"
+            );
+
+    }
+
+
+    manageTeamMemberModal.classList.add(
+        "open"
+    );
+
+
+    document.body.style.overflow =
+        "hidden";
+
+}
+
+
+
+/* =========================================================
+   CLOSE MANAGE TEAM MEMBER
+   ========================================================= */
+
+function closeManageTeamMemberModal() {
+
+    manageTeamMemberModal
+        ?.classList
+        .remove(
+            "open"
+        );
+
+
+    manageTeamMemberRoleDropdown
+        ?.classList
+        .remove(
+            "open"
+        );
+
+
+    currentManagedTeamMember =
+        null;
+
+
+    document.body.style.overflow =
+        "";
+
+}
+
+
+
+/* =========================================================
+   CLOSE EVENTS
+   ========================================================= */
+
+closeManageTeamMemberModalButton
+    ?.addEventListener(
+        "click",
+        closeManageTeamMemberModal
+    );
+
+
+cancelManageTeamMemberButton
+    ?.addEventListener(
+        "click",
+        closeManageTeamMemberModal
+    );
+
+
+manageTeamMemberBackdrop
+    ?.addEventListener(
+        "click",
+        closeManageTeamMemberModal
+    );
+
+
+
+/* =========================================================
+   MANAGE ROLE DROPDOWN
+   ========================================================= */
+
+manageTeamMemberRoleTrigger
+    ?.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+
+            if (
+                currentManagedTeamMember
+                    ?.isCurrentUser
+            ) {
+
+                return;
+
+            }
+
+
+            closeAllAdminCustomSelects(
+                manageTeamMemberRoleDropdown
+            );
+
+
+            manageTeamMemberRoleDropdown
+                ?.classList
+                .toggle(
+                    "open"
+                );
+
+        }
+    );
+
+
+manageTeamMemberRoleMenu
+    ?.querySelectorAll(
+        "button"
+    )
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                event => {
+
+                    event.stopPropagation();
+
+
+                    if (
+                        currentManagedTeamMember
+                            ?.isCurrentUser
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    const role =
+                        button.dataset
+                            .value;
+
+
+                    if (
+                        manageTeamMemberRoleInput
+                    ) {
+
+                        manageTeamMemberRoleInput.value =
+                            role;
+
+                    }
+
+
+                    if (
+                        manageTeamMemberRoleText
+                    ) {
+
+                        manageTeamMemberRoleText.textContent =
+                            getSystemAccessRoleLabel(
+                                role
+                            );
+
+                    }
+
+
+                    manageTeamMemberRoleMenu
+                        .querySelectorAll(
+                            "button"
+                        )
+                        .forEach(
+                            item => {
+
+                                item.classList.remove(
+                                    "selected"
+                                );
+
+                            }
+                        );
+
+
+                    button.classList.add(
+                        "selected"
+                    );
+
+
+                    manageTeamMemberRoleDropdown
+                        ?.classList
+                        .remove(
+                            "open"
+                        );
+
+                }
+            );
+
+        }
+    );
+
+
+
+/* =========================================================
+   UPDATE TEAM MEMBER ROLE
+   ========================================================= */
+
+manageTeamMemberForm
+    ?.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+
+            if (
+                !currentManagedTeamMember
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                currentManagedTeamMember
+                    .isCurrentUser
+            ) {
+
+                return;
+
+            }
+
+
+            const selectedRole =
+                manageTeamMemberRoleInput
+                    ?.value
+                ||
+                "";
+
+
+            if (
+                !selectedRole
+            ) {
+
+                return;
+
+            }
+
+
+
+            if (
+    selectedRole ===
+    (
+        currentManagedTeamMember
+            .assignedRole
+        ||
+        currentManagedTeamMember
+            .role
+    )
+) {
+
+                if (
+                    manageTeamMemberMessage
+                ) {
+
+                    manageTeamMemberMessage.textContent =
+                        "Choose a different access role before updating.";
+
+
+                    manageTeamMemberMessage
+                        .classList
+                        .add(
+                            "error"
+                        );
+
+
+                    manageTeamMemberMessage.hidden =
+                        false;
+
+                }
+
+
+                return;
+
+            }
+
+
+
+            try {
+
+                if (
+                    updateTeamMemberRoleButton
+                ) {
+
+                    updateTeamMemberRoleButton.disabled =
+                        true;
+
+
+                    updateTeamMemberRoleButton.textContent =
+                        "Updating...";
+
+                }
+
+
+                if (
+                    manageTeamMemberMessage
+                ) {
+
+                    manageTeamMemberMessage.hidden =
+                        true;
+
+
+                    manageTeamMemberMessage
+                        .classList
+                        .remove(
+                            "error"
+                        );
+
+                }
+
+
+
+                const response =
+                    await fetch(
+                        `/api/system/users/${currentManagedTeamMember.id}/role`,
+                        {
+
+                            method:
+                                "PATCH",
+
+                            credentials:
+                                "same-origin",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    role:
+                                        selectedRole
+
+                                })
+
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    throw new Error(
+                        data.message ||
+                        "Unable to update team member access."
+                    );
+
+                }
+
+
+
+                closeManageTeamMemberModal();
+
+
+                await loadSystemUsers();
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Update team member role error:",
+                    error
+                );
+
+
+                if (
+                    manageTeamMemberMessage
+                ) {
+
+                    manageTeamMemberMessage.textContent =
+                        error.message ||
+                        "Unable to update team member access.";
+
+
+                    manageTeamMemberMessage
+                        .classList
+                        .add(
+                            "error"
+                        );
+
+
+                    manageTeamMemberMessage.hidden =
+                        false;
+
+                }
+
+            }
+
+            finally {
+
+                if (
+                    updateTeamMemberRoleButton
+                ) {
+
+                    updateTeamMemberRoleButton.disabled =
+                        Boolean(
+                            currentManagedTeamMember
+                                ?.isCurrentUser
+                        );
+
+
+                    updateTeamMemberRoleButton.textContent =
+                        "Update Access Role";
+
+                }
+
+            }
+
+        }
+    );
 
 
 /* =========================================================

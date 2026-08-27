@@ -229,30 +229,490 @@ function handleApplicationCvUpload(
 // ===============================================================================
 // ADMIN ========================================================================
 
-function requireAdmin(req, res, next) {
+function requireAdmin(
+    req,
+    res,
+    next
+) {
 
-    if (!req.session.userId) {
+    if (
+        !req.session.userId
+    ) {
+
         return res.status(401).json({
-            success: false,
-            message: "You must be logged in."
+
+            success:
+                false,
+
+            message:
+                "You must be logged in."
+
         });
+
     }
 
-    if (req.session.role !== "admin") {
+
+    const allowedAdminRoles = [
+
+        "admin",
+
+        "system_admin"
+
+    ];
+
+
+    if (
+        !allowedAdminRoles.includes(
+            req.session.role
+        )
+    ) {
+
         return res.status(403).json({
-            success: false,
-            message: "Admin access required."
+
+            success:
+                false,
+
+            message:
+                "Admin access required."
+
         });
+
     }
+
 
     next();
+
 }
+
+/* =========================================================
+   LOAD EFFECTIVE USER PERMISSIONS
+   ========================================================= */
+
+async function loadEffectivePermissionKeys(
+    userId,
+    accountRole
+) {
+
+    /*
+        System Admin always has every permission.
+
+        We still return the permission keys here
+        because the frontend will later use them
+        to hide/show controls.
+    */
+
+    if (
+        accountRole ===
+        "system_admin"
+    ) {
+
+        const result =
+            await pool.query(
+                `
+                SELECT
+                    permission_key
+
+                FROM permissions
+
+                ORDER BY
+                    permission_key ASC
+                `
+            );
+
+
+        return result.rows.map(
+            row =>
+                row.permission_key
+        );
+
+    }
+
+
+
+    /*
+        IMPORTANT ACCESS MODEL
+
+        users.role = "admin"
+            means this is an internal team account.
+
+        user_roles may contain:
+            admin
+            + hr_manager
+
+        Once a NON-SYSTEM functional role exists,
+        Altrium ignores the broad built-in admin role
+        and calculates permissions from the functional
+        role(s) only.
+
+        This prevents Interviewer from inheriting
+        full System Manager permissions.
+    */
+
+    const result =
+        await pool.query(
+            `
+            WITH assigned_roles AS (
+
+                SELECT
+
+                    r.id,
+                    r.role_key,
+                    r.is_system
+
+                FROM user_roles ur
+
+                INNER JOIN roles r
+                    ON r.id =
+                        ur.role_id
+
+                WHERE
+                    ur.user_id = $1
+
+            ),
+
+
+            role_mode AS (
+
+                SELECT
+
+                    EXISTS (
+
+                        SELECT 1
+
+                        FROM assigned_roles
+
+                        WHERE
+                            is_system = FALSE
+
+                    )
+                    AS has_functional_role
+
+            ),
+
+
+            effective_roles AS (
+
+                SELECT
+                    ar.id
+
+                FROM assigned_roles ar
+
+                CROSS JOIN role_mode rm
+
+                WHERE
+
+                    (
+                        rm.has_functional_role = TRUE
+
+                        AND
+
+                        ar.is_system = FALSE
+                    )
+
+                    OR
+
+                    (
+                        rm.has_functional_role = FALSE
+
+                        AND
+
+                        ar.is_system = TRUE
+                    )
+
+            )
+
+
+            SELECT DISTINCT
+
+                p.permission_key
+
+            FROM effective_roles er
+
+            INNER JOIN role_permissions rp
+                ON rp.role_id =
+                    er.id
+
+            INNER JOIN permissions p
+                ON p.id =
+                    rp.permission_id
+
+            ORDER BY
+                p.permission_key ASC
+            `,
+            [
+                userId
+            ]
+        );
+
+
+    return result.rows.map(
+        row =>
+            row.permission_key
+    );
+
+}
+
+
+/* =========================================================
+   ALTRIUM TEAM ROLES
+   ========================================================= */
+
+const functionalTeamRoleKeys = [
+
+    "hr_manager",
+    "hr_recruiter",
+    "interviewer"
+
+];
+
+
+const assignableTeamRoleKeys = [
+
+    "admin",
+
+    ...functionalTeamRoleKeys,
+
+    "system_admin"
+
+];
+
+
+function getAccountRoleForAssignedRole(
+    assignedRole
+) {
+
+    return assignedRole ===
+        "system_admin"
+
+        ? "system_admin"
+
+        : "admin";
+
+}
+
+
+
+/* =========================================================
+   REQUIRE PERMISSION
+   ========================================================= */
+
+function requirePermission(
+    permissionKey
+) {
+
+    return async (
+        req,
+        res,
+        next
+    ) => {
+
+        /* =============================================
+           MUST BE LOGGED IN
+           ============================================= */
+
+        if (
+            !req.session.userId
+        ) {
+
+            return res.status(401).json({
+
+                success:
+                    false,
+
+                message:
+                    "You must be logged in."
+
+            });
+
+        }
+
+
+
+        /* =============================================
+           MUST BE INTERNAL TEAM ACCOUNT
+           ============================================= */
+
+        const allowedAccountRoles = [
+
+            "admin",
+            "system_admin"
+
+        ];
+
+
+        if (
+            !allowedAccountRoles.includes(
+                req.session.role
+            )
+        ) {
+
+            return res.status(403).json({
+
+                success:
+                    false,
+
+                message:
+                    "Team access required."
+
+            });
+
+        }
+
+
+
+        /* =============================================
+           SYSTEM ADMIN BYPASS
+           ============================================= */
+
+        if (
+            req.session.role ===
+            "system_admin"
+        ) {
+
+            return next();
+
+        }
+
+
+
+        try {
+
+            const permissionKeys =
+                await loadEffectivePermissionKeys(
+
+                    req.session.userId,
+
+                    req.session.role
+
+                );
+
+
+            const allowed =
+                permissionKeys.includes(
+                    permissionKey
+                );
+
+
+            if (
+                !allowed
+            ) {
+
+                return res.status(403).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "You do not have permission to perform this action.",
+
+                    requiredPermission:
+                        permissionKey
+
+                });
+
+            }
+
+
+            req.userPermissions =
+                permissionKeys;
+
+
+            next();
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Permission check error:",
+                permissionKey,
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success:
+                    false,
+
+                message:
+                    "Unable to verify your Altrium permissions."
+
+            });
+
+        }
+
+    };
+
+}
+
+
+/* =========================================================
+   CURRENT TEAM MEMBER PERMISSIONS
+   ========================================================= */
+
+app.get(
+    "/api/admin/my-permissions",
+    requireAdmin,
+    async (req, res) => {
+
+        try {
+
+            const permissions =
+                await loadEffectivePermissionKeys(
+
+                    req.session.userId,
+
+                    req.session.role
+
+                );
+
+
+            return res.json({
+
+                success:
+                    true,
+
+                accountRole:
+                    req.session.role,
+
+                permissions
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Load current permissions error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success:
+                    false,
+
+                message:
+                    "Unable to load your permissions."
+
+            });
+
+        }
+
+    }
+);
+
 
 // ADMIN CREATE JOB VACANCIES
 
 app.post(
     "/api/admin/jobs",
-    requireAdmin,
+    requirePermission(
+        "vacancies.manage"
+    ),
     async (req, res) => {
 
         try {
@@ -461,11 +921,2338 @@ app.post(
     }
 );
 
+
+/* =========================================================
+   REQUIRE SYSTEM ADMIN
+   ========================================================= */
+
+function requireSystemAdmin(
+    req,
+    res,
+    next
+) {
+
+    if (
+        !req.session.userId
+    ) {
+
+        return res.status(401).json({
+
+            success:
+                false,
+
+            message:
+                "You must be logged in."
+
+        });
+
+    }
+
+
+    if (
+        req.session.role !==
+        "system_admin"
+    ) {
+
+        return res.status(403).json({
+
+            success:
+                false,
+
+            message:
+                "System Admin access required."
+
+        });
+
+    }
+
+
+    next();
+
+}
+
+/* =========================================================
+   SYSTEM ADMIN - ACCESS TEST
+   ========================================================= */
+
+app.get(
+    "/api/system/access",
+    requireSystemAdmin,
+    async (req, res) => {
+
+        try {
+
+            const result =
+                await pool.query(
+                    `
+                    SELECT
+
+                        id,
+                        first_name,
+                        last_name,
+                        email,
+                        role
+
+                    FROM users
+
+                    WHERE id = $1
+
+                    LIMIT 1
+                    `,
+                    [
+                        req.session.userId
+                    ]
+                );
+
+
+            if (
+                result.rows.length ===
+                0
+            ) {
+
+                return res.status(404).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "System Admin account not found."
+
+                });
+
+            }
+
+
+            const user =
+                result.rows[0];
+
+
+            return res.json({
+
+                success:
+                    true,
+
+                systemAdmin:
+                    true,
+
+                user: {
+
+                    id:
+                        user.id,
+
+                    firstName:
+                        user.first_name,
+
+                    lastName:
+                        user.last_name,
+
+                    email:
+                        user.email,
+
+                    role:
+                        user.role
+
+                }
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "System Admin access test error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success:
+                    false,
+
+                message:
+                    "Unable to verify System Admin access."
+
+            });
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   SYSTEM ADMIN - USER DIRECTORY
+   READ ONLY
+   ========================================================= */
+
+app.get(
+    "/api/system/users",
+    requireSystemAdmin,
+    async (req, res) => {
+
+        try {
+
+            /* =================================================
+               FILTERS
+               ================================================= */
+
+            const search =
+                String(
+                    req.query.search ||
+                    ""
+                )
+                .trim()
+                .slice(
+                    0,
+                    120
+                );
+
+
+            const requestedGroup =
+                String(
+                    req.query.group ||
+                    "team"
+                )
+                .trim()
+                .toLowerCase();
+
+
+            const allowedGroups = [
+                "team",
+                "candidates",
+                "all"
+            ];
+
+
+            const group =
+                allowedGroups.includes(
+                    requestedGroup
+                )
+                    ? requestedGroup
+                    : "team";
+
+
+            let page =
+                Number(
+                    req.query.page
+                ) ||
+                1;
+
+
+            let limit =
+                Number(
+                    req.query.limit
+                ) ||
+                20;
+
+
+            page =
+                Math.max(
+                    1,
+                    page
+                );
+
+
+            limit =
+                Math.min(
+                    50,
+                    Math.max(
+                        10,
+                        limit
+                    )
+                );
+
+
+            const offset =
+                (
+                    page -
+                    1
+                ) *
+                limit;
+
+
+
+            /* =================================================
+               WHERE CLAUSE
+
+               No user input is pasted into SQL.
+               Everything goes through parameters.
+               ================================================= */
+
+            const filterSql = `
+                WHERE
+
+                    (
+                        $1 = ''
+
+                        OR
+
+                        u.first_name
+                            ILIKE
+                            '%' || $1 || '%'
+
+                        OR
+
+                        u.last_name
+                            ILIKE
+                            '%' || $1 || '%'
+
+                        OR
+
+                        (
+                            COALESCE(
+                                u.first_name,
+                                ''
+                            )
+                            ||
+                            ' '
+                            ||
+                            COALESCE(
+                                u.last_name,
+                                ''
+                            )
+                        )
+                            ILIKE
+                            '%' || $1 || '%'
+
+                        OR
+
+                        u.email
+                            ILIKE
+                            '%' || $1 || '%'
+
+                        OR
+
+                        COALESCE(
+                            u.phone_number,
+                            ''
+                        )
+                            ILIKE
+                            '%' || $1 || '%'
+                    )
+
+
+                    AND
+
+                    (
+                        $2 = 'all'
+
+                        OR
+
+                        (
+                            $2 = 'team'
+
+                            AND
+
+                            u.role
+                                IN (
+                                    'admin',
+                                    'system_admin'
+                                )
+                        )
+
+                        OR
+
+                        (
+                            $2 = 'candidates'
+
+                            AND
+
+                            u.role =
+                                'candidate'
+                        )
+                    )
+            `;
+
+
+
+            /* =================================================
+               TOTAL FILTERED USERS
+               ================================================= */
+
+            const countResult =
+                await pool.query(
+                    `
+                    SELECT
+
+                        COUNT(*)::INT
+                            AS total
+
+                    FROM users u
+
+                    ${filterSql}
+                    `,
+                    [
+                        search,
+                        group
+                    ]
+                );
+
+
+            const total =
+                Number(
+                    countResult
+                        .rows[0]
+                        .total
+                ) ||
+                0;
+
+
+
+            /* =================================================
+               LOAD USERS
+               ================================================= */
+
+            const result =
+                await pool.query(
+                    `
+                    SELECT
+
+                        u.id,
+                        u.first_name,
+                        u.last_name,
+                        u.email,
+                        u.phone_number,
+
+                        u.role,
+
+                        u.email_verified,
+
+                        u.created_at,
+
+                        u.profile_photo_path,
+
+
+                        r.role_name,
+
+                        team_role.role_key
+                            AS team_role_key,
+
+                        team_role.role_name
+                            AS team_role_name
+
+
+                    FROM users u
+
+
+                    LEFT JOIN roles r
+
+                        ON r.role_key =
+                            u.role
+
+                    LEFT JOIN LATERAL (
+
+                        SELECT
+
+                            functional_role.role_key,
+                            functional_role.role_name
+
+                        FROM user_roles ur
+
+                        INNER JOIN roles functional_role
+                            ON functional_role.id =
+                                ur.role_id
+
+                        WHERE
+                            ur.user_id =
+                                u.id
+
+                        AND
+                            functional_role.role_key
+                            IN (
+                                'hr_manager',
+                                'hr_recruiter',
+                                'interviewer'
+                            )
+
+                        ORDER BY
+                            ur.assigned_at DESC
+
+                        LIMIT 1
+
+                    ) team_role
+
+                        ON TRUE
+
+
+                    ${filterSql}
+
+
+                    ORDER BY
+
+                        CASE
+
+                            WHEN
+                                u.role =
+                                'system_admin'
+
+                            THEN
+                                1
+
+
+                            WHEN
+                                u.role =
+                                'admin'
+
+                            THEN
+                                2
+
+
+                            ELSE
+                                3
+
+                        END,
+
+                        u.created_at ASC,
+
+                        u.id ASC
+
+
+                    LIMIT $3
+
+                    OFFSET $4
+                    `,
+                    [
+                        search,
+                        group,
+                        limit,
+                        offset
+                    ]
+                );
+
+
+
+            /* =================================================
+               GLOBAL USER STATS
+               ================================================= */
+
+            const statsResult =
+                await pool.query(
+                    `
+                    SELECT
+
+                        COUNT(*)::INT
+                            AS total_users,
+
+
+                        COUNT(*)
+                        FILTER (
+                            WHERE
+                                role =
+                                'candidate'
+                        )::INT
+                            AS candidates,
+
+
+                        COUNT(*)
+                        FILTER (
+                            WHERE
+                                role =
+                                'admin'
+                        )::INT
+                            AS system_managers,
+
+
+                        COUNT(*)
+                        FILTER (
+                            WHERE
+                                role =
+                                'system_admin'
+                        )::INT
+                            AS system_admins
+
+
+                    FROM users
+                    `
+                );
+
+
+            const stats =
+                statsResult.rows[0];
+
+
+
+            /* =================================================
+               MAP SAFE USER DATA
+               ================================================= */
+
+            const users =
+                result.rows.map(
+                    user => {
+
+                        let profilePhotoUrl =
+                            null;
+
+
+                        if (
+                            user.profile_photo_path
+                        ) {
+
+                            const {
+                                data
+                            } =
+                                supabase.storage
+                                    .from(
+                                        "profile-photos"
+                                    )
+                                    .getPublicUrl(
+                                        user.profile_photo_path
+                                    );
+
+
+                            profilePhotoUrl =
+                                data.publicUrl;
+
+                        }
+
+
+                        const users =
+    result.rows.map(
+        user => {
+
+            let profilePhotoUrl =
+                null;
+
+
+            if (
+                user.profile_photo_path
+            ) {
+
+                const {
+                    data
+                } =
+                    supabase.storage
+                        .from(
+                            "profile-photos"
+                        )
+                        .getPublicUrl(
+                            user.profile_photo_path
+                        );
+
+
+                profilePhotoUrl =
+                    data.publicUrl;
+
+            }
+
+
+
+            /* =============================================
+               DETERMINE DISPLAY TEAM ROLE
+               ============================================= */
+
+            const assignedRole =
+
+                user.role ===
+                "system_admin"
+
+                    ? "system_admin"
+
+                    : user.role ===
+                        "admin"
+
+                        ? (
+                            user.team_role_key ||
+                            "admin"
+                        )
+
+                        : "candidate";
+
+
+            const displayRoleName =
+
+                user.role ===
+                "system_admin"
+
+                    ? "System Admin"
+
+                    : user.team_role_name
+
+                        ? user.team_role_name
+
+                        : user.role ===
+                            "admin"
+
+                            ? "System Manager"
+
+                            : "Candidate";
+
+
+
+            return {
+
+                id:
+                    user.id,
+
+
+                firstName:
+                    user.first_name,
+
+                lastName:
+                    user.last_name,
+
+
+                email:
+                    user.email,
+
+                phoneNumber:
+                    user.phone_number,
+
+
+                role:
+                    user.role,
+
+
+                assignedRole:
+                    assignedRole,
+
+
+                teamRole:
+                    user.team_role_key ||
+                    null,
+
+
+                teamRoleName:
+                    user.team_role_name ||
+                    null,
+
+
+                roleName:
+                    displayRoleName,
+
+
+                emailVerified:
+                    Boolean(
+                        user.email_verified
+                    ),
+
+
+                createdAt:
+                    user.created_at,
+
+
+                profilePicture:
+                    profilePhotoUrl,
+
+
+                isCurrentUser:
+                    String(
+                        user.id
+                    ) ===
+                    String(
+                        req.session.userId
+                    )
+
+            };
+
+        }
+    );
+
+
+                        return {
+
+                            id:
+                                user.id,
+
+
+                            firstName:
+                                user.first_name,
+
+                            lastName:
+                                user.last_name,
+
+
+                            email:
+                                user.email,
+
+                            phoneNumber:
+                                user.phone_number,
+
+
+                            role:
+                                user.role,
+
+                            roleName:
+                                user.role_name
+                                ||
+                                fallbackRoleNames[
+                                    user.role
+                                ]
+                                ||
+                                user.role,
+
+
+                            emailVerified:
+                                Boolean(
+                                    user.email_verified
+                                ),
+
+
+                            createdAt:
+                                user.created_at,
+
+
+                            profilePicture:
+                                profilePhotoUrl,
+
+
+                            isCurrentUser:
+                                String(
+                                    user.id
+                                ) ===
+                                String(
+                                    req.session.userId
+                                )
+
+                        };
+
+                    }
+                );
+
+
+
+            /* =================================================
+               PAGINATION
+               ================================================= */
+
+            const totalPages =
+                Math.max(
+                    1,
+                    Math.ceil(
+                        total /
+                        limit
+                    )
+                );
+
+
+
+            /* =================================================
+               RESPONSE
+               ================================================= */
+
+            return res.json({
+
+                success:
+                    true,
+
+
+                users,
+
+
+                group,
+
+
+                stats: {
+
+                    totalUsers:
+                        Number(
+                            stats.total_users
+                        ) ||
+                        0,
+
+                    teamMembers:
+                        (
+                            Number(
+                                stats.system_managers
+                            ) ||
+                            0
+                        )
+                        +
+                        (
+                            Number(
+                                stats.system_admins
+                            ) ||
+                            0
+                        ),
+
+                    systemManagers:
+                        Number(
+                            stats.system_managers
+                        ) ||
+                        0,
+
+                    systemAdmins:
+                        Number(
+                            stats.system_admins
+                        ) ||
+                        0,
+
+                    candidates:
+                        Number(
+                            stats.candidates
+                        ) ||
+                        0
+
+                },
+
+
+                pagination: {
+
+                    page,
+
+                    limit,
+
+                    total,
+
+                    totalPages,
+
+                    hasPrevious:
+                        page >
+                        1,
+
+                    hasNext:
+                        page <
+                        totalPages
+
+                }
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "System user directory error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success:
+                    false,
+
+                message:
+                    "Unable to load Altrium users."
+
+            });
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   SYSTEM ADMIN - CREATE TEAM MEMBER
+   ========================================================= */
+
+app.post(
+    "/api/system/users/team",
+    requireSystemAdmin,
+    async (req, res) => {
+
+        const client =
+            await pool.connect();
+
+
+        try {
+
+            const {
+                firstName,
+                lastName,
+                email,
+                phoneNumber,
+                role,
+                temporaryPassword
+            } =
+                req.body;
+
+
+
+            const cleanFirstName =
+                String(
+                    firstName ||
+                    ""
+                )
+                .trim();
+
+
+            const cleanLastName =
+                String(
+                    lastName ||
+                    ""
+                )
+                .trim();
+
+
+            const cleanEmail =
+                String(
+                    email ||
+                    ""
+                )
+                .trim()
+                .toLowerCase();
+
+
+            const cleanPhone =
+                String(
+                    phoneNumber ||
+                    ""
+                )
+                .trim();
+
+
+            const assignedRole =
+                String(
+                    role ||
+                    ""
+                )
+                .trim()
+                .toLowerCase();
+
+
+            const cleanPassword =
+                String(
+                    temporaryPassword ||
+                    ""
+                );
+
+
+
+            /* =================================================
+               VALIDATION
+               ========================================================= */
+
+            if (
+                !cleanFirstName ||
+                !cleanLastName ||
+                !cleanEmail ||
+                !cleanPhone ||
+                !assignedRole ||
+                !cleanPassword
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Please complete all team member fields."
+
+                });
+
+            }
+
+
+
+            if (
+                !/^[^\s@]+@[^\s@]+\.[^\s@]+$/
+                    .test(
+                        cleanEmail
+                    )
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Please enter a valid email address."
+
+                });
+
+            }
+
+
+
+            if (
+                !assignableTeamRoleKeys.includes(
+                    assignedRole
+                )
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Please select a valid Altrium team role."
+
+                });
+
+            }
+
+
+
+            if (
+                cleanPassword.length <
+                8
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Temporary password must be at least 8 characters long."
+
+                });
+
+            }
+
+
+
+            const accountRole =
+                getAccountRoleForAssignedRole(
+                    assignedRole
+                );
+
+
+
+            await client.query(
+                "BEGIN"
+            );
+
+
+
+            /* =================================================
+               DUPLICATE EMAIL
+               ========================================================= */
+
+            const existingUserResult =
+                await client.query(
+                    `
+                    SELECT id
+
+                    FROM users
+
+                    WHERE
+                        LOWER(email) =
+                        LOWER($1)
+
+                    LIMIT 1
+                    `,
+                    [
+                        cleanEmail
+                    ]
+                );
+
+
+            if (
+                existingUserResult.rows.length >
+                0
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(409).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "An Altrium account already exists with this email address."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               LOAD ACCOUNT + ASSIGNED ROLE RECORDS
+               ========================================================= */
+
+            const roleResult =
+                await client.query(
+                    `
+                    SELECT
+
+                        id,
+                        role_key,
+                        role_name
+
+                    FROM roles
+
+                    WHERE
+                        role_key = $1
+
+                        OR
+
+                        role_key = $2
+                    `,
+                    [
+                        accountRole,
+                        assignedRole
+                    ]
+                );
+
+
+            const accountRoleRecord =
+                roleResult.rows.find(
+                    role =>
+                        role.role_key ===
+                        accountRole
+                );
+
+
+            const assignedRoleRecord =
+                roleResult.rows.find(
+                    role =>
+                        role.role_key ===
+                        assignedRole
+                );
+
+
+            if (
+                !accountRoleRecord ||
+                !assignedRoleRecord
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "The selected Altrium role does not exist."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               PASSWORD HASH
+               ========================================================= */
+
+            const passwordHash =
+                await bcrypt.hash(
+                    cleanPassword,
+                    12
+                );
+
+
+
+            /* =================================================
+               CREATE USER
+               ========================================================= */
+
+            const userResult =
+                await client.query(
+                    `
+                    INSERT INTO users (
+
+                        first_name,
+                        last_name,
+                        email,
+                        phone_number,
+                        password_hash,
+                        role,
+                        email_verified
+
+                    )
+
+                    VALUES (
+
+                        $1,
+                        $2,
+                        $3,
+                        $4,
+                        $5,
+                        $6,
+                        TRUE
+
+                    )
+
+                    RETURNING
+
+                        id,
+                        first_name,
+                        last_name,
+                        email,
+                        phone_number,
+                        role,
+                        email_verified,
+                        created_at
+                    `,
+                    [
+
+                        cleanFirstName,
+
+                        cleanLastName,
+
+                        cleanEmail,
+
+                        cleanPhone,
+
+                        passwordHash,
+
+                        accountRole
+
+                    ]
+                );
+
+
+            const createdUser =
+                userResult.rows[0];
+
+
+
+            /* =================================================
+               ASSIGN BASE ACCOUNT ROLE
+
+               All ordinary team members retain admin as
+               their internal account class.
+               ========================================================= */
+
+            await client.query(
+                `
+                INSERT INTO user_roles (
+
+                    user_id,
+                    role_id,
+                    assigned_by
+
+                )
+
+                VALUES (
+                    $1,
+                    $2,
+                    $3
+                )
+
+                ON CONFLICT (
+                    user_id,
+                    role_id
+                )
+
+                DO UPDATE SET
+
+                    assigned_by =
+                        EXCLUDED.assigned_by,
+
+                    assigned_at =
+                        NOW()
+                `,
+                [
+
+                    createdUser.id,
+
+                    accountRoleRecord.id,
+
+                    req.session.userId
+
+                ]
+            );
+
+
+
+            /* =================================================
+               ASSIGN FUNCTIONAL ROLE
+               ========================================================= */
+
+            if (
+                functionalTeamRoleKeys.includes(
+                    assignedRole
+                )
+            ) {
+
+                await client.query(
+                    `
+                    INSERT INTO user_roles (
+
+                        user_id,
+                        role_id,
+                        assigned_by
+
+                    )
+
+                    VALUES (
+                        $1,
+                        $2,
+                        $3
+                    )
+
+                    ON CONFLICT (
+                        user_id,
+                        role_id
+                    )
+
+                    DO UPDATE SET
+
+                        assigned_by =
+                            EXCLUDED.assigned_by,
+
+                        assigned_at =
+                            NOW()
+                    `,
+                    [
+
+                        createdUser.id,
+
+                        assignedRoleRecord.id,
+
+                        req.session.userId
+
+                    ]
+                );
+
+            }
+
+
+
+            /* =================================================
+               AUDIT
+               ========================================================= */
+
+            await client.query(
+                `
+                INSERT INTO audit_logs (
+
+                    actor_user_id,
+                    target_user_id,
+
+                    action_key,
+
+                    entity_type,
+                    entity_id,
+
+                    description,
+
+                    after_data,
+
+                    ip_address,
+                    user_agent
+
+                )
+
+                VALUES (
+
+                    $1,
+                    $2,
+
+                    'user.team_member.created',
+
+                    'user',
+                    $3,
+
+                    $4,
+
+                    $5::jsonb,
+
+                    $6,
+                    $7
+
+                )
+                `,
+                [
+
+                    req.session.userId,
+
+                    createdUser.id,
+
+                    String(
+                        createdUser.id
+                    ),
+
+                    `Created team member ${cleanFirstName} ${cleanLastName} as ${assignedRoleRecord.role_name}.`,
+
+                    JSON.stringify({
+
+                        accountRole,
+
+                        assignedRole:
+                            assignedRoleRecord.role_key,
+
+                        assignedRoleName:
+                            assignedRoleRecord.role_name,
+
+                        email:
+                            createdUser.email
+
+                    }),
+
+                    req.ip ||
+                    null,
+
+                    req.get(
+                        "user-agent"
+                    ) ||
+                    null
+
+                ]
+            );
+
+
+
+            await client.query(
+                "COMMIT"
+            );
+
+
+
+            return res.status(201).json({
+
+                success:
+                    true,
+
+                message:
+                    "Team member created successfully.",
+
+                user: {
+
+                    id:
+                        createdUser.id,
+
+                    firstName:
+                        createdUser.first_name,
+
+                    lastName:
+                        createdUser.last_name,
+
+                    email:
+                        createdUser.email,
+
+                    phoneNumber:
+                        createdUser.phone_number,
+
+                    role:
+                        createdUser.role,
+
+                    assignedRole,
+
+                    roleName:
+                        assignedRoleRecord.role_name,
+
+                    createdAt:
+                        createdUser.created_at
+
+                }
+
+            });
+
+        }
+
+        catch (error) {
+
+            try {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+            }
+
+            catch (
+                rollbackError
+            ) {
+
+                console.error(
+                    "Create team member rollback error:",
+                    rollbackError
+                );
+
+            }
+
+
+            console.error(
+                "Create team member error:",
+                error
+            );
+
+
+            if (
+                error.code ===
+                "23505"
+            ) {
+
+                return res.status(409).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "An account with this email address already exists."
+
+                });
+
+            }
+
+
+            return res.status(500).json({
+
+                success:
+                    false,
+
+                message:
+                    "Unable to create the team member."
+
+            });
+
+        }
+
+        finally {
+
+            client.release();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   SYSTEM ADMIN - CHANGE TEAM MEMBER ACCESS ROLE
+   ========================================================= */
+
+app.patch(
+    "/api/system/users/:id/role",
+    requireSystemAdmin,
+    async (req, res) => {
+
+        const client =
+            await pool.connect();
+
+
+        try {
+
+            const targetUserId =
+                Number(
+                    req.params.id
+                );
+
+
+            const newRole =
+                String(
+                    req.body.role ||
+                    ""
+                )
+                .trim()
+                .toLowerCase();
+
+
+
+            /* =================================================
+               BASIC VALIDATION
+               ========================================================= */
+
+            if (
+                !Number.isInteger(
+                    targetUserId
+                ) ||
+                targetUserId <=
+                    0
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Invalid team member."
+
+                });
+
+            }
+
+
+
+            const allowedRoles = [
+
+                "admin",
+                "system_admin"
+
+            ];
+
+
+            if (
+                !allowedRoles.includes(
+                    newRole
+                )
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Please select a valid team access role."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               DO NOT CHANGE YOUR OWN ACCESS LEVEL HERE
+
+               This prevents accidental self-demotion.
+               ========================================================= */
+
+            if (
+                String(
+                    targetUserId
+                ) ===
+                String(
+                    req.session.userId
+                )
+            ) {
+
+                return res.status(409).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "You cannot change your own System Admin access level from this page."
+
+                });
+
+            }
+
+
+
+            await client.query(
+                "BEGIN"
+            );
+
+
+
+            /* =================================================
+               LOAD + LOCK TARGET USER
+               ========================================================= */
+
+            const userResult =
+                await client.query(
+                    `
+                    SELECT
+
+                        u.id,
+                        u.first_name,
+                        u.last_name,
+                        u.email,
+                        u.role,
+
+                        r.id
+                            AS current_role_id,
+
+                        r.role_name
+                            AS current_role_name
+
+                    FROM users u
+
+
+                    LEFT JOIN roles r
+
+                        ON r.role_key =
+                            u.role
+
+
+                    WHERE
+                        u.id = $1
+
+
+                    FOR UPDATE OF u
+                    `,
+                    [
+                        targetUserId
+                    ]
+                );
+
+
+            if (
+                userResult.rows.length ===
+                0
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(404).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Team member not found."
+
+                });
+
+            }
+
+
+            const targetUser =
+                userResult.rows[0];
+
+
+
+            /* =================================================
+               CANDIDATES ARE NOT MANAGED HERE
+               ========================================================= */
+
+            if (
+                targetUser.role ===
+                "candidate"
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(409).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Candidate accounts cannot be assigned team access from this control."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               SAME ROLE
+               ========================================================= */
+
+            if (
+                targetUser.role ===
+                newRole
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "This team member already has that access level."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               SERIALIZE SYSTEM ADMIN CHANGES
+
+               Prevent two requests from accidentally
+               demoting the final System Admin together.
+               ========================================================= */
+
+            if (
+                targetUser.role ===
+                    "system_admin"
+
+                ||
+
+                newRole ===
+                    "system_admin"
+            ) {
+
+                await client.query(
+                    `
+                    SELECT
+                        pg_advisory_xact_lock(
+                            26082801
+                        )
+                    `
+                );
+
+            }
+
+
+
+            /* =================================================
+               NEVER DEMOTE THE LAST SYSTEM ADMIN
+               ========================================================= */
+
+            if (
+                targetUser.role ===
+                    "system_admin"
+
+                &&
+
+                newRole !==
+                    "system_admin"
+            ) {
+
+                const systemAdminCountResult =
+                    await client.query(
+                        `
+                        SELECT
+
+                            COUNT(*)::INT
+                                AS count
+
+                        FROM users
+
+                        WHERE
+                            role =
+                            'system_admin'
+                        `
+                    );
+
+
+                const systemAdminCount =
+                    Number(
+                        systemAdminCountResult
+                            .rows[0]
+                            .count
+                    ) ||
+                    0;
+
+
+                if (
+                    systemAdminCount <=
+                    1
+                ) {
+
+                    await client.query(
+                        "ROLLBACK"
+                    );
+
+
+                    return res.status(409).json({
+
+                        success:
+                            false,
+
+                        message:
+                            "The final System Admin cannot be demoted."
+
+                    });
+
+                }
+
+            }
+
+
+
+            /* =================================================
+               VERIFY NEW ROLE EXISTS
+               ========================================================= */
+
+            const newRoleResult =
+                await client.query(
+                    `
+                    SELECT
+
+                        id,
+                        role_key,
+                        role_name
+
+                    FROM roles
+
+                    WHERE
+                        role_key = $1
+
+                    LIMIT 1
+                    `,
+                    [
+                        newRole
+                    ]
+                );
+
+
+            if (
+                newRoleResult.rows.length ===
+                0
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "The selected Altrium role does not exist."
+
+                });
+
+            }
+
+
+            const selectedRole =
+                newRoleResult.rows[0];
+
+
+
+            /* =================================================
+               UPDATE PRIMARY ACCESS ROLE
+               ========================================================= */
+
+            await client.query(
+                `
+                UPDATE users
+
+                SET
+                    role = $1
+
+                WHERE
+                    id = $2
+                `,
+                [
+                    newRole,
+                    targetUserId
+                ]
+            );
+
+
+
+            /* =================================================
+               ADD NEW USER_ROLES ASSIGNMENT
+               ========================================================= */
+
+            await client.query(
+                `
+                INSERT INTO user_roles (
+
+                    user_id,
+                    role_id,
+                    assigned_by
+
+                )
+
+                VALUES (
+
+                    $1,
+                    $2,
+                    $3
+
+                )
+
+                ON CONFLICT (
+                    user_id,
+                    role_id
+                )
+
+                DO UPDATE SET
+
+                    assigned_by =
+                        EXCLUDED.assigned_by,
+
+                    assigned_at =
+                        NOW()
+                `,
+                [
+
+                    targetUserId,
+
+                    selectedRole.id,
+
+                    req.session.userId
+
+                ]
+            );
+
+
+
+            /* =================================================
+               REMOVE OLD BUILT-IN ACCESS ROLE LINKS
+
+               IMPORTANT:
+               This ONLY removes candidate/admin/system_admin
+               assignment links for this one user.
+
+               Custom roles are preserved.
+               No user account or role is deleted.
+               ========================================================= */
+
+            await client.query(
+                `
+                DELETE FROM user_roles ur
+
+                USING roles r
+
+                WHERE
+                    ur.role_id =
+                        r.id
+
+                AND
+                    ur.user_id =
+                        $1
+
+                AND
+                    r.role_key IN (
+                        'candidate',
+                        'admin',
+                        'system_admin'
+                    )
+
+                AND
+                    r.id <>
+                        $2
+                `,
+                [
+
+                    targetUserId,
+
+                    selectedRole.id
+
+                ]
+            );
+
+
+
+            /* =================================================
+               REVOKE EXISTING LOGIN SESSIONS
+
+               Makes the new access level take effect
+               immediately on their next login.
+               ========================================================= */
+
+            await client.query(
+                `
+                DELETE FROM "session"
+
+                WHERE
+                    sess ->> 'userId' =
+                    $1
+                `,
+                [
+                    String(
+                        targetUserId
+                    )
+                ]
+            );
+
+
+
+            /* =================================================
+               AUDIT LOG
+               ========================================================= */
+
+            const fullName =
+                `${
+                    targetUser.first_name ||
+                    ""
+                } ${
+                    targetUser.last_name ||
+                    ""
+                }`
+                .trim()
+                ||
+                targetUser.email;
+
+
+            await client.query(
+                `
+                INSERT INTO audit_logs (
+
+                    actor_user_id,
+                    target_user_id,
+
+                    action_key,
+
+                    entity_type,
+                    entity_id,
+
+                    description,
+
+                    before_data,
+                    after_data,
+
+                    metadata,
+
+                    ip_address,
+                    user_agent
+
+                )
+
+                VALUES (
+
+                    $1,
+                    $2,
+
+                    'user.access_role.changed',
+
+                    'user',
+                    $3,
+
+                    $4,
+
+                    $5::jsonb,
+                    $6::jsonb,
+
+                    $7::jsonb,
+
+                    $8,
+                    $9
+
+                )
+                `,
+                [
+
+                    req.session.userId,
+
+                    targetUserId,
+
+                    String(
+                        targetUserId
+                    ),
+
+                    `Changed ${fullName}'s access role from ${targetUser.role} to ${newRole}.`,
+
+                    JSON.stringify({
+
+                        role:
+                            targetUser.role,
+
+                        roleName:
+                            targetUser
+                                .current_role_name
+
+                    }),
+
+                    JSON.stringify({
+
+                        role:
+                            selectedRole
+                                .role_key,
+
+                        roleName:
+                            selectedRole
+                                .role_name
+
+                    }),
+
+                    JSON.stringify({
+
+                        sessionsRevoked:
+                            true
+
+                    }),
+
+                    req.ip ||
+                    null,
+
+                    req.get(
+                        "user-agent"
+                    ) ||
+                    null
+
+                ]
+            );
+
+
+
+            await client.query(
+                "COMMIT"
+            );
+
+
+
+            return res.json({
+
+                success:
+                    true,
+
+                message:
+                    "Team member access role updated successfully.",
+
+                user: {
+
+                    id:
+                        targetUserId,
+
+                    role:
+                        selectedRole
+                            .role_key,
+
+                    roleName:
+                        selectedRole
+                            .role_name
+
+                }
+
+            });
+
+        }
+
+        catch (error) {
+
+            try {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+            }
+
+            catch (rollbackError) {
+
+                console.error(
+                    "Team role rollback error:",
+                    rollbackError
+                );
+
+            }
+
+
+            console.error(
+                "Change team member role error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success:
+                    false,
+
+                message:
+                    "Unable to update the team member access role."
+
+            });
+
+        }
+
+        finally {
+
+            client.release();
+
+        }
+
+    }
+);
+
+
+
 // ADMIN LOAD JOB VACANCIES
 
 app.get(
     "/api/admin/jobs",
-    requireAdmin,
+    requirePermission(
+        "vacancies.view_all"
+    ),
     async (req, res) => {
 
         try {
@@ -533,7 +3320,9 @@ app.get(
 
 app.patch(
     "/api/admin/jobs/:id/status",
-    requireAdmin,
+    requirePermission(
+        "vacancies.manage"
+    ),
     async (req, res) => {
 
         try {
@@ -629,7 +3418,9 @@ app.patch(
 
 app.patch(
     "/api/admin/jobs/:id",
-    requireAdmin,
+    requirePermission(
+        "vacancies.manage"
+    ),
     async (req, res) => {
 
         try {
@@ -1082,7 +3873,9 @@ async function getStoredGoogleCalendarClient() {
 
 app.get(
     "/api/admin/google-calendar/test",
-    requireAdmin,
+    requirePermission(
+        "system.settings.manage"
+    ),
     async (req, res) => {
 
         try {
@@ -3720,7 +6513,9 @@ async function inviteCandidateToGoogleInterview({
 
 app.get(
     "/api/google/calendar/connect",
-    requireAdmin,
+    requirePermission(
+        "system.settings.manage"
+    ),
     (req, res) => {
 
         try {
@@ -3775,7 +6570,9 @@ app.get(
 
 app.get(
     "/api/google/calendar/callback",
-    requireAdmin,
+    requirePermission(
+        "system.settings.manage"
+    ),
     async (req, res) => {
 
         try {
@@ -8342,7 +11139,9 @@ app.get(
 
 app.get(
     "/api/admin/applications",
-    requireAdmin,
+    requirePermission(
+        "applications.view_all"
+    ),
     async (req, res) => {
 
         try {
@@ -9263,7 +12062,9 @@ app.get(
 
 app.get(
     "/api/admin/applications/:id",
-    requireAdmin,
+    requirePermission(
+        "applications.view_all"
+    ),
     async (req, res) => {
 
         try {
@@ -9629,7 +12430,9 @@ app.get(
 
 app.get(
     "/api/admin/applications/:id/evaluations",
-    requireAdmin,
+    requirePermission(
+        "evaluations.view"
+    ),
     async (req, res) => {
 
         try {
@@ -10272,7 +13075,9 @@ app.get(
 
 app.put(
     "/api/admin/applications/:id/evaluation",
-    requireAdmin,
+    requirePermission(
+        "evaluations.manage"
+    ),
     async (req, res) => {
 
         const client =
@@ -10678,166 +13483,165 @@ app.put(
                 }
 
 
+/* =============================================
+   SAVE OLD VERSION TO AUDIT HISTORY
+   ============================================= */
 
-                /* =============================================
-                   SAVE OLD VERSION TO AUDIT HISTORY
-                   ============================================= */
+await client.query(
+    `
+    INSERT INTO application_evaluation_history (
 
-                await client.query(
-                    `
-                    INSERT INTO application_evaluation_history (
+        evaluation_id,
+        application_id,
+        reviewer_id,
 
-                        evaluation_id,
-                        application_id,
-                        reviewer_id,
+        technical_skills_rating,
+        relevant_experience_rating,
+        qualifications_rating,
+        overall_suitability_rating,
 
-                        technical_skills_rating,
-                        relevant_experience_rating,
-                        qualifications_rating,
-                        overall_suitability_rating,
+        technical_skills_note,
+        relevant_experience_note,
+        qualifications_note,
+        overall_suitability_note,
 
-                        technical_skills_note,
-                        relevant_experience_note,
-                        qualifications_note,
-                        overall_suitability_note,
+        feedback,
+        reviewer_score,
 
-                        feedback,
-                        reviewer_score,
+        change_type,
+        changed_at
 
-                        change_type,
-                        changed_at
+    )
 
-                    )
+    SELECT
 
-                    SELECT
+        id,
+        application_id,
+        reviewer_id,
 
-                        id,
-                        application_id,
-                        reviewer_id,
+        technical_skills_rating,
+        relevant_experience_rating,
+        qualifications_rating,
+        overall_suitability_rating,
 
-                        technical_skills_rating,
-                        relevant_experience_rating,
-                        qualifications_rating,
-                        overall_suitability_rating,
+        technical_skills_note,
+        relevant_experience_note,
+        qualifications_note,
+        overall_suitability_note,
 
-                        technical_skills_note,
-                        relevant_experience_note,
-                        qualifications_note,
-                        overall_suitability_note,
+        feedback,
+        reviewer_score,
 
-                        recommendation,
-                        feedback,
-                        reviewer_score,
+        'updated',
+        NOW()
 
-                        'updated',
-                        NOW()
+    FROM application_evaluations
 
-                    FROM application_evaluations
-
-                    WHERE
-                        id = $1
-                    `,
-                    [
-                        existingEvaluation.id
-                    ]
-                );
+    WHERE
+        id = $1
+    `,
+    [
+        existingEvaluation.id
+    ]
+);
 
 
 
-                const updateResult =
-                    await client.query(
-                        `
-                        UPDATE application_evaluations
+const updateResult =
+    await client.query(
+        `
+        UPDATE application_evaluations
 
-                        SET
+        SET
 
-                            technical_skills_rating =
-                                $1,
+            technical_skills_rating =
+                $1,
 
-                            relevant_experience_rating =
-                                $2,
+            relevant_experience_rating =
+                $2,
 
-                            qualifications_rating =
-                                $3,
+            qualifications_rating =
+                $3,
 
-                            overall_suitability_rating =
-                                $4,
+            overall_suitability_rating =
+                $4,
 
-                            technical_skills_note =
-                                $5,
+            technical_skills_note =
+                $5,
 
-                            relevant_experience_note =
-                                $6,
+            relevant_experience_note =
+                $6,
 
-                            qualifications_note =
-                                $7,
+            qualifications_note =
+                $7,
 
-                            overall_suitability_note =
-                                $8,
+            overall_suitability_note =
+                $8,
 
-                            feedback =
-                                $9
+            feedback =
+                $9,
 
-                            updated_at =
-                                NOW()
+            updated_at =
+                NOW()
 
-                        WHERE
-                            id = $11
+        WHERE
+            id = $10
 
-                        RETURNING *
-                        `,
-                        [
+        RETURNING *
+        `,
+        [
 
-                            ratings
-                                .technicalSkills,
+            ratings
+                .technicalSkills,
 
-                            ratings
-                                .relevantExperience,
+            ratings
+                .relevantExperience,
 
-                            ratings
-                                .qualifications,
+            ratings
+                .qualifications,
 
-                            ratings
-                                .overallSuitability,
-
-
-                            String(
-                                technicalSkillsNote ||
-                                ""
-                            )
-                            .trim() ||
-                            null,
+            ratings
+                .overallSuitability,
 
 
-                            String(
-                                relevantExperienceNote ||
-                                ""
-                            )
-                            .trim() ||
-                            null,
+            String(
+                technicalSkillsNote ||
+                ""
+            )
+            .trim() ||
+            null,
 
 
-                            String(
-                                qualificationsNote ||
-                                ""
-                            )
-                            .trim() ||
-                            null,
+            String(
+                relevantExperienceNote ||
+                ""
+            )
+            .trim() ||
+            null,
 
 
-                            String(
-                                overallSuitabilityNote ||
-                                ""
-                            )
-                            .trim() ||
-                            null,
+            String(
+                qualificationsNote ||
+                ""
+            )
+            .trim() ||
+            null,
 
-                            cleanFeedback,
 
-                            existingEvaluation.id
+            String(
+                overallSuitabilityNote ||
+                ""
+            )
+            .trim() ||
+            null,
 
-                        ]
-                    );
+
+            cleanFeedback,
+
+            existingEvaluation.id
+
+        ]
+    );
 
 
                 savedEvaluation =
@@ -11351,7 +14155,9 @@ app.put(
 
 app.post(
     "/api/admin/applications/bulk-shortlist",
-    requireAdmin,
+    requirePermission(
+        "applications.manage"
+    ),
     async (req, res) => {
 
         const client =
@@ -12416,7 +15222,9 @@ app.post(
 
 app.patch(
     "/api/admin/applications/:id/status",
-    requireAdmin,
+    requirePermission(
+        "applications.manage"
+    ),
     async (req, res) => {
 
         const client =
@@ -13359,7 +16167,9 @@ if (
 
 app.get(
     "/api/admin/interview-sessions",
-    requireAdmin,
+    requirePermission(
+        "interviews.view"
+    ),
     async (req, res) => {
 
         try {
@@ -13565,7 +16375,9 @@ app.get(
 
 app.get(
     "/api/admin/interview-sessions/:id",
-    requireAdmin,
+    requirePermission(
+        "interviews.view"
+    ),
     async (req, res) => {
 
         try {
@@ -13867,7 +16679,9 @@ app.get(
 
 app.get(
     "/api/admin/interview-session-options",
-    requireAdmin,
+    requirePermission(
+        "interviews.manage"
+    ),
     async (req, res) => {
 
         try {
@@ -13976,7 +16790,9 @@ app.get(
 
 app.post(
     "/api/admin/interview-sessions",
-    requireAdmin,
+    requirePermission(
+        "interviews.manage"
+    ),
     async (req, res) => {
 
         const client =
@@ -14928,7 +17744,9 @@ app.post(
 
 app.patch(
     "/api/admin/interview-sessions/:id/confirm",
-    requireAdmin,
+    requirePermission(
+        "interviews.manage"
+    ),
     async (req, res) => {
 
         const sessionId =

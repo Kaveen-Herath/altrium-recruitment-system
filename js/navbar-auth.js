@@ -205,26 +205,31 @@ async function loadNavbarUser() {
            ADMIN DASHBOARD
            ============================================= */
 
-        if (dashboardLink) {
+const hasAdminDashboardAccess = [
 
-            if (
-                user.role ===
-                "admin"
-            ) {
+    "admin",
+    "system_admin"
 
-                dashboardLink.style.display =
-                    "inline";
+].includes(
+    user.role
+);
 
-            }
 
-            else {
+if (
+    hasAdminDashboardAccess
+) {
 
-                dashboardLink.style.display =
-                    "none";
+    dashboardLink.style.display =
+        "inline";
 
-            }
+}
 
-        }
+else {
+
+    dashboardLink.style.display =
+        "none";
+
+}
 
 
 

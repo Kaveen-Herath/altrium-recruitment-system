@@ -150,6 +150,15 @@ async function updateNavbarAccount() {
         const user =
             data.user;
 
+        const hasAdminDashboardAccess = [
+
+            "admin",
+            "system_admin"
+
+        ].includes(
+            user.role
+        );
+
         const dashboardLink =
             document.getElementById(
                 "dashboardLink"
@@ -158,12 +167,16 @@ async function updateNavbarAccount() {
 
         if (dashboardLink) {
 
-            if (user.role === "admin") {
+            if (
+                hasAdminDashboardAccess
+            ) {
 
                 dashboardLink.style.display =
                     "inline-block";
 
-            } else {
+            }
+
+            else {
 
                 dashboardLink.style.display =
                     "none";
@@ -176,24 +189,32 @@ async function updateNavbarAccount() {
            Correct destination based on role
         --------------------------------------------- */
 
-        if (user.role === "admin") {
+if (
+    hasAdminDashboardAccess
+) {
 
-            profileLink.href =
-                "admin/admin-dashboard.html";
+    profileLink.href =
+        "admin/admin-dashboard.html";
 
-            profileLink.title =
-                "Admin Dashboard";
+    profileLink.title =
+        user.role ===
+        "system_admin"
 
-        }
+            ? "System Admin Dashboard"
 
-        else {
+            : "Admin Dashboard";
 
-            profileLink.href =
-                "profile.html";
+}
 
-            profileLink.title =
-                "My Profile";
-        }
+else {
+
+    profileLink.href =
+        "profile.html";
+
+    profileLink.title =
+        "My Profile";
+
+}
 
 
         /* ---------------------------------------------
