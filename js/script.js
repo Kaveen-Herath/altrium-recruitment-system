@@ -1653,6 +1653,131 @@ async function loadHomeDashboard() {
 loadHomeDashboard();
 
 
+/* =========================================================
+   HOMEPAGE RECRUITMENT STATS
+   ========================================================= */
+
+async function loadHomepageRecruitmentStats() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/home/stats"
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            return;
+
+        }
+
+
+        const stats =
+            data.stats ||
+            {};
+
+
+        const activeRoles =
+            document.getElementById(
+                "homeActiveRoles"
+            );
+
+
+        const departments =
+            document.getElementById(
+                "homeDepartmentCount"
+            );
+
+
+        const openPositions =
+            document.getElementById(
+                "homeOpenPositions"
+            );
+
+
+        if (
+            activeRoles
+        ) {
+
+            activeRoles.textContent =
+                String(
+                    Number(
+                        stats.activeRoles
+                    ) ||
+                    0
+                )
+                .padStart(
+                    2,
+                    "0"
+                );
+
+        }
+
+
+        if (
+            departments
+        ) {
+
+            departments.textContent =
+                String(
+                    Number(
+                        stats.departments
+                    ) ||
+                    0
+                )
+                .padStart(
+                    2,
+                    "0"
+                );
+
+        }
+
+
+        if (
+            openPositions
+        ) {
+
+            openPositions.textContent =
+                String(
+                    Number(
+                        stats.openPositions
+                    ) ||
+                    0
+                )
+                .padStart(
+                    2,
+                    "0"
+                );
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Homepage recruitment stats error:",
+            error
+        );
+
+    }
+
+}
+
+
+loadHomepageRecruitmentStats();
+
+
+
 /* ================= FILTERS ================= */
 
 const filterValues = {
@@ -1796,31 +1921,46 @@ const tips = [
             "Find your perfect spot.",
 
         text:
-            "Look beyond the title. Find a role where your strengths, ambitions and the culture align."
+            "Look beyond the title. Find a role where your strengths, ambitions and the culture align.",
+
+        image:
+            "assets/SlideImg1.png"
     },
+
 
     {
         title:
             "Make your profile count.",
 
         text:
-            "A complete profile gives recruiters a clearer picture of what you can bring to the team."
+            "A complete profile gives recruiters a clearer picture of what you can bring to the team.",
+
+        image:
+            "assets/SlideImg2.png"
     },
+
 
     {
         title:
             "Show, don't just tell.",
 
         text:
-            "Use measurable results and real examples to make your experience memorable."
+            "Use measurable results and real examples to make your experience memorable.",
+
+        image:
+            "assets/SlideImg3.png"
     },
+
 
     {
         title:
             "Stay open to growth.",
 
         text:
-            "Your ideal first step may not have the perfect title — but it can open the right door."
+            "Your ideal first step may not have the perfect title — but it can open the right door.",
+
+        image:
+            "assets/SlideImg4.png"
     }
 
 ];
@@ -1832,10 +1972,28 @@ let currentTip = 0;
 function updateTip() {
 
     const title =
-        document.getElementById("tipTitle");
+        document.getElementById(
+            "tipTitle"
+        );
+
 
     const text =
-        document.getElementById("tipText");
+        document.getElementById(
+            "tipText"
+        );
+
+
+    const image =
+        document.getElementById(
+            "careerTipImage"
+        );
+
+
+    const slideNumber =
+        document.getElementById(
+            "careerSlideNumber"
+        );
+
 
     const bars =
         document.querySelectorAll(
@@ -1843,21 +2001,110 @@ function updateTip() {
         );
 
 
-    title.textContent =
-        tips[currentTip].title;
-
-    text.textContent =
-        tips[currentTip].text;
+    const current =
+        tips[currentTip];
 
 
-    bars.forEach((bar, index) => {
 
-        bar.classList.toggle(
-            "active",
-            index === currentTip
+    /* TEXT */
+
+    if (
+        title
+    ) {
+
+        title.textContent =
+            current.title;
+
+    }
+
+
+    if (
+        text
+    ) {
+
+        text.textContent =
+            current.text;
+
+    }
+
+
+
+    /* IMAGE */
+
+    if (
+        image
+    ) {
+
+        image.style.opacity =
+            "0";
+
+
+        setTimeout(
+            () => {
+
+                image.src =
+                    current.image;
+
+
+                image.style.opacity =
+                    "1";
+
+            },
+            180
         );
 
-    });
+    }
+
+
+
+    /* SLIDE NUMBER */
+
+    if (
+        slideNumber
+    ) {
+
+        slideNumber.textContent =
+            `${
+                String(
+                    currentTip + 1
+                )
+                .padStart(
+                    2,
+                    "0"
+                )
+            } / ${
+                String(
+                    tips.length
+                )
+                .padStart(
+                    2,
+                    "0"
+                )
+            }`;
+
+    }
+
+
+
+    /* PROGRESS BARS */
+
+    bars.forEach(
+        (
+            bar,
+            index
+        ) => {
+
+            bar.classList.toggle(
+
+                "active",
+
+                index ===
+                currentTip
+
+            );
+
+        }
+    );
 
 }
 

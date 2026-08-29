@@ -3064,6 +3064,78 @@ footer {
         none !important;
 }
 
+/* =========================================================
+   CAREER TIP SLIDER IMAGE
+   ========================================================= */
+
+.career-tip-image {
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    object-position: center;
+
+    z-index: 1;
+
+    transition:
+        opacity 0.35s ease,
+        transform 0.5s ease;
+
+    transform: scale(1.02);
+}
+
+
+/* DARKEN IMAGE SLIGHTLY SO IT MATCHES ALTRIUM */
+
+.career-image-overlay {
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 2;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(0, 0, 0, 0.08),
+            rgba(0, 0, 0, 0.20)
+        );
+}
+
+
+/* KEEP YOUR EXISTING GLOW ABOVE IMAGE */
+
+.career-image .image-glow {
+    position: absolute;
+
+    z-index: 3;
+}
+
+
+/* KEEP SLIDE NUMBER ABOVE IMAGE */
+
+.career-image .slide-number {
+    position: absolute;
+
+    z-index: 4;
+}
+
+
+/* KEEP CAREER TIP LABEL ABOVE IMAGE */
+
+.career-image .career-tag {
+    position: absolute;
+
+    z-index: 4;
+}
+
 
 @media (
     max-width:

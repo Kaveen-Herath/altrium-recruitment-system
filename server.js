@@ -6886,6 +6886,104 @@ app.get("/api/jobs", async (req, res) => {
 });
 
 
+/* =========================================================
+   HOMEPAGE - PUBLIC RECRUITMENT STATS
+   ========================================================= */
+
+app.get(
+    "/api/home/stats",
+    async (req, res) => {
+
+        try {
+
+            const result =
+                await pool.query(
+                    `
+                    SELECT
+
+                        COUNT(*)::INT
+                            AS active_roles,
+
+                        COUNT(
+                            DISTINCT department
+                        )::INT
+                            AS departments,
+
+                        COALESCE(
+                            SUM(
+                                number_of_openings
+                            ),
+                            0
+                        )::INT
+                            AS open_positions
+
+                    FROM jobs
+
+                    WHERE
+                        status = 'active'
+                    `
+                );
+
+
+            const stats =
+                result.rows[0];
+
+
+            return res.json({
+
+                success:
+                    true,
+
+                stats: {
+
+                    activeRoles:
+                        Number(
+                            stats.active_roles
+                        ) ||
+                        0,
+
+                    departments:
+                        Number(
+                            stats.departments
+                        ) ||
+                        0,
+
+                    openPositions:
+                        Number(
+                            stats.open_positions
+                        ) ||
+                        0
+
+                }
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Homepage stats error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success:
+                    false,
+
+                message:
+                    "Unable to load recruitment stats."
+
+            });
+
+        }
+
+    }
+);
+
+
 app.post(
     "/api/profile/photo",
     profilePhotoUpload.single("profilePhoto"),
