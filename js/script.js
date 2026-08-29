@@ -2031,29 +2031,16 @@ function updateTip() {
 
     /* IMAGE */
 
-    if (
-        image
-    ) {
+/* IMAGE */
 
-        image.style.opacity =
-            "0";
+if (
+    image
+) {
 
+    image.src =
+        current.image;
 
-        setTimeout(
-            () => {
-
-                image.src =
-                    current.image;
-
-
-                image.style.opacity =
-                    "1";
-
-            },
-            180
-        );
-
-    }
+}
 
 
 
