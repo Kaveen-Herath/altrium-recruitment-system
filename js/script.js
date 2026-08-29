@@ -322,6 +322,1337 @@ else {
 updateNavbarAccount();
 
 
+/* =========================================================
+   HOMEPAGE ROLE-AWARE DASHBOARD
+   ========================================================= */
+
+function getHomepageGreeting() {
+
+    const hour =
+        new Date()
+            .getHours();
+
+
+    if (
+        hour <
+        12
+    ) {
+
+        return "Good Morning";
+
+    }
+
+
+    if (
+        hour <
+        18
+    ) {
+
+        return "Good Afternoon";
+
+    }
+
+
+    return "Good Evening";
+
+}
+
+
+
+/* =========================================================
+   FORMAT APPLICATION STATUS
+   ========================================================= */
+
+function formatHomepageStatus(
+    status
+) {
+
+    const value =
+        String(
+            status ||
+            ""
+        );
+
+
+    if (
+        !value
+    ) {
+
+        return "";
+
+    }
+
+
+    return value
+
+        .replaceAll(
+            "_",
+            " "
+        )
+
+        .replace(
+            /\b\w/g,
+            character =>
+                character.toUpperCase()
+        );
+
+}
+
+
+function formatHomepageApplicationDate(
+    value
+) {
+
+    if (
+        !value
+    ) {
+
+        return "";
+
+    }
+
+
+    const date =
+        new Date(
+            value
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "";
+
+    }
+
+
+    return new Intl.DateTimeFormat(
+        "en-GB",
+        {
+
+            day:
+                "2-digit",
+
+            month:
+                "short",
+
+            year:
+                "numeric"
+
+        }
+    )
+    .format(
+        date
+    );
+
+}
+
+
+/* =========================================================
+   SET HOMEPAGE DASHBOARD TEXT
+   ========================================================= */
+
+function setHomepageDashboardText(
+    id,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (
+        element
+    ) {
+
+        element.textContent =
+            value;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   RENDER CANDIDATE HOMEPAGE
+   ========================================================= */
+
+function renderCandidateHomeDashboard(
+    data
+) {
+
+    const recruitmentActions =
+        document.getElementById(
+            "homeRecruitmentActions"
+        );
+
+
+    if (
+        recruitmentActions
+    ) {
+
+        recruitmentActions.hidden =
+            true;
+
+    }
+
+    const candidate =
+        data.candidate ||
+        {};
+
+
+    const firstName =
+        data.user
+            ?.firstName ||
+        "";
+
+
+    const applications =
+        Number(
+            candidate.applications
+        ) ||
+        0;
+
+
+    const savedJobs =
+        Number(
+            candidate.savedJobs
+        ) ||
+        0;
+
+
+    const latestApplication =
+        candidate.latestApplication ||
+        null;
+
+
+
+    setHomepageDashboardText(
+
+        "homeDashboardLabel",
+
+        "YOUR CAREER DASHBOARD"
+
+    );
+
+
+    setHomepageDashboardText(
+
+        "homeDashboardGreeting",
+
+        `${
+            getHomepageGreeting()
+        }${
+            firstName
+                ? `, ${firstName}`
+                : ""
+        }.`
+
+    );
+
+
+
+    /* TILE 1 */
+
+    setHomepageDashboardText(
+
+        "homeDashboardTileOneLabel",
+
+        "Applications"
+
+    );
+
+
+    setHomepageDashboardText(
+
+        "homeDashboardTileOneValue",
+
+        String(
+            applications
+        )
+        .padStart(
+            2,
+            "0"
+        )
+
+    );
+
+
+    setHomepageDashboardText(
+
+        "homeDashboardTileOneMeta",
+
+        applications ===
+            0
+
+            ? "No applications yet"
+
+            : applications ===
+                1
+
+                ? "1 submitted application"
+
+                : `${applications} submitted applications`
+
+    );
+
+
+
+    /* TILE 2 */
+
+    setHomepageDashboardText(
+
+        "homeDashboardTileTwoLabel",
+
+        "Saved jobs"
+
+    );
+
+
+    setHomepageDashboardText(
+
+        "homeDashboardTileTwoValue",
+
+        String(
+            savedJobs
+        )
+        .padStart(
+            2,
+            "0"
+        )
+
+    );
+
+
+    setHomepageDashboardText(
+
+        "homeDashboardTileTwoMeta",
+
+        savedJobs ===
+            0
+
+            ? "Start exploring"
+
+            : savedJobs ===
+                1
+
+                ? "1 job saved"
+
+                : `${savedJobs} jobs saved`
+
+    );
+
+
+
+    const focusTitle =
+        document.getElementById(
+            "homeDashboardFocusTitle"
+        );
+
+
+    const focusText =
+        document.getElementById(
+            "homeDashboardFocusText"
+        );
+
+
+    const action =
+        document.getElementById(
+            "homeDashboardAction"
+        );
+
+
+
+    /* =====================================================
+       BRAND NEW CANDIDATE
+       ===================================================== */
+
+    if (
+        !latestApplication
+    ) {
+
+        const applicationTitle =
+            document.getElementById(
+                "homeDashboardApplicationTitle"
+            );
+
+
+        const applicationMeta =
+            document.getElementById(
+                "homeDashboardApplicationMeta"
+            );
+
+
+        const statusBadge =
+            document.getElementById(
+                "homeDashboardStatusBadge"
+            );
+
+
+        if (
+            applicationTitle
+        ) {
+
+            applicationTitle.hidden =
+                true;
+
+        }
+
+
+        if (
+            applicationMeta
+        ) {
+
+            applicationMeta.hidden =
+                true;
+
+        }
+
+
+        if (
+            statusBadge
+        ) {
+
+            statusBadge.hidden =
+                true;
+
+        }
+
+
+        if (
+            focusTitle
+        ) {
+
+            focusTitle.textContent =
+                "Ready to get started?";
+
+        }
+
+
+        if (
+            focusText
+        ) {
+
+            focusText.textContent =
+                "Explore available vacancies and submit your first application with Altrium.";
+
+        }
+
+
+        if (
+            action
+        ) {
+
+            action.hidden =
+                false;
+
+
+            action.href =
+                "jobs.html";
+
+
+            action.textContent =
+                "Explore vacancies";
+
+        }
+
+
+        return;
+
+    }
+
+
+
+/* =====================================================
+   CANDIDATE WITH APPLICATION
+   ===================================================== */
+
+const applicationTitle =
+    document.getElementById(
+        "homeDashboardApplicationTitle"
+    );
+
+
+const applicationMeta =
+    document.getElementById(
+        "homeDashboardApplicationMeta"
+    );
+
+
+const applicationReference =
+    document.getElementById(
+        "homeDashboardApplicationReference"
+    );
+
+
+const applicationDate =
+    document.getElementById(
+        "homeDashboardApplicationDate"
+    );
+
+
+const statusBadge =
+    document.getElementById(
+        "homeDashboardStatusBadge"
+    );
+
+
+const formattedStatus =
+    formatHomepageStatus(
+        latestApplication.status
+    );
+
+
+
+if (
+    focusTitle
+) {
+
+    focusTitle.textContent =
+        "Latest application";
+
+}
+
+
+
+if (
+    applicationTitle
+) {
+
+    applicationTitle.hidden =
+        false;
+
+
+    applicationTitle.textContent =
+        latestApplication.jobTitle ||
+        "Vacancy";
+
+}
+
+
+
+if (
+    statusBadge
+) {
+
+    statusBadge.hidden =
+        false;
+
+
+    statusBadge.textContent =
+        formattedStatus;
+
+}
+
+
+
+if (
+    applicationMeta
+) {
+
+    applicationMeta.hidden =
+        false;
+
+}
+
+
+
+if (
+    applicationReference
+) {
+
+    applicationReference.textContent =
+        latestApplication.reference ||
+        "Application";
+
+}
+
+
+
+if (
+    applicationDate
+) {
+
+    const formattedDate =
+        formatHomepageApplicationDate(
+            latestApplication.appliedAt
+        );
+
+
+    applicationDate.textContent =
+        formattedDate
+            ? `Applied ${formattedDate}`
+            : "";
+
+}
+
+
+
+if (
+    focusText
+) {
+
+    focusText.textContent =
+        `Your application is currently in the ${formattedStatus} stage.`;
+
+}
+
+
+
+if (
+    action
+) {
+
+    action.hidden =
+        false;
+
+
+    action.href =
+        `/application-progress.html?id=${
+            encodeURIComponent(
+                latestApplication.id
+            )
+        }`;
+
+
+    action.textContent =
+        "View application progress";
+
+}
+
+}
+
+
+/* =========================================================
+   RENDER LOGGED-OUT HOMEPAGE
+   ========================================================= */
+
+function renderGuestHomeDashboard(
+    data
+) {
+
+    const guest =
+        data.guest ||
+        {};
+
+
+    const activeVacancies =
+        Number(
+            guest.activeVacancies
+        ) ||
+        0;
+
+
+
+    /* =====================================================
+       HEADER
+       ===================================================== */
+
+    setHomepageDashboardText(
+
+        "homeDashboardLabel",
+
+        "ALTRIUM CAREER PORTAL"
+
+    );
+
+
+    setHomepageDashboardText(
+
+        "homeDashboardGreeting",
+
+        "Your career journey, all in one place."
+
+    );
+
+
+
+    /* =====================================================
+       TILE ONE
+       ===================================================== */
+
+    setHomepageDashboardText(
+
+        "homeDashboardTileOneLabel",
+
+        "Open vacancies"
+
+    );
+
+
+    setHomepageDashboardText(
+
+        "homeDashboardTileOneValue",
+
+        String(
+            activeVacancies
+        )
+        .padStart(
+            2,
+            "0"
+        )
+
+    );
+
+
+    setHomepageDashboardText(
+
+        "homeDashboardTileOneMeta",
+
+        "Roles available now"
+
+    );
+
+
+
+    /* =====================================================
+       TILE TWO
+       ===================================================== */
+
+    setHomepageDashboardText(
+
+        "homeDashboardTileTwoLabel",
+
+        "Application tracking"
+
+    );
+
+
+    setHomepageDashboardText(
+
+        "homeDashboardTileTwoValue",
+
+        "LIVE"
+
+    );
+
+
+    setHomepageDashboardText(
+
+        "homeDashboardTileTwoMeta",
+
+        "Follow every recruitment stage"
+
+    );
+
+
+
+    /* =====================================================
+       BOTTOM INFORMATION
+       ===================================================== */
+
+    setHomepageDashboardText(
+
+        "homeDashboardFocusTitle",
+
+        "What Altrium helps you do"
+
+    );
+
+
+    setHomepageDashboardText(
+
+        "homeDashboardFocusText",
+
+        "Everything you need to move from discovering a vacancy to following your recruitment progress."
+
+    );
+
+
+
+    /* =====================================================
+       HIDE CANDIDATE ELEMENTS
+       ===================================================== */
+
+    const applicationTitle =
+        document.getElementById(
+            "homeDashboardApplicationTitle"
+        );
+
+
+    const applicationMeta =
+        document.getElementById(
+            "homeDashboardApplicationMeta"
+        );
+
+
+    const statusBadge =
+        document.getElementById(
+            "homeDashboardStatusBadge"
+        );
+
+
+    if (
+        applicationTitle
+    ) {
+
+        applicationTitle.hidden =
+            true;
+
+    }
+
+
+    if (
+        applicationMeta
+    ) {
+
+        applicationMeta.hidden =
+            true;
+
+    }
+
+
+    if (
+        statusBadge
+    ) {
+
+        statusBadge.hidden =
+            true;
+
+    }
+
+
+
+    /* =====================================================
+       HIDE NORMAL ACTION BUTTON
+       ===================================================== */
+
+    const dashboardAction =
+        document.getElementById(
+            "homeDashboardAction"
+        );
+
+
+    if (
+        dashboardAction
+    ) {
+
+        dashboardAction.hidden =
+            true;
+
+    }
+
+
+
+    /* =====================================================
+       HIDE TEAM QUICK ACTIONS
+       ===================================================== */
+
+    const recruitmentActions =
+        document.getElementById(
+            "homeRecruitmentActions"
+        );
+
+
+    if (
+        recruitmentActions
+    ) {
+
+        recruitmentActions.hidden =
+            true;
+
+    }
+
+}
+
+
+/* =========================================================
+   RENDER TEAM HOMEPAGE
+   ========================================================= */
+
+function renderTeamHomeDashboard(
+    data
+) {
+
+    const recruitment =
+        data.recruitment ||
+        {};
+
+
+    const firstName =
+        data.user
+            ?.firstName ||
+        "";
+
+
+    const activeVacancies =
+        Number(
+            recruitment
+                .activeVacancies
+        ) ||
+        0;
+
+
+    const applicants =
+        Number(
+            recruitment
+                .applicants
+        ) ||
+        0;
+
+
+    const awaitingReview =
+        Number(
+            recruitment
+                .awaitingReview
+        ) ||
+        0;
+
+
+    const screening =
+        Number(
+            recruitment
+                .screening
+        ) ||
+        0;
+
+
+    const upcomingInterviews =
+        Number(
+            recruitment
+                .upcomingInterviews
+        ) ||
+        0;
+
+
+
+    setHomepageDashboardText(
+
+        "homeDashboardLabel",
+
+        "RECRUITMENT OVERVIEW"
+
+    );
+
+
+    setHomepageDashboardText(
+
+        "homeDashboardGreeting",
+
+        `${
+            getHomepageGreeting()
+        }${
+            firstName
+                ? `, ${firstName}`
+                : ""
+        }.`
+
+    );
+
+
+
+    /* TILE 1 */
+
+    setHomepageDashboardText(
+
+        "homeDashboardTileOneLabel",
+
+        "Active vacancies"
+
+    );
+
+
+    setHomepageDashboardText(
+
+        "homeDashboardTileOneValue",
+
+        String(
+            activeVacancies
+        )
+        .padStart(
+            2,
+            "0"
+        )
+
+    );
+
+
+    setHomepageDashboardText(
+
+        "homeDashboardTileOneMeta",
+
+        "Currently recruiting"
+
+    );
+
+
+
+    /* TILE 2 */
+
+    setHomepageDashboardText(
+
+        "homeDashboardTileTwoLabel",
+
+        "Applicants"
+
+    );
+
+
+    setHomepageDashboardText(
+
+        "homeDashboardTileTwoValue",
+
+        String(
+            applicants
+        )
+        .padStart(
+            2,
+            "0"
+        )
+
+    );
+
+
+    setHomepageDashboardText(
+
+        "homeDashboardTileTwoMeta",
+
+        `${awaitingReview} awaiting review`
+
+    );
+
+
+
+ /* =========================================================
+   RECRUITMENT ACTIVITY
+   ========================================================= */
+
+setHomepageDashboardText(
+
+    "homeDashboardFocusTitle",
+
+    "Recruitment activity"
+
+);
+
+
+setHomepageDashboardText(
+
+    "homeDashboardFocusText",
+
+    `${screening} ${
+        screening === 1
+            ? "application is"
+            : "applications are"
+    } currently in Screening · ${
+        upcomingInterviews
+    } upcoming ${
+        upcomingInterviews === 1
+            ? "interview session"
+            : "interview sessions"
+    }.`
+
+);
+
+
+
+/* =========================================================
+   HIDE CANDIDATE APPLICATION ELEMENTS
+   ========================================================= */
+
+const applicationTitle =
+    document.getElementById(
+        "homeDashboardApplicationTitle"
+    );
+
+
+const applicationMeta =
+    document.getElementById(
+        "homeDashboardApplicationMeta"
+    );
+
+
+const statusBadge =
+    document.getElementById(
+        "homeDashboardStatusBadge"
+    );
+
+
+if (
+    applicationTitle
+) {
+
+    applicationTitle.hidden =
+        true;
+
+}
+
+
+if (
+    applicationMeta
+) {
+
+    applicationMeta.hidden =
+        true;
+
+}
+
+
+if (
+    statusBadge
+) {
+
+    statusBadge.hidden =
+        true;
+
+}
+
+
+
+/* =========================================================
+   REMOVE OLD SINGLE ACTION
+   ========================================================= */
+
+const oldAction =
+    document.getElementById(
+        "homeDashboardAction"
+    );
+
+
+if (
+    oldAction
+) {
+
+    oldAction.hidden =
+        true;
+
+}
+
+
+
+/* =========================================================
+   QUICK ACTIONS
+   ========================================================= */
+
+const recruitmentActions =
+    document.getElementById(
+        "homeRecruitmentActions"
+    );
+
+
+if (
+    recruitmentActions
+) {
+
+    recruitmentActions.hidden =
+        false;
+
+}
+
+
+
+const permissions =
+    Array.isArray(
+        data.permissions
+    )
+        ? data.permissions
+        : [];
+
+
+
+function hasHomePermission(
+    permission
+) {
+
+    return permissions.includes(
+        permission
+    );
+
+}
+
+
+
+/* VIEW VACANCIES */
+
+const viewVacanciesAction =
+    document.getElementById(
+        "homeViewVacanciesAction"
+    );
+
+
+if (
+    viewVacanciesAction
+) {
+
+    viewVacanciesAction.hidden =
+        !hasHomePermission(
+            "vacancies.view_all"
+        );
+
+}
+
+
+
+/* CREATE VACANCY */
+
+const createVacancyAction =
+    document.getElementById(
+        "homeCreateVacancyAction"
+    );
+
+
+if (
+    createVacancyAction
+) {
+
+    createVacancyAction.hidden =
+        !hasHomePermission(
+            "vacancies.manage"
+        );
+
+}
+
+
+
+/* VIEW APPLICANTS */
+
+const applicantsAction =
+    document.getElementById(
+        "homeViewApplicantsAction"
+    );
+
+
+if (
+    applicantsAction
+) {
+
+    applicantsAction.hidden =
+        !hasHomePermission(
+            "applications.view_all"
+        );
+
+}
+
+
+
+/* INTERVIEWS */
+
+const interviewsAction =
+    document.getElementById(
+        "homeInterviewSessionsAction"
+    );
+
+
+if (
+    interviewsAction
+) {
+
+    interviewsAction.hidden =
+        !hasHomePermission(
+            "interviews.view"
+        );
+
+}
+
+}
+
+
+
+/* =========================================================
+   LOAD HOMEPAGE DASHBOARD
+   ========================================================= */
+
+async function loadHomeDashboard() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/home/dashboard",
+                {
+
+                    method:
+                        "GET",
+
+                    credentials:
+                        "same-origin"
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            return;
+
+        }
+
+        if (
+            !data.loggedIn
+        ) {
+
+            renderGuestHomeDashboard(
+                data
+            );
+
+            return;
+
+        }
+
+        if (
+            data.mode ===
+            "candidate"
+        ) {
+
+            renderCandidateHomeDashboard(
+                data
+            );
+
+
+            return;
+
+        }
+
+
+
+        if (
+            data.mode ===
+            "team"
+        ) {
+
+            renderTeamHomeDashboard(
+                data
+            );
+
+        }
+
+    }
+
+    catch (error) {
+
+        /*
+            Homepage must still work even if
+            dashboard stats fail.
+
+            We simply keep the static preview.
+        */
+
+        console.error(
+            "Homepage dashboard error:",
+            error
+        );
+
+    }
+
+}
+
+
+loadHomeDashboard();
+
+
 /* ================= FILTERS ================= */
 
 const filterValues = {

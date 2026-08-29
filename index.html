@@ -253,79 +253,299 @@
     </div>
 
 
-    <!-- Dashboard card -->
+<!-- =====================================================
+     ROLE AWARE HOMEPAGE DASHBOARD
+     ===================================================== -->
 
-    <div class="dashboard-card glass">
+<div
+    class="dashboard-card glass"
+    id="homeDashboardCard"
+>
 
-        <div class="dashboard-header">
+    <div class="dashboard-header">
 
-            <div>
-                <span class="card-label">
-                    YOUR CAREER DASHBOARD
-                </span>
+        <div>
 
-                <h3>
-                    Good evening<span>.</span>
-                </h3>
-            </div>
-
-            <div class="online">
-                <i></i>
-                Online
-            </div>
-
-        </div>
-        <br>
+            <span
+                class="card-label"
+                id="homeDashboardLabel"
+            >
+                YOUR CAREER DASHBOARD
+            </span>
 
 
-        <div class="dashboard-grid">
+            <h3 id="homeDashboardGreeting">
 
-            <div class="dashboard-tile">
+                Good evening<span>.</span>
 
-                <span>Applications</span>
-
-                <strong>03</strong>
-
-                <small>
-                    1 awaiting review
-                </small>
-
-            </div>
-
-
-            <div class="dashboard-tile">
-
-                <span>Saved jobs</span>
-
-                <strong>07</strong>
-
-                <small>
-                    2 new matches
-                </small>
-
-            </div>
+            </h3>
 
         </div>
 
 
-        <div class="tip-box">
+        <div class="online">
 
-            <div class="tip-icon">
-                ✦
-            </div>
+            <i></i>
 
-            <div>
-                <b>Today's tip</b>
-
-                <p>
-                    Tailor your CV to the role you want.
-                    Relevance gets noticed.
-                </p>
-            </div>
+            Online
 
         </div>
 
     </div>
+
+
+    <br>
+
+
+
+    <!-- =================================================
+         DASHBOARD STATS
+         ================================================= -->
+
+    <div class="dashboard-grid">
+
+
+        <div class="dashboard-tile">
+
+            <span id="homeDashboardTileOneLabel">
+                Applications
+            </span>
+
+
+            <strong id="homeDashboardTileOneValue">
+                03
+            </strong>
+
+
+            <small id="homeDashboardTileOneMeta">
+                1 awaiting review
+            </small>
+
+        </div>
+
+
+
+        <div class="dashboard-tile">
+
+            <span id="homeDashboardTileTwoLabel">
+                Saved jobs
+            </span>
+
+
+            <strong id="homeDashboardTileTwoValue">
+                07
+            </strong>
+
+
+            <small id="homeDashboardTileTwoMeta">
+                2 new matches
+            </small>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =================================================
+         CONTEXT BOX
+         ================================================= -->
+
+        <div
+            class="tip-box home-dashboard-focus"
+            id="homeDashboardFocus"
+        >
+
+            <div class="home-dashboard-focus-accent">
+                ✦
+            </div>
+
+
+            <div class="home-dashboard-focus-content">
+
+
+                <div class="home-dashboard-focus-heading">
+
+                    <b id="homeDashboardFocusTitle">
+                        Today's tip
+                    </b>
+
+
+                    <span
+                        class="home-dashboard-status-badge"
+                        id="homeDashboardStatusBadge"
+                        hidden
+                    >
+                        Screening
+                    </span>
+
+                </div>
+
+
+
+                <h4
+                    class="home-dashboard-application-title"
+                    id="homeDashboardApplicationTitle"
+                    hidden
+                >
+                    Software Engineer
+                </h4>
+
+
+
+                <div
+                    class="home-dashboard-application-meta"
+                    id="homeDashboardApplicationMeta"
+                    hidden
+                >
+
+                    <span id="homeDashboardApplicationReference">
+                        ALT-2026-00001
+                    </span>
+
+
+                    <span class="home-dashboard-meta-separator"></span>
+
+
+                    <span id="homeDashboardApplicationDate">
+                        Applied 26 Aug 2026
+                    </span>
+
+                </div>
+
+
+
+                <p id="homeDashboardFocusText">
+
+                    Tailor your CV to the role you want.
+                    Relevance gets noticed.
+
+                </p>
+
+
+
+                <a
+                    href="jobs.html"
+                    class="home-dashboard-action"
+                    id="homeDashboardAction"
+                    hidden
+                >
+                    Explore vacancies
+                </a>
+
+        </div>
+
+        <div
+                    class="home-recruitment-actions"
+                    id="homeRecruitmentActions"
+                    hidden
+                >
+
+                <a
+                    href="admin/admin-dashboard.html#vacancies"
+                    class="home-recruitment-action"
+                    id="homeViewVacanciesAction"
+                >
+
+                    <span>
+                        01
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            View Vacancies
+                        </strong>
+
+                        <small>
+                            Browse active and closed vacancies
+                        </small>
+
+                    </div>
+
+                </a>
+
+
+                <a
+                    href="admin/admin-dashboard.html#vacancies"
+                    class="home-recruitment-action"
+                    id="homeCreateVacancyAction"
+                >
+
+                    <span>
+                        02
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Create Vacancy
+                        </strong>
+
+                        <small>
+                            Publish a new recruitment opening
+                        </small>
+
+                    </div>
+
+                </a>
+
+
+                <a
+                    href="admin/admin-dashboard.html#applicants"
+                    class="home-recruitment-action"
+                    id="homeViewApplicantsAction"
+                >
+
+                    <span>
+                        03
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            View Applicants
+                        </strong>
+
+                        <small>
+                            Review candidate applications
+                        </small>
+
+                    </div>
+
+                </a>
+
+
+                <a
+                    href="admin/admin-dashboard.html#interviews"
+                    class="home-recruitment-action"
+                    id="homeInterviewSessionsAction"
+                >
+
+                    <span>
+                        04
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Interview Sessions
+                        </strong>
+
+                        <small>
+                            View recruitment interview schedules
+                        </small>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+    </div>
+
+</div>
 
 </section>
 

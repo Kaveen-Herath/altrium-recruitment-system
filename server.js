@@ -8242,6 +8242,546 @@ app.get("/api/auth/me",
     }
 );
 
+
+/* =========================================================
+   HOMEPAGE - ROLE AWARE DASHBOARD
+   ========================================================= */
+
+app.get(
+    "/api/home/dashboard",
+    async (req, res) => {
+
+        try {
+
+            /* =================================================
+               NOT LOGGED IN
+
+               Homepage keeps its normal preview card.
+               ================================================= */
+
+            if (
+                !req.session.userId
+            ) {
+
+                const vacancyResult =
+                    await pool.query(
+                        `
+                        SELECT
+
+                            COUNT(*)::INT
+                                AS count
+
+                        FROM jobs
+
+                        WHERE
+                            status = 'active'
+                        `
+                    );
+
+
+                return res.json({
+
+                    success:
+                        true,
+
+                    loggedIn:
+                        false,
+
+                    mode:
+                        "guest",
+
+                    guest: {
+
+                        activeVacancies:
+                            Number(
+                                vacancyResult
+                                    .rows[0]
+                                    .count
+                            ) ||
+                            0
+
+                    }
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               LOAD CURRENT USER
+               ================================================= */
+
+            const userResult =
+                await pool.query(
+                    `
+                    SELECT
+
+                        id,
+                        first_name,
+                        last_name,
+                        role
+
+                    FROM users
+
+                    WHERE
+                        id = $1
+
+                    LIMIT 1
+                    `,
+                    [
+                        req.session.userId
+                    ]
+                );
+
+
+            if (
+                userResult.rows.length ===
+                0
+            ) {
+
+                return res.status(404).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "User account not found."
+
+                });
+
+            }
+
+
+            const user =
+                userResult.rows[0];
+
+
+
+            /* =================================================
+               CANDIDATE DASHBOARD
+               ================================================= */
+
+            if (
+                user.role ===
+                "candidate"
+            ) {
+
+                const [
+
+                    applicationsResult,
+
+                    savedJobsResult,
+
+                    latestApplicationResult
+
+                ] =
+                    await Promise.all([
+
+
+                        /* Total applications */
+
+                        pool.query(
+                            `
+                            SELECT
+
+                                COUNT(*)::INT
+                                    AS count
+
+                            FROM applications
+
+                            WHERE
+                                candidate_id = $1
+                            `,
+                            [
+                                user.id
+                            ]
+                        ),
+
+
+
+                        /* Saved jobs */
+
+                        pool.query(
+                            `
+                            SELECT
+
+                                COUNT(*)::INT
+                                    AS count
+
+                            FROM saved_jobs
+
+                            WHERE
+                                candidate_id = $1
+                            `,
+                            [
+                                user.id
+                            ]
+                        ),
+
+
+
+                        /* Latest application */
+
+                        pool.query(
+                            `
+                            SELECT
+
+                                a.id,
+                                a.application_reference,
+                                a.status,
+                                a.applied_at,
+
+                                j.job_title
+
+                            FROM applications a
+
+                            INNER JOIN jobs j
+                                ON j.id =
+                                    a.job_id
+
+                            WHERE
+                                a.candidate_id = $1
+
+                            ORDER BY
+
+                                a.applied_at DESC,
+                                a.id DESC
+
+                            LIMIT 1
+                            `,
+                            [
+                                user.id
+                            ]
+                        )
+
+                    ]);
+
+
+                const applicationCount =
+                    Number(
+                        applicationsResult
+                            .rows[0]
+                            .count
+                    ) ||
+                    0;
+
+
+                const savedJobsCount =
+                    Number(
+                        savedJobsResult
+                            .rows[0]
+                            .count
+                    ) ||
+                    0;
+
+
+                const latestApplication =
+                    latestApplicationResult
+                        .rows[0] ||
+                    null;
+
+
+
+                return res.json({
+
+                    success:
+                        true,
+
+                    loggedIn:
+                        true,
+
+                    mode:
+                        "candidate",
+
+                    user: {
+
+                        firstName:
+                            user.first_name,
+
+                        lastName:
+                            user.last_name
+
+                    },
+
+
+                    candidate: {
+
+                        applications:
+                            applicationCount,
+
+                        savedJobs:
+                            savedJobsCount,
+
+
+                        latestApplication:
+
+                            latestApplication
+
+                                ? {
+
+                                    id:
+                                        latestApplication.id,
+
+                                    reference:
+                                        latestApplication
+                                            .application_reference,
+
+                                    status:
+                                        latestApplication.status,
+
+                                    jobTitle:
+                                        latestApplication
+                                            .job_title,
+
+                                    appliedAt:
+                                        latestApplication
+                                            .applied_at
+
+                                }
+
+                                : null
+
+                    }
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               INTERNAL TEAM DASHBOARD
+
+               admin + system_admin both use one simple
+               Recruitment Overview.
+               ================================================= */
+
+            if (
+                user.role ===
+                    "admin"
+
+                ||
+
+                user.role ===
+                    "system_admin"
+            ) {
+
+                const [
+
+                    vacanciesResult,
+
+                    applicationStatsResult,
+
+                    interviewResult
+
+                ] =
+                    await Promise.all([
+
+
+                        /* Active vacancies */
+
+                        pool.query(
+                            `
+                            SELECT
+
+                                COUNT(*)::INT
+                                    AS count
+
+                            FROM jobs
+
+                            WHERE
+                                status =
+                                'active'
+                            `
+                        ),
+
+
+
+                        /* Applicant summary */
+
+                        pool.query(
+                            `
+                            SELECT
+
+                                COUNT(*)::INT
+                                    AS total,
+
+                                COUNT(*)
+                                FILTER (
+                                    WHERE
+                                        status =
+                                        'submitted'
+                                )::INT
+                                    AS awaiting_review,
+
+                                COUNT(*)
+                                FILTER (
+                                    WHERE
+                                        status =
+                                        'screening'
+                                )::INT
+                                    AS screening
+
+                            FROM applications
+                            `
+                        ),
+
+
+
+                        /* Upcoming confirmed sessions */
+
+                        pool.query(
+                            `
+                            SELECT
+
+                                COUNT(*)::INT
+                                    AS count
+
+                            FROM interview_sessions
+
+                            WHERE
+
+                                status =
+                                    'confirmed'
+
+                            AND
+
+                                session_date >=
+                                (
+                                    NOW()
+                                    AT TIME ZONE
+                                    'Asia/Colombo'
+                                )::date
+                            `
+                        )
+
+                    ]);
+
+
+                const applicationStats =
+                    applicationStatsResult
+                        .rows[0];
+
+
+                const permissions =
+                    await loadEffectivePermissionKeys(
+                        user.id,
+                        user.role
+                    );
+
+
+                return res.json({
+
+                    success:
+                        true,
+
+                    loggedIn:
+                        true,
+
+                    mode:
+                        "team",
+
+                    permissions,
+
+                    user: {
+
+                        firstName:
+                            user.first_name,
+
+                        lastName:
+                            user.last_name
+
+                    },
+
+
+                    recruitment: {
+
+                        activeVacancies:
+                            Number(
+                                vacanciesResult
+                                    .rows[0]
+                                    .count
+                            ) ||
+                            0,
+
+                        applicants:
+                            Number(
+                                applicationStats
+                                    .total
+                            ) ||
+                            0,
+
+                        awaitingReview:
+                            Number(
+                                applicationStats
+                                    .awaiting_review
+                            ) ||
+                            0,
+
+                        screening:
+                            Number(
+                                applicationStats
+                                    .screening
+                            ) ||
+                            0,
+
+                        upcomingInterviews:
+                            Number(
+                                interviewResult
+                                    .rows[0]
+                                    .count
+                            ) ||
+                            0
+
+                    }
+
+                });
+
+            }
+
+
+
+            return res.json({
+
+                success:
+                    true,
+
+                loggedIn:
+                    true,
+
+                mode:
+                    "candidate"
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Homepage dashboard error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success:
+                    false,
+
+                message:
+                    "Unable to load homepage dashboard."
+
+            });
+
+        }
+
+    }
+);
+
+
+
 // ---------------------------------------------------------------------------------
 // Backend Verification for the 6 Digit Verfitication Popup
 

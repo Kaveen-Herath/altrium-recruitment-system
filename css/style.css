@@ -2426,6 +2426,659 @@ footer {
 
 
 /* =========================================================
+   HOMEPAGE DYNAMIC DASHBOARD
+   ========================================================= */
+
+.home-dashboard-focus-content {
+    flex:
+        1;
+}
+
+
+.home-dashboard-action {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    margin-top:
+        13px;
+
+    min-height:
+        34px;
+
+    padding:
+        0
+        14px;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            132,
+            31,
+            0.25
+        );
+
+    border-radius:
+        30px;
+
+    background:
+        rgba(
+            255,
+            132,
+            31,
+            0.08
+        );
+
+    color:
+        #ff9a3d;
+
+    text-decoration:
+        none;
+
+    font-size:
+        10px;
+
+    font-weight:
+        700;
+
+    transition:
+        background
+        0.2s
+        ease,
+        border-color
+        0.2s
+        ease;
+}
+
+
+.home-dashboard-action:hover {
+    background:
+        rgba(
+            255,
+            132,
+            31,
+            0.13
+        );
+
+    border-color:
+        rgba(
+            255,
+            132,
+            31,
+            0.40
+        );
+}
+
+
+.home-dashboard-action[hidden] {
+    display:
+        none !important;
+}
+
+
+/* =========================================================
+   HOMEPAGE APPLICATION SNAPSHOT
+   ========================================================= */
+
+.home-dashboard-focus {
+    position: relative;
+
+    min-height: auto;
+
+    padding: 24px 26px;
+
+    display: grid;
+
+    grid-template-columns: 34px minmax(0, 1fr);
+
+    column-gap: 16px;
+
+    row-gap: 20px;
+
+    align-items: start;
+}
+
+
+.home-dashboard-focus-accent {
+    width:
+        34px;
+
+    height:
+        34px;
+
+    flex-shrink:
+        0;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    margin-top:
+        1px;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            132,
+            31,
+            0.25
+        );
+
+    border-radius:
+        10px;
+
+    background:
+        rgba(
+            255,
+            132,
+            31,
+            0.08
+        );
+
+    color:
+        #ff8a2b;
+
+    font-size:
+        15px;
+
+    grid-column: 1;
+
+}
+
+
+.home-dashboard-focus-content {
+    grid-column: 2;
+
+    width:
+        100%;
+
+    min-width:
+        0;
+}
+
+
+.home-dashboard-focus-heading {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        16px;
+
+    margin-bottom:
+        12px;
+}
+
+
+.home-dashboard-focus-heading b {
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.72
+        );
+
+    font-size:
+        12px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        1px;
+
+    text-transform:
+        uppercase;
+}
+
+
+
+/* =========================================================
+   APPLICATION STATUS
+   ========================================================= */
+
+.home-dashboard-status-badge {
+    padding:
+        7px 11px;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            132,
+            31,
+            0.28
+        );
+
+    border-radius:
+        999px;
+
+    background:
+        rgba(
+            255,
+            132,
+            31,
+            0.08
+        );
+
+    color:
+        #ff9a3c;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.8px;
+
+    text-transform:
+        uppercase;
+}
+
+
+.home-dashboard-status-badge[hidden] {
+    display:
+        none !important;
+}
+
+
+
+/* =========================================================
+   JOB TITLE
+   ========================================================= */
+
+.home-dashboard-application-title {
+    margin:
+        0
+        0
+        11px;
+
+    color:
+        #ffffff;
+
+    font-size:
+        22px;
+
+    line-height:
+        1.25;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        -0.5px;
+}
+
+
+.home-dashboard-application-title[hidden] {
+    display:
+        none !important;
+}
+
+
+
+/* =========================================================
+   APPLICATION META
+   ========================================================= */
+
+.home-dashboard-application-meta {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        10px;
+
+    margin-bottom:
+        14px;
+}
+
+
+.home-dashboard-application-meta[hidden] {
+    display:
+        none !important;
+}
+
+
+.home-dashboard-application-meta span {
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.48
+        );
+
+    font-size:
+        11px;
+
+    font-weight:
+        600;
+}
+
+
+#homeDashboardApplicationReference {
+    color:
+        #ff9a3c;
+
+    font-weight:
+        750;
+}
+
+
+.home-dashboard-meta-separator {
+    width:
+        4px;
+
+    height:
+        4px;
+
+    border-radius:
+        50%;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.22
+        );
+}
+
+
+
+/* =========================================================
+   DESCRIPTION
+   ========================================================= */
+
+.home-dashboard-focus-content > p {
+    max-width:
+        560px;
+
+    margin:
+        0;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.64
+        );
+
+    font-size:
+        13px;
+
+    line-height:
+        1.65;
+}
+
+
+
+/* =========================================================
+   ACTION
+   ========================================================= */
+
+.home-dashboard-action {
+    min-height:
+        40px;
+
+    margin-top:
+        17px;
+
+    padding:
+        0
+        17px;
+
+    font-size:
+        11px;
+
+    font-weight:
+        800;
+}
+
+
+/* =========================================================
+   HOMEPAGE RECRUITMENT QUICK ACTIONS
+   ========================================================= */
+
+.home-recruitment-actions {
+    grid-column: 1 / -1;
+
+    width: 100%;
+
+    margin-top: 4px;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+
+    gap: 10px;
+}
+
+
+.home-recruitment-actions[hidden] {
+    display:
+        none !important;
+}
+
+
+.home-recruitment-action {
+    min-height:
+        72px;
+
+    padding:
+        14px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        13px;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.08
+        );
+
+    border-radius:
+        14px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.025
+        );
+
+    color:
+        #ffffff;
+
+    text-decoration:
+        none;
+
+    transition:
+        border-color
+        0.2s
+        ease,
+        background
+        0.2s
+        ease,
+        transform
+        0.2s
+        ease;
+}
+
+
+.home-recruitment-action:hover {
+    transform:
+        translateY(
+            -2px
+        );
+
+    border-color:
+        rgba(
+            255,
+            132,
+            31,
+            0.30
+        );
+
+    background:
+        rgba(
+            255,
+            132,
+            31,
+            0.06
+        );
+}
+
+
+.home-recruitment-action > span {
+    width:
+        38px;
+
+    height:
+        38px;
+
+    flex-shrink:
+        0;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            132,
+            31,
+            0.22
+        );
+
+    border-radius:
+        11px;
+
+    background:
+        rgba(
+            255,
+            132,
+            31,
+            0.07
+        );
+
+    color:
+        #ff9638;
+
+    font-size:
+        11px;
+
+    font-weight:
+        800;
+}
+
+
+.home-recruitment-action div {
+    min-width:
+        0;
+}
+
+
+.home-recruitment-action strong {
+    display:
+        block;
+
+    color:
+        #ffffff;
+
+    font-size:
+        13px;
+
+    font-weight:
+        750;
+}
+
+
+.home-recruitment-action small {
+    display:
+        block;
+
+    margin-top:
+        5px;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.50
+        );
+
+    font-size:
+        10px;
+
+    line-height:
+        1.4;
+}
+
+
+.home-recruitment-action[hidden] {
+    display:
+        none !important;
+}
+
+
+@media (
+    max-width:
+        650px
+) {
+
+    .home-recruitment-actions {
+        grid-template-columns:
+            1fr;
+    }
+
+}
+
+
+/* =========================================================
    RESPONSIVE - TABLET
    ========================================================= */
 
