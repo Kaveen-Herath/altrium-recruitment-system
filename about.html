@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
+
+
+    <title>ALTRIUM - Find Your Perfect Fit</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/about.css?v=1">
+    
+</head>
+
+<body>
+
+<!-- Background glow -->
+<div class="glow glow-one"></div>
+<div class="glow glow-two"></div>
+
+<!-- ================= NAVBAR ================= -->
+
+<header class="navbar">
+
+    <!-- LOGO -->
+
+    <a
+        href="index.html"
+        class="logo"
+    >
+
+        <img
+            src="assets/altrium_logoW.png"
+            alt="Altrium"
+            style="height: 30px; width: auto;"
+        >
+
+    </a>
+
+
+    <!-- NAVIGATION -->
+
+    <nav class="nav-links">
+
+        <a
+            href="index.html"
+            class="nav-home active"
+        >
+            Home
+        </a>
+
+
+        <a
+            href="jobs.html"
+            class="nav-jobs"
+        >
+            Find jobs
+        </a>
+
+
+        <a
+            href="about.html"
+            class="nav-about"
+        >
+            About Altrium
+        </a>
+
+
+        <a
+            href="contact.html"
+            class="nav-contact"
+        >
+            Contact Us
+        </a>
+
+
+        <a
+            href="admin/admin-dashboard.html"
+            id="dashboardLink"
+        >
+            Dashboard
+        </a>
+
+    </nav>
+
+
+    <!-- RIGHT SIDE -->
+
+    <div class="nav-right">
+
+        <a
+            href="login.html"
+            id="signInLink"
+            class="signin-btn"
+        >
+            Sign in
+        </a>
+
+
+        <a
+            href="profile.html"
+            id="profileLink"
+            class="profile-nav-icon"
+            aria-label="My profile"
+        ></a>
+
+        <div
+            class="notification-nav"
+            id="notificationNav"
+        >
+
+            <button
+                type="button"
+                class="notification-trigger"
+                id="notificationTrigger"
+                aria-label="Notifications"
+            >
+
+                <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path
+                        d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"
+                    ></path>
+
+                    <path
+                        d="M10 21h4"
+                    ></path>
+                </svg>
+
+
+                <span
+                    class="notification-unread-dot"
+                    id="notificationUnreadDot"
+                ></span>
+
+            </button>
+
+
+            <div
+                class="notification-panel"
+                id="notificationPanel"
+            >
+
+                <div class="notification-panel-header">
+
+                    <div>
+                        <span>NOTIFICATIONS</span>
+
+                        <h3>
+                            Updates
+                        </h3>
+                    </div>
+
+
+                    <span
+                        class="notification-count"
+                        id="notificationCount"
+                    >
+                        0 unread
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="notification-list"
+                    id="notificationList"
+                >
+
+                    <div class="notification-empty">
+
+                        <strong>
+                            You're all caught up.
+                        </strong>
+
+                        <p>
+                            New job and application updates
+                            will appear here.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+
+<!-- =========================================================
+     ABOUT PAGE
+     ========================================================= -->
+
+<main class="about-page">
+
+
+    <!-- =====================================================
+         HERO
+         ===================================================== -->
+
+    <section class="about-hero">
+
+
+        <div class="about-hero-copy">
+
+
+            <span class="section-label">
+                ABOUT ALTRIUM
+            </span>
+
+
+            <h1>
+
+                Technology with
+                <em>purpose.</em>
+
+            </h1>
+
+
+            <p>
+
+                Altrium brings talented people,
+                thoughtful engineering and business
+                understanding together to build software
+                that creates meaningful impact.
+
+            </p>
+
+
+            <div class="about-hero-tags">
+
+                <span>
+                    SOFTWARE ENGINEERING
+                </span>
+
+                <span>
+                    PEOPLE
+                </span>
+
+                <span>
+                    INNOVATION
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- RIGHT VISUAL -->
+
+        <div class="about-hero-visual glass">
+
+
+            <div class="about-hero-logo">
+
+                <img
+                    src="assets/altrium_logoW.png"
+                    alt="Altrium"
+                >
+
+            </div>
+
+
+            <div class="about-founded-card">
+
+                <span>
+                    FOUNDED
+                </span>
+
+                <strong>
+                    2022
+                </strong>
+
+                <p>
+                    Built by software engineering
+                    veterans with global experience.
+                </p>
+
+            </div>
+
+
+            <div class="about-hero-line"></div>
+
+
+            <div class="about-hero-note">
+
+                <span>
+                    OUR APPROACH
+                </span>
+
+                <p>
+                    Align technology with the real
+                    needs of the business.
+                </p>
+
+            </div>
+
+
+            <div class="about-visual-glow"></div>
+
+        </div>
+
+    </section>
+
+    <!-- =====================================================
+         WHAT ALTRIUM STANDS FOR
+         ===================================================== -->
+
+    <section class="about-pillars-section">
+
+
+        <div class="about-section-heading">
+
+            <span class="section-label">
+                WHAT DEFINES ALTRIUM
+            </span>
+
+
+            <h2>
+
+                More than
+                <em>software.</em>
+
+            </h2>
+
+        </div>
+
+
+
+<div class="about-pillars-grid">
+
+
+    <!-- MISSION -->
+
+    <article class="about-pillar glass">
+
+        <div class="about-pillar-media">
+
+            <div class="about-pillar-top">
+
+                <span class="about-pillar-number">
+                    01
+                </span>
+
+                <span class="about-pillar-label">
+                    MISSION
+                </span>
+
+            </div>
+
+
+            <img
+                src="assets/about/1Mission.png"
+                alt="Target representing Altrium's mission"
+            >
+
+        </div>
+
+
+        <div class="about-pillar-copy">
+
+            <h3>
+                Build technology that matters.
+            </h3>
+
+            <p>
+                Altrium's mission is to bring together
+                talented technologists and turn their
+                expertise into exceptional software
+                and meaningful results.
+            </p>
+
+        </div>
+
+    </article>
+
+
+
+    <!-- PEOPLE -->
+
+    <article class="about-pillar glass">
+
+        <div class="about-pillar-media">
+
+            <div class="about-pillar-top">
+
+                <span class="about-pillar-number">
+                    02
+                </span>
+
+                <span class="about-pillar-label">
+                    PEOPLE
+                </span>
+
+            </div>
+
+
+            <img
+                src="assets/about/2People.png"
+                alt="People representing the Altrium team"
+            >
+
+        </div>
+
+
+        <div class="about-pillar-copy">
+
+            <h3>
+                People are the foundation.
+            </h3>
+
+            <p>
+                Innovative, open and bold individuals
+                sit at the heart of Altrium, supported
+                by a culture that encourages growth,
+                respect and collaboration.
+            </p>
+
+        </div>
+
+    </article>
+
+
+
+    <!-- CULTURE -->
+
+    <article class="about-pillar glass">
+
+        <div class="about-pillar-media">
+
+            <div class="about-pillar-top">
+
+                <span class="about-pillar-number">
+                    03
+                </span>
+
+                <span class="about-pillar-label">
+                    CULTURE
+                </span>
+
+            </div>
+
+
+            <img
+                src="assets/about/3Culture.png"
+                alt="Glowing light bulb representing ideas and culture"
+            >
+
+        </div>
+
+
+        <div class="about-pillar-copy">
+
+            <h3>
+                Ideas over hierarchy.
+            </h3>
+
+            <p>
+                Altrium describes its culture as open,
+                flexible and built on trust — an
+                environment where people can challenge
+                ideas and continuously improve.
+            </p>
+
+        </div>
+
+    </article>
+
+
+</div>
+
+
+    </section>
+
+    <!-- =====================================================
+         FUTURE
+         ===================================================== -->
+
+    <section class="about-future-section">
+
+
+        <div class="about-future-heading">
+
+            <span class="section-label">
+                LOOKING FORWARD
+            </span>
+
+
+            <h2>
+
+                Building what's
+                <em>next.</em>
+
+            </h2>
+
+        </div>
+
+
+
+        <div class="about-future-body">
+
+
+            <p>
+
+                Altrium continues to grow its expertise
+                in high-scale software product engineering
+                while empowering the people behind the
+                technology.
+
+            </p>
+
+
+
+            <div class="about-tech-list">
+
+                <span>
+                    UI / UX
+                </span>
+
+                <span>
+                    AI & ML
+                </span>
+
+                <span>
+                    ENTERPRISE APIs
+                </span>
+
+                <span>
+                    PRODUCT ENGINEERING
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         RECRUITMENT CTA
+         ===================================================== -->
+
+    <section class="about-career-cta glass">
+
+
+        <div>
+
+            <span class="section-label">
+                CAREERS AT ALTRIUM
+            </span>
+
+
+            <h2>
+                Ready to make a
+                <em>difference?</em>
+            </h2>
+
+
+            <p>
+
+                Explore the opportunities currently
+                available and find where you could
+                make your next move.
+
+            </p>
+
+        </div>
+
+
+
+        <a
+            href="jobs.html"
+            class="primary-btn about-career-button"
+        >
+            Explore vacancies
+        </a>
+
+    </section>
+
+</main>
+
+
+
+<!-- =========================================================
+     ABOUT CONTACT / FOOTER
+     ========================================================= -->
+
+<footer class="about-footer">
+
+
+    <!-- =====================================================
+         CONTACT STRIP
+         ===================================================== -->
+
+    <div class="about-footer-top">
+
+
+        <h2>
+
+            Contact us to start the conversation and
+            discover how we can scale new heights together.
+
+        </h2>
+
+
+        <a
+            href="contact.html"
+            class="about-footer-contact"
+        >
+            Contact Us
+        </a>
+
+    </div>
+
+
+
+    <div class="about-footer-divider"></div>
+
+
+
+    <!-- =====================================================
+         FOOTER GRID
+         ===================================================== -->
+
+    <div class="about-footer-grid">
+
+
+        <!-- BRAND -->
+
+        <div class="about-footer-brand">
+
+
+            <img
+                src="assets/altrium_logoW.png"
+                alt="Altrium"
+            >
+
+
+            <p>
+                Technology built around people,
+                opportunity and meaningful impact.
+            </p>
+
+
+            <small>
+                © 2026 All rights reserved.
+            </small>
+
+        </div>
+
+
+
+        <!-- UNITED STATES -->
+
+        <div class="about-footer-column">
+
+            <h3>
+                United States 🇺🇸
+            </h3>
+
+
+            <p>
+
+                1250 Broadway,<br>
+
+                36th Floor,<br>
+
+                New York,<br>
+
+                NY 10001
+
+            </p>
+
+
+            <a
+                href="mailto:hello@altrium.io"
+            >
+                hello@altrium.io
+            </a>
+
+        </div>
+
+
+
+        <!-- SRI LANKA -->
+
+        <div class="about-footer-column">
+
+            <h3>
+                Sri Lanka 🇱🇰
+            </h3>
+
+
+            <p>
+
+                Level 3, Onyx Tower,<br>
+
+                Sri Jayawardenepura Mawatha,<br>
+
+                Sri Jayawardenepura Kotte 10100
+
+            </p>
+
+
+            <a
+                href="tel:+94112772517"
+            >
+                +94 11 277 2517
+            </a>
+
+        </div>
+
+
+
+        <!-- LINKS -->
+
+        <div class="about-footer-column about-footer-links">
+
+            <h3>
+                Learn More
+            </h3>
+
+
+            <a href="about.html">
+                About Us
+            </a>
+
+            <a href="jobs.html">
+                Careers
+            </a>
+
+            <a href="contact.html">
+                Contact Us
+            </a>
+
+        </div>
+
+    </div>
+
+
+
+    <a
+        href="#top"
+        class="about-back-top"
+        aria-label="Back to top"
+    >
+        ↑
+    </a>
+
+</footer>
+
+
+
+<!-- =========================================================
+     EXISTING NAVBAR AUTH / NOTIFICATIONS
+     ========================================================= -->
+
+<script src="js/navbar-auth.js?v=1"></script>
+
+
+</body>
+
+</html>
