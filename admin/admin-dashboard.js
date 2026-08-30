@@ -677,6 +677,98 @@ systemAdminSections.forEach(
 
         ]);
 
+
+        /* =============================================
+            SYSTEM FEEDBACK DEEP LINK
+            ============================================= */
+
+            if (
+                data.user.role ===
+                "system_admin"
+
+                &&
+
+                window.location.hash ===
+                "#system-feedback"
+            ) {
+
+                const feedbackNav =
+                    document.querySelector(
+                        '[data-section="system-feedback"]'
+                    );
+
+
+                const feedbackSection =
+                    document.getElementById(
+                        "system-feedback"
+                    );
+
+
+                adminNavItems.forEach(
+                    item => {
+
+                        item.classList.remove(
+                            "active"
+                        );
+
+                    }
+                );
+
+
+                adminSections.forEach(
+                    section => {
+
+                        section.classList.remove(
+                            "active"
+                        );
+
+                    }
+                );
+
+
+                feedbackNav
+                    ?.classList
+                    .add(
+                        "active"
+                    );
+
+
+                feedbackSection
+                    ?.classList
+                    .add(
+                        "active"
+                    );
+
+
+                await loadSystemFeedback(
+                    1
+                );
+
+
+                const parameters =
+                    new URLSearchParams(
+                        window.location.search
+                    );
+
+
+                const requestedFeedbackId =
+                    parameters.get(
+                        "feedback"
+                    );
+
+
+                if (
+                    requestedFeedbackId
+                ) {
+
+                    openSystemFeedbackDetail(
+                        requestedFeedbackId
+                    );
+
+                }
+
+            }
+
     }
 
     catch (error) {
@@ -694,6 +786,1987 @@ systemAdminSections.forEach(
 
 }
 
+
+/* =========================================================
+   SYSTEM ADMIN - FEEDBACK & ISSUES
+   ========================================================= */
+
+let systemFeedbackItems =
+    [];
+
+let activeSystemFeedbackId =
+    null;
+
+
+let selectedSystemFeedbackStatus =
+    "new";
+
+let systemFeedbackCategory =
+    "all";
+
+
+let systemFeedbackStatus =
+    "all";
+
+
+let systemFeedbackPage =
+    1;
+
+
+let systemFeedbackTotalPages =
+    1;
+
+
+let systemFeedbackSearchTimer =
+    null;
+
+
+
+/* =========================================================
+   FEEDBACK DATE
+   ========================================================= */
+
+function formatSystemFeedbackDate(
+    value
+) {
+
+    if (
+        !value
+    ) {
+
+        return "Unknown";
+
+    }
+
+
+    const date =
+        new Date(
+            value
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "Unknown";
+
+    }
+
+
+    return date.toLocaleString(
+        "en-GB",
+        {
+
+            day:
+                "2-digit",
+
+            month:
+                "short",
+
+            year:
+                "numeric",
+
+            hour:
+                "2-digit",
+
+            minute:
+                "2-digit"
+
+        }
+    );
+
+}
+
+
+
+/* =========================================================
+   FEEDBACK CATEGORY LABEL
+   ========================================================= */
+
+function getSystemFeedbackCategoryLabel(
+    category
+) {
+
+    const labels = {
+
+        general:
+            "Contact message",
+
+        feedback:
+            "Feedback",
+
+        bug:
+            "System issue"
+
+    };
+
+
+    return labels[
+        category
+    ] ||
+    "Message";
+
+}
+
+
+
+/* =========================================================
+   FEEDBACK STATUS LABEL
+   ========================================================= */
+
+function getSystemFeedbackStatusLabel(
+    status
+) {
+
+    const labels = {
+
+        new:
+            "New",
+
+        reviewing:
+            "Reviewing",
+
+        resolved:
+            "Resolved"
+
+    };
+
+
+    return labels[
+        status
+    ] ||
+    status ||
+    "Unknown";
+
+}
+
+
+
+/* =========================================================
+   FEEDBACK MESSAGE PREVIEW
+   ========================================================= */
+
+function createSystemFeedbackPreview(
+    value
+) {
+
+    const text =
+        String(
+            value ||
+            ""
+        )
+        .trim();
+
+
+    if (
+        text.length <=
+        150
+    ) {
+
+        return text;
+
+    }
+
+
+    return (
+        text
+            .slice(
+                0,
+                150
+            )
+            .trim()
+
+        +
+        "..."
+    );
+
+}
+
+
+
+/* =========================================================
+   UPDATE FEEDBACK STATS
+   ========================================================= */
+
+function updateSystemFeedbackStats(
+    stats
+) {
+
+    const total =
+        document.getElementById(
+            "systemFeedbackTotal"
+        );
+
+
+    const newCount =
+        document.getElementById(
+            "systemFeedbackNew"
+        );
+
+
+    const reviewing =
+        document.getElementById(
+            "systemFeedbackReviewing"
+        );
+
+
+    const resolved =
+        document.getElementById(
+            "systemFeedbackResolved"
+        );
+
+
+    if (
+        total
+    ) {
+
+        total.textContent =
+            Number(
+                stats?.total
+            ) ||
+            0;
+
+    }
+
+
+    if (
+        newCount
+    ) {
+
+        newCount.textContent =
+            Number(
+                stats?.new
+            ) ||
+            0;
+
+    }
+
+
+    if (
+        reviewing
+    ) {
+
+        reviewing.textContent =
+            Number(
+                stats?.reviewing
+            ) ||
+            0;
+
+    }
+
+
+    if (
+        resolved
+    ) {
+
+        resolved.textContent =
+            Number(
+                stats?.resolved
+            ) ||
+            0;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   RENDER FEEDBACK LIST
+   ========================================================= */
+
+function renderSystemFeedbackList(
+    feedback,
+    pagination
+) {
+
+    const list =
+        document.getElementById(
+            "systemFeedbackList"
+        );
+
+
+    const visibleCount =
+        document.getElementById(
+            "systemFeedbackVisibleCount"
+        );
+
+
+    if (
+        !list
+    ) {
+
+        return;
+
+    }
+
+
+    const items =
+        Array.isArray(
+            feedback
+        )
+            ? feedback
+            : [];
+
+
+    if (
+        visibleCount
+    ) {
+
+        const total =
+            Number(
+                pagination?.total
+            ) ||
+            0;
+
+
+        visibleCount.textContent =
+            `${total} ${
+                total ===
+                1
+                    ? "submission"
+                    : "submissions"
+            }`;
+
+    }
+
+
+    list.innerHTML =
+        "";
+
+
+    if (
+        items.length ===
+        0
+    ) {
+
+        list.innerHTML = `
+
+            <div class="system-feedback-empty">
+
+                <strong>
+                    No submissions found.
+                </strong>
+
+                <p>
+                    Try changing the current search
+                    or feedback filters.
+                </p>
+
+            </div>
+
+        `;
+
+
+        return;
+
+    }
+
+
+
+    items.forEach(
+        item => {
+
+            const card =
+                document.createElement(
+                    "article"
+                );
+
+
+            card.className =
+                `system-feedback-card ${
+                    escapeHTML(
+                        item.status ||
+                        "new"
+                    )
+                }`;
+
+
+            const categoryLabel =
+                getSystemFeedbackCategoryLabel(
+                    item.category
+                );
+
+
+            const statusLabel =
+                getSystemFeedbackStatusLabel(
+                    item.status
+                );
+
+
+            card.innerHTML = `
+
+                <!-- =============================================
+                    LEFT - FEEDBACK INFORMATION
+                    ============================================= -->
+
+                <div class="system-feedback-card-main">
+
+                    <span
+                        class="
+                            system-feedback-category
+                            ${escapeHTML(
+                                item.category ||
+                                "general"
+                            )}
+                        "
+                    >
+                        ${escapeHTML(
+                            categoryLabel
+                        )}
+                    </span>
+
+
+                    <h3>
+                        ${escapeHTML(
+                            item.subject ||
+                            "Untitled message"
+                        )}
+                    </h3>
+
+
+                    <p class="system-feedback-preview">
+                        ${escapeHTML(
+                            createSystemFeedbackPreview(
+                                item.message
+                            )
+                        )}
+                    </p>
+
+                </div>
+
+
+
+                <!-- =============================================
+                    MIDDLE - SENDER
+                    ============================================= -->
+
+                <div class="system-feedback-card-sender">
+
+                    <span>
+                        SUBMITTED BY
+                    </span>
+
+                    <strong>
+                        ${escapeHTML(
+                            item.sender?.name ||
+                            "Unknown sender"
+                        )}
+                    </strong>
+
+                    <p>
+                        ${escapeHTML(
+                            item.sender?.email ||
+                            ""
+                        )}
+                    </p>
+
+                </div>
+
+
+
+                <!-- =============================================
+                    RIGHT - STATUS + DATE + ACTION
+                    ============================================= -->
+
+                <div class="system-feedback-card-right">
+
+                    <span
+                        class="
+                            system-feedback-status
+                            ${escapeHTML(
+                                item.status ||
+                                "new"
+                            )}
+                        "
+                    >
+                        ${escapeHTML(
+                            statusLabel
+                        )}
+                    </span>
+
+
+                    <p class="system-feedback-card-date">
+
+                        ${escapeHTML(
+                            formatSystemFeedbackDate(
+                                item.createdAt
+                            )
+                        )}
+
+                    </p>
+
+
+                    <button
+                        type="button"
+                        class="system-feedback-view-button"
+                        data-feedback-id="${escapeHTML(
+                            item.id
+                        )}"
+                    >
+                        View details
+                    </button>
+
+                </div>
+
+            `;
+
+
+            list.appendChild(
+                card
+            );
+
+        }
+    );
+
+
+
+    /* =====================================================
+       DETAIL BUTTONS
+       ===================================================== */
+
+    list
+        .querySelectorAll(
+            ".system-feedback-view-button"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        openSystemFeedbackDetail(
+                            button.dataset
+                                .feedbackId
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+
+/* =========================================================
+   FEEDBACK PAGINATION
+   ========================================================= */
+
+function renderSystemFeedbackPagination(
+    pagination
+) {
+
+    const container =
+        document.getElementById(
+            "systemFeedbackPagination"
+        );
+
+
+    if (
+        !container
+    ) {
+
+        return;
+
+    }
+
+
+    const page =
+        Number(
+            pagination?.page
+        ) ||
+        1;
+
+
+    const totalPages =
+        Math.max(
+            1,
+            Number(
+                pagination?.totalPages
+            ) ||
+            1
+        );
+
+
+    systemFeedbackPage =
+        page;
+
+
+    systemFeedbackTotalPages =
+        totalPages;
+
+
+    if (
+        totalPages <=
+        1
+    ) {
+
+        container.innerHTML =
+            "";
+
+        return;
+
+    }
+
+
+    container.innerHTML = `
+
+        <button
+            type="button"
+            id="previousSystemFeedbackPage"
+            ${
+                page <= 1
+                    ? "disabled"
+                    : ""
+            }
+        >
+            Previous
+        </button>
+
+
+        <span>
+            Page ${page} of ${totalPages}
+        </span>
+
+
+        <button
+            type="button"
+            id="nextSystemFeedbackPage"
+            ${
+                page >= totalPages
+                    ? "disabled"
+                    : ""
+            }
+        >
+            Next
+        </button>
+
+    `;
+
+
+    document
+        .getElementById(
+            "previousSystemFeedbackPage"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                if (
+                    systemFeedbackPage >
+                    1
+                ) {
+
+                    loadSystemFeedback(
+                        systemFeedbackPage -
+                        1
+                    );
+
+                }
+
+            }
+        );
+
+
+    document
+        .getElementById(
+            "nextSystemFeedbackPage"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                if (
+                    systemFeedbackPage <
+                    systemFeedbackTotalPages
+                ) {
+
+                    loadSystemFeedback(
+                        systemFeedbackPage +
+                        1
+                    );
+
+                }
+
+            }
+        );
+
+}
+
+
+
+/* =========================================================
+   LOAD SYSTEM FEEDBACK
+   ========================================================= */
+
+async function loadSystemFeedback(
+    page = 1
+) {
+
+    const list =
+        document.getElementById(
+            "systemFeedbackList"
+        );
+
+
+    if (
+        !list
+    ) {
+
+        return;
+
+    }
+
+
+    const search =
+        document
+            .getElementById(
+                "systemFeedbackSearch"
+            )
+            ?.value
+            .trim()
+        ||
+        "";
+
+
+    list.innerHTML = `
+
+        <div class="system-feedback-empty">
+
+            <strong>
+                Loading feedback...
+            </strong>
+
+            <p>
+                Retrieving feedback and system issue reports.
+            </p>
+
+        </div>
+
+    `;
+
+
+    try {
+
+        const parameters =
+            new URLSearchParams();
+
+
+        parameters.set(
+            "page",
+            String(
+                page
+            )
+        );
+
+
+        parameters.set(
+            "limit",
+            "20"
+        );
+
+
+        parameters.set(
+            "category",
+            systemFeedbackCategory
+        );
+
+
+        parameters.set(
+            "status",
+            systemFeedbackStatus
+        );
+
+
+        if (
+            search
+        ) {
+
+            parameters.set(
+                "search",
+                search
+            );
+
+        }
+
+
+        const response =
+            await fetch(
+                `/api/system/feedback?${parameters.toString()}`,
+                {
+
+                    method:
+                        "GET",
+
+                    credentials:
+                        "same-origin"
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load feedback."
+            );
+
+        }
+
+
+        systemFeedbackItems =
+            data.feedback ||
+            [];
+
+
+        updateSystemFeedbackStats(
+            data.stats
+        );
+
+
+        renderSystemFeedbackList(
+
+            systemFeedbackItems,
+
+            data.pagination
+
+        );
+
+
+        renderSystemFeedbackPagination(
+            data.pagination
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Load System Admin feedback error:",
+            error
+        );
+
+
+        list.innerHTML = `
+
+            <div class="system-feedback-empty">
+
+                <strong>
+                    Unable to load feedback.
+                </strong>
+
+                <p>
+                    ${escapeHTML(
+                        error.message ||
+                        "Please try again."
+                    )}
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   CATEGORY DROPDOWN
+   ========================================================= */
+
+const systemFeedbackCategoryDropdown =
+    document.getElementById(
+        "systemFeedbackCategoryDropdown"
+    );
+
+
+const systemFeedbackCategoryTrigger =
+    document.getElementById(
+        "systemFeedbackCategoryTrigger"
+    );
+
+
+const systemFeedbackCategoryText =
+    document.getElementById(
+        "systemFeedbackCategoryText"
+    );
+
+
+systemFeedbackCategoryTrigger
+    ?.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+
+            closeAllAdminCustomSelects(
+                systemFeedbackCategoryDropdown
+            );
+
+
+            systemFeedbackCategoryDropdown
+                ?.classList
+                .toggle(
+                    "open"
+                );
+
+        }
+    );
+
+
+systemFeedbackCategoryDropdown
+    ?.querySelectorAll(
+        ".admin-custom-select-menu button"
+    )
+    .forEach(
+        option => {
+
+            option.addEventListener(
+                "click",
+                event => {
+
+                    event.stopPropagation();
+
+
+                    systemFeedbackCategory =
+                        option.dataset.value ||
+                        "all";
+
+
+                    if (
+                        systemFeedbackCategoryText
+                    ) {
+
+                        systemFeedbackCategoryText
+                            .textContent =
+                            option.textContent
+                                .trim();
+
+                    }
+
+
+                    systemFeedbackCategoryDropdown
+                        ?.querySelectorAll(
+                            ".admin-custom-select-menu button"
+                        )
+                        .forEach(
+                            button => {
+
+                                button.classList.remove(
+                                    "selected"
+                                );
+
+                            }
+                        );
+
+
+                    option.classList.add(
+                        "selected"
+                    );
+
+
+                    systemFeedbackCategoryDropdown
+                        ?.classList
+                        .remove(
+                            "open"
+                        );
+
+
+                    loadSystemFeedback(
+                        1
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+
+/* =========================================================
+   STATUS DROPDOWN
+   ========================================================= */
+
+const systemFeedbackStatusDropdown =
+    document.getElementById(
+        "systemFeedbackStatusDropdown"
+    );
+
+
+const systemFeedbackStatusTrigger =
+    document.getElementById(
+        "systemFeedbackStatusTrigger"
+    );
+
+
+const systemFeedbackStatusText =
+    document.getElementById(
+        "systemFeedbackStatusText"
+    );
+
+
+systemFeedbackStatusTrigger
+    ?.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+
+            closeAllAdminCustomSelects(
+                systemFeedbackStatusDropdown
+            );
+
+
+            systemFeedbackStatusDropdown
+                ?.classList
+                .toggle(
+                    "open"
+                );
+
+        }
+    );
+
+
+systemFeedbackStatusDropdown
+    ?.querySelectorAll(
+        ".admin-custom-select-menu button"
+    )
+    .forEach(
+        option => {
+
+            option.addEventListener(
+                "click",
+                event => {
+
+                    event.stopPropagation();
+
+
+                    systemFeedbackStatus =
+                        option.dataset.value ||
+                        "all";
+
+
+                    if (
+                        systemFeedbackStatusText
+                    ) {
+
+                        systemFeedbackStatusText
+                            .textContent =
+                            option.textContent
+                                .trim();
+
+                    }
+
+
+                    systemFeedbackStatusDropdown
+                        ?.querySelectorAll(
+                            ".admin-custom-select-menu button"
+                        )
+                        .forEach(
+                            button => {
+
+                                button.classList.remove(
+                                    "selected"
+                                );
+
+                            }
+                        );
+
+
+                    option.classList.add(
+                        "selected"
+                    );
+
+
+                    systemFeedbackStatusDropdown
+                        ?.classList
+                        .remove(
+                            "open"
+                        );
+
+
+                    loadSystemFeedback(
+                        1
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+document
+    .getElementById(
+        "systemFeedbackSearch"
+    )
+    ?.addEventListener(
+        "input",
+        () => {
+
+            clearTimeout(
+                systemFeedbackSearchTimer
+            );
+
+
+            systemFeedbackSearchTimer =
+                setTimeout(
+                    () => {
+
+                        loadSystemFeedback(
+                            1
+                        );
+
+                    },
+                    350
+                );
+
+        }
+    );
+
+
+
+/* =========================================================
+   OPEN FEEDBACK DETAILS
+   ========================================================= */
+
+function openSystemFeedbackDetail(
+    feedbackId
+) {
+
+    const feedback =
+        systemFeedbackItems.find(
+            item =>
+                String(
+                    item.id
+                ) ===
+                String(
+                    feedbackId
+                )
+        );
+
+
+    if (
+        !feedback
+    ) {
+
+        return;
+
+    }
+
+    activeSystemFeedbackId =
+        feedback.id;
+
+
+    selectedSystemFeedbackStatus =
+        feedback.status ||
+        "new";
+
+
+    const modal =
+        document.getElementById(
+            "systemFeedbackModal"
+        );
+
+
+    if (
+        !modal
+    ) {
+
+        return;
+
+    }
+
+
+    const category =
+        document.getElementById(
+            "systemFeedbackModalCategory"
+        );
+
+
+    const title =
+        document.getElementById(
+            "systemFeedbackModalTitle"
+        );
+
+
+    const status =
+        document.getElementById(
+            "systemFeedbackModalStatus"
+        );
+
+
+    const date =
+        document.getElementById(
+            "systemFeedbackModalDate"
+        );
+
+
+    const sender =
+        document.getElementById(
+            "systemFeedbackModalSender"
+        );
+
+
+    const email =
+        document.getElementById(
+            "systemFeedbackModalEmail"
+        );
+
+
+    const message =
+        document.getElementById(
+            "systemFeedbackModalMessage"
+        );
+
+
+    const accountNote =
+        document.getElementById(
+            "systemFeedbackAccountNote"
+        );
+
+
+    const accountName =
+        document.getElementById(
+            "systemFeedbackAccountName"
+        );
+
+
+    if (
+        category
+    ) {
+
+        category.textContent =
+            getSystemFeedbackCategoryLabel(
+                feedback.category
+            )
+            .toUpperCase();
+
+    }
+
+
+    if (
+        title
+    ) {
+
+        title.textContent =
+            feedback.subject ||
+            "Feedback details";
+
+    }
+
+
+    if (
+        status
+    ) {
+
+        status.textContent =
+            getSystemFeedbackStatusLabel(
+                feedback.status
+            );
+
+        status.className =
+            `system-feedback-detail-status ${
+                feedback.status ||
+                "new"
+            }`;
+
+    }
+
+
+    if (
+        date
+    ) {
+
+        date.textContent =
+            formatSystemFeedbackDate(
+                feedback.createdAt
+            );
+
+    }
+
+
+    if (
+        sender
+    ) {
+
+        sender.textContent =
+            feedback.sender?.name ||
+            "Unknown sender";
+
+    }
+
+
+    if (
+        email
+    ) {
+
+        const senderEmail =
+            feedback.sender?.email ||
+            "";
+
+
+        email.textContent =
+            senderEmail ||
+            "No email";
+
+
+        email.href =
+            senderEmail
+                ? `mailto:${senderEmail}`
+                : "#";
+
+    }
+
+
+    if (
+        message
+    ) {
+
+        message.textContent =
+            feedback.message ||
+            "No message provided.";
+
+    }
+
+
+
+    if (
+        feedback.account
+    ) {
+
+        if (
+            accountNote
+        ) {
+
+            accountNote.hidden =
+                false;
+
+        }
+
+
+        if (
+            accountName
+        ) {
+
+            accountName.textContent =
+                `${
+                    feedback.account.name ||
+                    feedback.account.email ||
+                    "Altrium user"
+                } · Account #${
+                    feedback.account.id
+                }`;
+
+        }
+
+    }
+
+    else {
+
+        if (
+            accountNote
+        ) {
+
+            accountNote.hidden =
+                true;
+
+        }
+
+    }
+
+    /* =====================================================
+        MANAGEMENT STATE
+        ===================================================== */
+
+        const statusOptions =
+            document.querySelectorAll(
+                ".system-feedback-status-option"
+            );
+
+
+        statusOptions.forEach(
+            option => {
+
+                option.classList.toggle(
+
+                    "active",
+
+                    option.dataset
+                        .feedbackStatus ===
+                        selectedSystemFeedbackStatus
+
+                );
+
+            }
+        );
+
+
+
+        const internalNote =
+            document.getElementById(
+                "systemFeedbackInternalNote"
+            );
+
+
+        if (
+            internalNote
+        ) {
+
+            internalNote.value =
+                feedback.internalNote ||
+                "";
+
+        }
+
+
+
+        const noteCount =
+            document.getElementById(
+                "systemFeedbackNoteCount"
+            );
+
+
+        if (
+            noteCount
+        ) {
+
+            noteCount.textContent =
+                `${
+                    (
+                        feedback.internalNote ||
+                        ""
+                    ).length
+                } / 2000`;
+
+        }
+
+
+
+        /* =====================================================
+        REVIEW INFORMATION
+        ===================================================== */
+
+        const reviewInfo =
+            document.getElementById(
+                "systemFeedbackReviewInfo"
+            );
+
+
+        const reviewedBy =
+            document.getElementById(
+                "systemFeedbackReviewedBy"
+            );
+
+
+        const reviewedAt =
+            document.getElementById(
+                "systemFeedbackReviewedAt"
+            );
+
+
+        const resolvedInfo =
+            document.getElementById(
+                "systemFeedbackResolvedInfo"
+            );
+
+
+        const resolvedAt =
+            document.getElementById(
+                "systemFeedbackResolvedAt"
+            );
+
+
+        if (
+            feedback.reviewedBy
+        ) {
+
+            reviewInfo.hidden =
+                false;
+
+
+            reviewedBy.textContent =
+                feedback.reviewedBy.name ||
+                feedback.reviewedBy.email ||
+                "System Admin";
+
+
+            reviewedAt.textContent =
+                formatSystemFeedbackDate(
+                    feedback.reviewedAt
+                );
+
+        }
+
+        else {
+
+            reviewInfo.hidden =
+                true;
+
+        }
+
+
+        if (
+            feedback.resolvedAt
+        ) {
+
+            resolvedInfo.hidden =
+                false;
+
+
+            resolvedAt.textContent =
+                formatSystemFeedbackDate(
+                    feedback.resolvedAt
+                );
+
+        }
+
+        else {
+
+            resolvedInfo.hidden =
+                true;
+
+        }
+
+
+
+        /* =====================================================
+        CLEAR OLD SAVE MESSAGE
+        ===================================================== */
+
+        const saveMessage =
+            document.getElementById(
+                "systemFeedbackSaveMessage"
+            );
+
+
+        if (
+            saveMessage
+        ) {
+
+            saveMessage.textContent =
+                "";
+
+
+            saveMessage.classList.remove(
+                "success",
+                "error"
+            );
+
+        }
+
+
+    modal.classList.add(
+        "open"
+    );
+
+
+    modal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+
+    document.body.style.overflow =
+        "hidden";
+
+}
+
+
+
+/* =========================================================
+   CLOSE FEEDBACK DETAILS
+   ========================================================= */
+
+function closeSystemFeedbackDetail() {
+
+    const modal =
+        document.getElementById(
+            "systemFeedbackModal"
+        );
+
+
+    modal
+        ?.classList
+        .remove(
+            "open"
+        );
+
+
+    modal?.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+
+    document.body.style.overflow =
+        "";
+
+}
+
+
+/* =========================================================
+   FEEDBACK MANAGEMENT - STATUS SELECTION
+   ========================================================= */
+
+document
+    .querySelectorAll(
+        ".system-feedback-status-option"
+    )
+    .forEach(
+        option => {
+
+            option.addEventListener(
+                "click",
+                () => {
+
+                    selectedSystemFeedbackStatus =
+                        option.dataset
+                            .feedbackStatus ||
+                        "new";
+
+
+                    document
+                        .querySelectorAll(
+                            ".system-feedback-status-option"
+                        )
+                        .forEach(
+                            item => {
+
+                                item.classList.remove(
+                                    "active"
+                                );
+
+                            }
+                        );
+
+
+                    option.classList.add(
+                        "active"
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+
+/* =========================================================
+   INTERNAL NOTE COUNTER
+   ========================================================= */
+
+document
+    .getElementById(
+        "systemFeedbackInternalNote"
+    )
+    ?.addEventListener(
+        "input",
+        event => {
+
+            const count =
+                event.target
+                    .value
+                    .length;
+
+
+            const counter =
+                document.getElementById(
+                    "systemFeedbackNoteCount"
+                );
+
+
+            if (
+                counter
+            ) {
+
+                counter.textContent =
+                    `${count} / 2000`;
+
+            }
+
+        }
+    );
+
+
+/* =========================================================
+   SAVE SYSTEM FEEDBACK CHANGES
+   ========================================================= */
+
+document
+    .getElementById(
+        "saveSystemFeedbackChanges"
+    )
+    ?.addEventListener(
+        "click",
+        async () => {
+
+            if (
+                !activeSystemFeedbackId
+            ) {
+
+                return;
+
+            }
+
+
+            const saveButton =
+                document.getElementById(
+                    "saveSystemFeedbackChanges"
+                );
+
+
+            const saveMessage =
+                document.getElementById(
+                    "systemFeedbackSaveMessage"
+                );
+
+
+            const internalNote =
+                document
+                    .getElementById(
+                        "systemFeedbackInternalNote"
+                    )
+                    ?.value
+                    .trim()
+                ||
+                "";
+
+
+
+            saveButton.disabled =
+                true;
+
+
+            saveButton.textContent =
+                "Saving...";
+
+
+            if (
+                saveMessage
+            ) {
+
+                saveMessage.textContent =
+                    "Updating feedback...";
+
+
+                saveMessage.classList.remove(
+                    "success",
+                    "error"
+                );
+
+            }
+
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        `/api/system/feedback/${activeSystemFeedbackId}`,
+                        {
+
+                            method:
+                                "PATCH",
+
+                            credentials:
+                                "same-origin",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    status:
+                                        selectedSystemFeedbackStatus,
+
+                                    internalNote
+
+                                })
+
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    throw new Error(
+                        data.message ||
+                        "Unable to update feedback."
+                    );
+
+                }
+
+
+
+                if (
+                    saveMessage
+                ) {
+
+                    saveMessage.textContent =
+                        data.message ||
+                        "Feedback updated successfully.";
+
+
+                    saveMessage.classList.remove(
+                        "error"
+                    );
+
+
+                    saveMessage.classList.add(
+                        "success"
+                    );
+
+                }
+
+
+
+                /* =================================================
+                   RELOAD THE CURRENT LIST
+                   ================================================= */
+
+                await loadSystemFeedback(
+                    systemFeedbackPage
+                );
+
+
+
+                /* =================================================
+                   REOPEN UPDATED ITEM
+
+                   This refreshes reviewer/status/timestamps
+                   without closing the modal.
+                   ================================================= */
+
+                openSystemFeedbackDetail(
+                    activeSystemFeedbackId
+                );
+
+
+
+                const refreshedMessage =
+                    document.getElementById(
+                        "systemFeedbackSaveMessage"
+                    );
+
+
+                if (
+                    refreshedMessage
+                ) {
+
+                    refreshedMessage.textContent =
+                        data.message ||
+                        "Feedback updated successfully.";
+
+
+                    refreshedMessage.classList.add(
+                        "success"
+                    );
+
+                }
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Save System Admin feedback error:",
+                    error
+                );
+
+
+                if (
+                    saveMessage
+                ) {
+
+                    saveMessage.textContent =
+                        error.message ||
+                        "Unable to save changes.";
+
+
+                    saveMessage.classList.remove(
+                        "success"
+                    );
+
+
+                    saveMessage.classList.add(
+                        "error"
+                    );
+
+                }
+
+            }
+
+            finally {
+
+                saveButton.disabled =
+                    false;
+
+
+                saveButton.textContent =
+                    "Save changes";
+
+            }
+
+        }
+    );
+
+document
+    .getElementById(
+        "closeSystemFeedbackModal"
+    )
+    ?.addEventListener(
+        "click",
+        closeSystemFeedbackDetail
+    );
+
+
+document
+    .getElementById(
+        "systemFeedbackModalBackdrop"
+    )
+    ?.addEventListener(
+        "click",
+        closeSystemFeedbackDetail
+    );
 
 
 /* =========================================================
@@ -791,6 +2864,18 @@ adminNavItems.forEach(
                 ) {
 
                     loadAdminInterviewSessions();
+
+                }
+
+
+                if (
+                    target ===
+                    "system-feedback"
+                ) {
+
+                    loadSystemFeedback(
+                        1
+                    );
 
                 }
 

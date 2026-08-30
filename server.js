@@ -1837,6 +1837,1405 @@ app.get(
 
 
 /* =========================================================
+   SYSTEM ADMIN - FEEDBACK & ISSUES
+   READ ONLY DIRECTORY
+   ========================================================= */
+
+app.get(
+    "/api/system/feedback",
+    requireSystemAdmin,
+    async (req, res) => {
+
+        try {
+
+            /* =================================================
+               SEARCH
+               ================================================= */
+
+            const search =
+                String(
+                    req.query.search ||
+                    ""
+                )
+                .trim()
+                .slice(
+                    0,
+                    200
+                );
+
+
+
+            /* =================================================
+               CATEGORY FILTER
+               ================================================= */
+
+            const requestedCategory =
+                String(
+                    req.query.category ||
+                    "all"
+                )
+                .trim()
+                .toLowerCase();
+
+
+            const allowedCategories = [
+
+                "all",
+                "general",
+                "feedback",
+                "bug"
+
+            ];
+
+
+            const category =
+                allowedCategories.includes(
+                    requestedCategory
+                )
+                    ? requestedCategory
+                    : "all";
+
+
+
+            /* =================================================
+               STATUS FILTER
+               ================================================= */
+
+            const requestedStatus =
+                String(
+                    req.query.status ||
+                    "all"
+                )
+                .trim()
+                .toLowerCase();
+
+
+            const allowedStatuses = [
+
+                "all",
+                "new",
+                "reviewing",
+                "resolved"
+
+            ];
+
+
+            const status =
+                allowedStatuses.includes(
+                    requestedStatus
+                )
+                    ? requestedStatus
+                    : "all";
+
+
+
+            /* =================================================
+               PAGINATION
+               ================================================= */
+
+            let page =
+                Number(
+                    req.query.page
+                ) ||
+                1;
+
+
+            let limit =
+                Number(
+                    req.query.limit
+                ) ||
+                20;
+
+
+            page =
+                Math.max(
+                    1,
+                    page
+                );
+
+
+            limit =
+                Math.min(
+                    50,
+                    Math.max(
+                        10,
+                        limit
+                    )
+                );
+
+
+            const offset =
+                (
+                    page -
+                    1
+                ) *
+                limit;
+
+
+
+            /* =================================================
+               FILTER SQL
+
+               All browser values go through PostgreSQL
+               parameters.
+
+               Nothing from the browser is directly inserted
+               into the SQL string.
+               ================================================= */
+
+            const filterSql = `
+                WHERE
+
+                    (
+                        $1 = ''
+
+                        OR
+
+                        fs.sender_name
+                            ILIKE
+                            '%' || $1 || '%'
+
+                        OR
+
+                        fs.sender_email
+                            ILIKE
+                            '%' || $1 || '%'
+
+                        OR
+
+                        fs.subject
+                            ILIKE
+                            '%' || $1 || '%'
+
+                        OR
+
+                        fs.message
+                            ILIKE
+                            '%' || $1 || '%'
+                    )
+
+
+                    AND
+
+                    (
+                        $2 = 'all'
+
+                        OR
+
+                        fs.category =
+                            $2
+                    )
+
+
+                    AND
+
+                    (
+                        $3 = 'all'
+
+                        OR
+
+                        fs.status =
+                            $3
+                    )
+            `;
+
+
+
+            /* =================================================
+               FILTERED TOTAL
+               ================================================= */
+
+            const countResult =
+                await pool.query(
+                    `
+                    SELECT
+
+                        COUNT(*)::INT
+                            AS total
+
+                    FROM feedback_submissions fs
+
+                    ${filterSql}
+                    `,
+                    [
+
+                        search,
+                        category,
+                        status
+
+                    ]
+                );
+
+
+            const total =
+                Number(
+                    countResult
+                        .rows[0]
+                        .total
+                ) ||
+                0;
+
+
+
+            /* =================================================
+               LOAD FEEDBACK
+               ================================================= */
+
+            const feedbackResult =
+                await pool.query(
+                    `
+                    SELECT
+
+                        fs.id,
+
+                        fs.submitted_by,
+
+                        fs.sender_name,
+                        fs.sender_email,
+
+                        fs.category,
+
+                        fs.subject,
+                        fs.message,
+
+                        fs.status,
+
+                        fs.internal_note,
+
+                        fs.reviewed_by,
+                        fs.reviewed_at,
+
+                        fs.resolved_at,
+
+                        fs.created_at,
+                        fs.updated_at,
+
+
+                        submitted_user.first_name
+                            AS account_first_name,
+
+                        submitted_user.last_name
+                            AS account_last_name,
+
+                        submitted_user.email
+                            AS account_email,
+
+
+                        reviewer.first_name
+                            AS reviewer_first_name,
+
+                        reviewer.last_name
+                            AS reviewer_last_name,
+
+                        reviewer.email
+                            AS reviewer_email
+
+
+                    FROM feedback_submissions fs
+
+
+                    LEFT JOIN users submitted_user
+
+                        ON submitted_user.id =
+                            fs.submitted_by
+
+
+                    LEFT JOIN users reviewer
+
+                        ON reviewer.id =
+                            fs.reviewed_by
+
+
+                    ${filterSql}
+
+
+                    ORDER BY
+
+                        CASE
+
+                            WHEN
+                                fs.status =
+                                'new'
+
+                            THEN
+                                1
+
+
+                            WHEN
+                                fs.status =
+                                'reviewing'
+
+                            THEN
+                                2
+
+
+                            WHEN
+                                fs.status =
+                                'resolved'
+
+                            THEN
+                                3
+
+
+                            ELSE
+                                4
+
+                        END,
+
+                        fs.created_at DESC,
+
+                        fs.id DESC
+
+
+                    LIMIT $4
+
+                    OFFSET $5
+                    `,
+                    [
+
+                        search,
+                        category,
+                        status,
+                        limit,
+                        offset
+
+                    ]
+                );
+
+
+
+            /* =================================================
+               GLOBAL FEEDBACK STATS
+               ================================================= */
+
+            const statsResult =
+                await pool.query(
+                    `
+                    SELECT
+
+                        COUNT(*)::INT
+                            AS total,
+
+
+                        COUNT(*)
+                        FILTER (
+                            WHERE
+                                status =
+                                'new'
+                        )::INT
+                            AS new_count,
+
+
+                        COUNT(*)
+                        FILTER (
+                            WHERE
+                                status =
+                                'reviewing'
+                        )::INT
+                            AS reviewing_count,
+
+
+                        COUNT(*)
+                        FILTER (
+                            WHERE
+                                status =
+                                'resolved'
+                        )::INT
+                            AS resolved_count
+
+
+                    FROM feedback_submissions
+                    `
+                );
+
+
+            const stats =
+                statsResult.rows[0];
+
+
+
+            /* =================================================
+               MAP SAFE SYSTEM ADMIN DATA
+               ================================================= */
+
+            const feedback =
+                feedbackResult
+                    .rows
+                    .map(
+                        item => {
+
+                            const accountName =
+                                item.submitted_by
+
+                                    ? `${
+                                        item.account_first_name ||
+                                        ""
+                                    } ${
+                                        item.account_last_name ||
+                                        ""
+                                    }`
+                                    .trim()
+
+                                    : null;
+
+
+                            const reviewerName =
+                                item.reviewed_by
+
+                                    ? `${
+                                        item.reviewer_first_name ||
+                                        ""
+                                    } ${
+                                        item.reviewer_last_name ||
+                                        ""
+                                    }`
+                                    .trim()
+
+                                    : null;
+
+
+
+                            return {
+
+                                id:
+                                    item.id,
+
+
+                                category:
+                                    item.category,
+
+
+                                subject:
+                                    item.subject,
+
+
+                                message:
+                                    item.message,
+
+
+                                status:
+                                    item.status,
+
+
+                                sender: {
+
+                                    name:
+                                        item.sender_name,
+
+                                    email:
+                                        item.sender_email
+
+                                },
+
+
+                                account:
+
+                                    item.submitted_by
+
+                                        ? {
+
+                                            id:
+                                                item.submitted_by,
+
+                                            name:
+                                                accountName ||
+                                                item.account_email,
+
+                                            email:
+                                                item.account_email
+
+                                        }
+
+                                        : null,
+
+
+                                internalNote:
+                                    item.internal_note,
+
+
+                                reviewedBy:
+
+                                    item.reviewed_by
+
+                                        ? {
+
+                                            id:
+                                                item.reviewed_by,
+
+                                            name:
+                                                reviewerName ||
+                                                item.reviewer_email,
+
+                                            email:
+                                                item.reviewer_email
+
+                                        }
+
+                                        : null,
+
+
+                                reviewedAt:
+                                    item.reviewed_at,
+
+
+                                resolvedAt:
+                                    item.resolved_at,
+
+
+                                createdAt:
+                                    item.created_at,
+
+
+                                updatedAt:
+                                    item.updated_at
+
+                            };
+
+                        }
+                    );
+
+
+
+            /* =================================================
+               PAGINATION
+               ================================================= */
+
+            const totalPages =
+                Math.max(
+                    1,
+                    Math.ceil(
+                        total /
+                        limit
+                    )
+                );
+
+
+
+            /* =================================================
+               RESPONSE
+               ================================================= */
+
+            return res.json({
+
+                success:
+                    true,
+
+
+                feedback,
+
+
+                stats: {
+
+                    total:
+                        Number(
+                            stats.total
+                        ) ||
+                        0,
+
+                    new:
+                        Number(
+                            stats.new_count
+                        ) ||
+                        0,
+
+                    reviewing:
+                        Number(
+                            stats.reviewing_count
+                        ) ||
+                        0,
+
+                    resolved:
+                        Number(
+                            stats.resolved_count
+                        ) ||
+                        0
+
+                },
+
+
+                filters: {
+
+                    search,
+
+                    category,
+
+                    status
+
+                },
+
+
+                pagination: {
+
+                    page,
+
+                    limit,
+
+                    total,
+
+                    totalPages,
+
+                    hasPrevious:
+                        page >
+                        1,
+
+                    hasNext:
+                        page <
+                        totalPages
+
+                }
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "System feedback directory error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success:
+                    false,
+
+                message:
+                    "Unable to load feedback and system issues."
+
+            });
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   SYSTEM ADMIN - UPDATE FEEDBACK / SYSTEM ISSUE
+   ========================================================= */
+
+app.patch(
+    "/api/system/feedback/:id",
+    requireSystemAdmin,
+    async (req, res) => {
+
+        const client =
+            await pool.connect();
+
+
+        try {
+
+            const feedbackId =
+                Number(
+                    req.params.id
+                );
+
+
+            const requestedStatus =
+                String(
+                    req.body.status ||
+                    ""
+                )
+                .trim()
+                .toLowerCase();
+
+
+            const internalNote =
+                String(
+                    req.body.internalNote ||
+                    ""
+                )
+                .trim();
+
+
+
+            /* =================================================
+               VALIDATE ID
+               ================================================= */
+
+            if (
+                !Number.isInteger(
+                    feedbackId
+                ) ||
+                feedbackId <= 0
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Invalid feedback submission."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               VALIDATE STATUS
+               ================================================= */
+
+            const allowedStatuses = [
+
+                "new",
+                "reviewing",
+                "resolved"
+
+            ];
+
+
+            if (
+                !allowedStatuses.includes(
+                    requestedStatus
+                )
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Please select a valid feedback status."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               VALIDATE NOTE
+               ================================================= */
+
+            if (
+                internalNote.length >
+                2000
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Internal note must be 2000 characters or fewer."
+
+                });
+
+            }
+
+
+
+            await client.query(
+                "BEGIN"
+            );
+
+
+
+            /* =================================================
+               LOAD + LOCK FEEDBACK
+               ================================================= */
+
+            const existingResult =
+                await client.query(
+                    `
+                    SELECT
+
+                        id,
+
+                        submitted_by,
+
+                        sender_name,
+                        sender_email,
+
+                        category,
+
+                        subject,
+                        message,
+
+                        status,
+                        internal_note,
+
+                        reviewed_by,
+                        reviewed_at,
+
+                        resolved_at,
+
+                        created_at,
+                        updated_at
+
+                    FROM feedback_submissions
+
+                    WHERE
+                        id = $1
+
+                    FOR UPDATE
+                    `,
+                    [
+                        feedbackId
+                    ]
+                );
+
+
+            if (
+                existingResult.rows.length ===
+                0
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(404).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Feedback submission not found."
+
+                });
+
+            }
+
+
+            const existing =
+                existingResult.rows[0];
+
+
+
+            /* =================================================
+               NOTHING CHANGED
+               ================================================= */
+
+            const existingNote =
+                String(
+                    existing.internal_note ||
+                    ""
+                )
+                .trim();
+
+
+            if (
+                existing.status ===
+                    requestedStatus
+
+                &&
+
+                existingNote ===
+                    internalNote
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "No feedback changes were made."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               UPDATE WORKFLOW
+
+               NEW
+                   No active reviewer.
+
+               REVIEWING
+                   Current System Admin becomes reviewer.
+
+               RESOLVED
+                   Current System Admin becomes reviewer
+                   and resolution timestamp is stored.
+               ================================================= */
+
+            const updateResult =
+                await client.query(
+                    `
+                    UPDATE feedback_submissions
+
+                    SET
+
+                        status =
+                            $1::VARCHAR(30),
+
+
+                        internal_note =
+                            NULLIF(
+                                $2::TEXT,
+                                ''
+                            ),
+
+
+                        reviewed_by =
+
+                            CASE
+
+                                WHEN
+                                    $1::VARCHAR(30) = 'new'
+
+                                THEN
+                                    NULL::BIGINT
+
+                                ELSE
+                                    $3::BIGINT
+
+                            END,
+
+
+                        reviewed_at =
+
+                            CASE
+
+                                WHEN
+                                    $1::VARCHAR(30) = 'new'
+
+                                THEN
+                                    NULL
+
+
+                                WHEN
+                                    status = 'new'
+
+                                    OR
+
+                                    reviewed_at IS NULL
+
+                                THEN
+                                    NOW()
+
+
+                                ELSE
+                                    reviewed_at
+
+                            END,
+
+
+                        resolved_at =
+
+                            CASE
+
+                                WHEN
+                                    $1::VARCHAR(30) = 'resolved'
+
+                                THEN
+                                    NOW()
+
+                                ELSE
+                                    NULL
+
+                            END,
+
+
+                        updated_at =
+                            NOW()
+
+
+                    WHERE
+                        id = $4::BIGINT
+
+
+                    RETURNING
+
+                        id,
+                        submitted_by,
+
+                        sender_name,
+                        sender_email,
+
+                        category,
+
+                        subject,
+                        message,
+
+                        status,
+                        internal_note,
+
+                        reviewed_by,
+                        reviewed_at,
+
+                        resolved_at,
+
+                        created_at,
+                        updated_at
+                    `,
+                    [
+
+                        requestedStatus,
+
+                        internalNote,
+
+                        req.session.userId,
+
+                        feedbackId
+
+                    ]
+                );
+
+
+            const updated =
+                updateResult.rows[0];
+
+
+
+            /* =================================================
+               LOAD SYSTEM ADMIN NAME FOR RESPONSE
+               ================================================= */
+
+            const reviewerResult =
+                await client.query(
+                    `
+                    SELECT
+
+                        id,
+                        first_name,
+                        last_name,
+                        email
+
+                    FROM users
+
+                    WHERE
+                        id = $1
+
+                    LIMIT 1
+                    `,
+                    [
+                        req.session.userId
+                    ]
+                );
+
+
+            const reviewer =
+                reviewerResult.rows[0] ||
+                null;
+
+
+
+            /* =================================================
+               AUDIT LOG
+               ================================================= */
+
+            const statusChanged =
+                existing.status !==
+                requestedStatus;
+
+
+            const noteChanged =
+                existingNote !==
+                internalNote;
+
+
+            const changeParts =
+                [];
+
+
+            if (
+                statusChanged
+            ) {
+
+                changeParts.push(
+                    `status ${existing.status} → ${requestedStatus}`
+                );
+
+            }
+
+
+            if (
+                noteChanged
+            ) {
+
+                changeParts.push(
+                    "internal note updated"
+                );
+
+            }
+
+
+            await client.query(
+                `
+                INSERT INTO audit_logs (
+
+                    actor_user_id,
+
+                    target_user_id,
+
+                    action_key,
+
+                    entity_type,
+                    entity_id,
+
+                    description,
+
+                    before_data,
+                    after_data,
+
+                    metadata,
+
+                    ip_address,
+                    user_agent
+
+                )
+
+                VALUES (
+
+                    $1,
+
+                    $2,
+
+                    'feedback.updated',
+
+                    'feedback',
+                    $3,
+
+                    $4,
+
+                    $5::jsonb,
+                    $6::jsonb,
+
+                    $7::jsonb,
+
+                    $8,
+                    $9
+
+                )
+                `,
+                [
+
+                    req.session.userId,
+
+                    existing.submitted_by,
+
+                    String(
+                        feedbackId
+                    ),
+
+                    `Updated feedback #${feedbackId}: ${changeParts.join(", ")}.`,
+
+                    JSON.stringify({
+
+                        status:
+                            existing.status,
+
+                        internalNote:
+                            existing.internal_note
+
+                    }),
+
+                    JSON.stringify({
+
+                        status:
+                            updated.status,
+
+                        internalNote:
+                            updated.internal_note
+
+                    }),
+
+                    JSON.stringify({
+
+                        category:
+                            existing.category,
+
+                        subject:
+                            existing.subject
+
+                    }),
+
+                    req.ip ||
+                    null,
+
+                    req.get(
+                        "user-agent"
+                    ) ||
+                    null
+
+                ]
+            );
+
+
+
+            await client.query(
+                "COMMIT"
+            );
+
+
+
+            const reviewerName =
+                reviewer
+
+                    ? `${
+                        reviewer.first_name ||
+                        ""
+                    } ${
+                        reviewer.last_name ||
+                        ""
+                    }`
+                    .trim()
+
+                    : null;
+
+
+
+            return res.json({
+
+                success:
+                    true,
+
+                message:
+
+                    requestedStatus ===
+                        "resolved"
+
+                        ? "Feedback marked as resolved."
+
+                        : requestedStatus ===
+                            "reviewing"
+
+                            ? "Feedback is now being reviewed."
+
+                            : "Feedback returned to New.",
+
+
+                feedback: {
+
+                    id:
+                        updated.id,
+
+                    category:
+                        updated.category,
+
+                    subject:
+                        updated.subject,
+
+                    message:
+                        updated.message,
+
+                    status:
+                        updated.status,
+
+                    internalNote:
+                        updated.internal_note,
+
+
+                    sender: {
+
+                        name:
+                            updated.sender_name,
+
+                        email:
+                            updated.sender_email
+
+                    },
+
+
+                    reviewedBy:
+
+                        updated.reviewed_by &&
+                        reviewer
+
+                            ? {
+
+                                id:
+                                    reviewer.id,
+
+                                name:
+                                    reviewerName ||
+                                    reviewer.email,
+
+                                email:
+                                    reviewer.email
+
+                            }
+
+                            : null,
+
+
+                    reviewedAt:
+                        updated.reviewed_at,
+
+                    resolvedAt:
+                        updated.resolved_at,
+
+                    createdAt:
+                        updated.created_at,
+
+                    updatedAt:
+                        updated.updated_at
+
+                }
+
+            });
+
+        }
+
+        catch (error) {
+
+            try {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+            }
+
+            catch (
+                rollbackError
+            ) {
+
+                console.error(
+                    "Feedback update rollback error:",
+                    rollbackError
+                );
+
+            }
+
+
+            console.error(
+                "System feedback update error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success:
+                    false,
+
+                message:
+                    "Unable to update the feedback submission."
+
+            });
+
+        }
+
+        finally {
+
+            client.release();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
    SYSTEM ADMIN - CREATE TEAM MEMBER
    ========================================================= */
 
@@ -11450,6 +12849,472 @@ app.patch(
 
     }
 );
+
+
+/* =========================================================
+   PUBLIC CONTACT / FEEDBACK SUBMISSION
+   ========================================================= */
+
+app.post(
+    "/api/contact/feedback",
+    async (req, res) => {
+
+        const client =
+            await pool.connect();
+
+
+        try {
+
+            const {
+
+                name,
+                email,
+                category,
+                subject,
+                message
+
+            } =
+                req.body;
+
+
+
+            /* =================================================
+               CLEAN VALUES
+               ================================================= */
+
+            const cleanName =
+                String(
+                    name ||
+                    ""
+                )
+                .trim();
+
+
+            const cleanEmail =
+                String(
+                    email ||
+                    ""
+                )
+                .trim()
+                .toLowerCase();
+
+
+            const cleanCategory =
+                String(
+                    category ||
+                    "general"
+                )
+                .trim()
+                .toLowerCase();
+
+
+            const cleanSubject =
+                String(
+                    subject ||
+                    ""
+                )
+                .trim();
+
+
+            const cleanMessage =
+                String(
+                    message ||
+                    ""
+                )
+                .trim();
+
+
+
+            /* =================================================
+               VALIDATION
+               ================================================= */
+
+            if (
+                !cleanName ||
+                !cleanEmail ||
+                !cleanSubject ||
+                !cleanMessage
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Please complete all contact fields."
+
+                });
+
+            }
+
+
+            if (
+                cleanName.length >
+                120
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Name is too long."
+
+                });
+
+            }
+
+
+            if (
+                cleanEmail.length >
+                255
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Email address is too long."
+
+                });
+
+            }
+
+
+            const emailPattern =
+                /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+            if (
+                !emailPattern.test(
+                    cleanEmail
+                )
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Please enter a valid email address."
+
+                });
+
+            }
+
+
+            if (
+                cleanSubject.length >
+                180
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Subject is too long."
+
+                });
+
+            }
+
+
+            if (
+                cleanMessage.length >
+                5000
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Message must be 5000 characters or fewer."
+
+                });
+
+            }
+
+
+
+            /* =================================================
+               CATEGORY WHITELIST
+               ================================================= */
+
+            const allowedCategories = [
+
+                "general",
+                "feedback",
+                "bug"
+
+            ];
+
+
+            if (
+                !allowedCategories.includes(
+                    cleanCategory
+                )
+            ) {
+
+                return res.status(400).json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Invalid feedback category."
+
+                });
+
+            }
+
+
+
+            /*
+                Guests are allowed to send feedback.
+
+                If signed in, this connects the report
+                to their Altrium account.
+            */
+
+            const submittedBy =
+                req.session?.userId ||
+                null;
+
+
+
+            await client.query(
+                "BEGIN"
+            );
+
+
+
+            /* =================================================
+               SAVE FEEDBACK
+               ================================================= */
+
+            const feedbackResult =
+                await client.query(
+                    `
+                    INSERT INTO feedback_submissions (
+
+                        submitted_by,
+
+                        sender_name,
+                        sender_email,
+
+                        category,
+
+                        subject,
+                        message
+
+                    )
+
+                    VALUES (
+
+                        $1,
+                        $2,
+                        $3,
+                        $4,
+                        $5,
+                        $6
+
+                    )
+
+                    RETURNING
+
+                        id,
+                        category,
+                        subject,
+                        created_at
+                    `,
+                    [
+
+                        submittedBy,
+
+                        cleanName,
+                        cleanEmail,
+
+                        cleanCategory,
+
+                        cleanSubject,
+                        cleanMessage
+
+                    ]
+                );
+
+
+            const feedback =
+                feedbackResult.rows[0];
+
+
+
+            /* =================================================
+               SYSTEM ADMIN NOTIFICATION TEXT
+               ================================================= */
+
+            let notificationTitle =
+                "New contact message";
+
+
+            let notificationMessage =
+                `${cleanName} sent a new contact message.`;
+
+
+            if (
+                cleanCategory ===
+                "feedback"
+            ) {
+
+                notificationTitle =
+                    "New feedback received";
+
+
+                notificationMessage =
+                    `${cleanName} submitted new feedback for Altrium.`;
+
+            }
+
+
+            if (
+                cleanCategory ===
+                "bug"
+            ) {
+
+                notificationTitle =
+                    "New system issue reported";
+
+
+                notificationMessage =
+                    `${cleanName} reported a system issue that needs review.`;
+
+            }
+
+
+
+            /* =================================================
+               NOTIFY EVERY SYSTEM ADMIN
+               ================================================= */
+
+            await client.query(
+                `
+                INSERT INTO notifications (
+
+                    user_id,
+
+                    notification_type,
+
+                    title,
+                    message,
+
+                    action_url
+
+                )
+
+                SELECT
+
+                    id,
+
+                    'system_feedback',
+
+                    $1,
+                    $2,
+                    $3
+
+                FROM users
+
+                WHERE role =
+                    'system_admin'
+                `,
+                [
+
+                    notificationTitle,
+
+                    notificationMessage,
+
+                    `/admin/admin-dashboard.html?feedback=${feedback.id}#system-feedback`
+
+                ]
+            );
+
+
+
+            /* =================================================
+               COMPLETE TRANSACTION
+               ================================================= */
+
+            await client.query(
+                "COMMIT"
+            );
+
+
+            return res.status(201).json({
+
+                success:
+                    true,
+
+                message:
+                    "Thanks — your message has been sent to Altrium.",
+
+                feedback: {
+
+                    id:
+                        feedback.id,
+
+                    category:
+                        feedback.category,
+
+                    createdAt:
+                        feedback.created_at
+
+                }
+
+            });
+
+        }
+
+        catch (error) {
+
+            await client.query(
+                "ROLLBACK"
+            );
+
+
+            console.error(
+                "Contact feedback submission error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success:
+                    false,
+
+                message:
+                    "Unable to send your message right now."
+
+            });
+
+        }
+
+        finally {
+
+            client.release();
+
+        }
+
+    }
+);
+
 
 
 /* =========================================================

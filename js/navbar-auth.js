@@ -717,6 +717,16 @@ function renderNavbarNotifications() {
 
                     }
 
+                    else if (
+                        notificationType ===
+                        "system_feedback"
+                    ) {
+
+                        action.textContent =
+                            "View feedback";
+
+                    }
+
                     else {
 
                         action.textContent =
@@ -1125,7 +1135,1269 @@ window.refreshNavbarNotifications =
 
 
 /* =========================================================
+   ALTRIUM MOBILE NAVIGATION
+   ========================================================= */
+
+function createMobileNavigation() {
+
+    const navbar =
+        document.querySelector(
+            ".navbar"
+        );
+
+
+    if (
+        !navbar ||
+        document.getElementById(
+            "mobileMenuButton"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    const logo =
+        navbar.querySelector(
+            ".logo"
+        );
+
+
+    const desktopNavigation =
+        navbar.querySelector(
+            ".nav-links"
+        );
+
+
+    if (
+        !logo ||
+        !desktopNavigation
+    ) {
+
+        return;
+
+    }
+
+
+
+    /* =====================================================
+       MENU BUTTON
+       ===================================================== */
+
+    const menuButton =
+        document.createElement(
+            "button"
+        );
+
+
+    menuButton.type =
+        "button";
+
+
+    menuButton.id =
+        "mobileMenuButton";
+
+
+    menuButton.className =
+        "mobile-menu-button";
+
+
+    menuButton.setAttribute(
+        "aria-label",
+        "Open navigation"
+    );
+
+
+    menuButton.setAttribute(
+        "aria-expanded",
+        "false"
+    );
+
+
+    menuButton.innerHTML = `
+
+        <span></span>
+        <span></span>
+        <span></span>
+
+    `;
+
+
+
+    /*
+        Put it BEFORE the Altrium logo.
+    */
+
+    navbar.insertBefore(
+        menuButton,
+        logo
+    );
+
+
+
+    /* =====================================================
+       BACKDROP
+       ===================================================== */
+
+    const backdrop =
+        document.createElement(
+            "div"
+        );
+
+
+    backdrop.className =
+        "mobile-menu-backdrop";
+
+
+    backdrop.id =
+        "mobileMenuBackdrop";
+
+
+
+    /* =====================================================
+       DRAWER
+       ===================================================== */
+
+    const drawer =
+        document.createElement(
+            "aside"
+        );
+
+
+    drawer.className =
+        "mobile-menu-drawer";
+
+
+    drawer.id =
+        "mobileMenuDrawer";
+
+
+    drawer.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+
+
+    /* =====================================================
+       DRAWER HEADER
+       ===================================================== */
+
+    const drawerHeader =
+        document.createElement(
+            "div"
+        );
+
+
+    drawerHeader.className =
+        "mobile-menu-header";
+
+
+    drawerHeader.innerHTML = `
+
+        <span>
+            ALTRIUM
+        </span>
+
+        <strong>
+            Navigation
+        </strong>
+
+    `;
+
+
+    drawer.appendChild(
+        drawerHeader
+    );
+
+
+
+    /* =====================================================
+       NAVIGATION LINKS
+       ===================================================== */
+
+    const mobileNavigation =
+        document.createElement(
+            "nav"
+        );
+
+
+    mobileNavigation.className =
+        "mobile-menu-links";
+
+
+
+    desktopNavigation
+        .querySelectorAll(
+            ":scope > a"
+        )
+        .forEach(
+            (
+                link,
+                index
+            ) => {
+
+                const mobileLink =
+                    link.cloneNode(
+                        true
+                    );
+
+
+                /*
+                    Never duplicate HTML IDs.
+                */
+
+                mobileLink.removeAttribute(
+                    "id"
+                );
+
+
+                mobileLink.classList.add(
+                    "mobile-menu-link"
+                );
+
+
+                /*
+                    Number used only as a visual menu index.
+                */
+
+                const menuNumber =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                menuNumber.className =
+                    "mobile-menu-link-number";
+
+
+                menuNumber.textContent =
+                    String(
+                        index + 1
+                    )
+                    .padStart(
+                        2,
+                        "0"
+                    );
+
+
+                mobileLink.prepend(
+                    menuNumber
+                );
+
+
+
+                /*
+                    Dashboard visibility will mirror
+                    the real desktop Dashboard link
+                    after authentication completes.
+                */
+
+                if (
+                    link.id ===
+                    "dashboardLink"
+                ) {
+
+                    mobileLink.classList.add(
+                        "mobile-dashboard-link"
+                    );
+
+
+                    mobileLink.hidden =
+                        true;
+
+                }
+
+
+                mobileNavigation
+                    .appendChild(
+                        mobileLink
+                    );
+
+            }
+        );
+
+
+    drawer.appendChild(
+        mobileNavigation
+    );
+
+
+
+    /* =====================================================
+       BOTTOM DETAIL
+       ===================================================== */
+
+    const drawerFooter =
+        document.createElement(
+            "div"
+        );
+
+
+    drawerFooter.className =
+        "mobile-menu-footer";
+
+
+    drawerFooter.innerHTML = `
+
+        <span>
+            ALTRIUM CAREER PORTAL
+        </span>
+
+        <p>
+            Find opportunities. Build your profile.
+            Track your journey.
+        </p>
+
+    `;
+
+
+    drawer.appendChild(
+        drawerFooter
+    );
+
+
+
+    document.body.appendChild(
+        backdrop
+    );
+
+
+    document.body.appendChild(
+        drawer
+    );
+
+
+
+    /* =====================================================
+       OPEN MENU
+       ===================================================== */
+
+    function openMobileMenu() {
+
+        document.body
+            .classList
+            .add(
+                "mobile-menu-open"
+            );
+
+
+        menuButton.classList.add(
+            "open"
+        );
+
+
+        drawer.classList.add(
+            "open"
+        );
+
+
+        backdrop.classList.add(
+            "open"
+        );
+
+
+        menuButton.setAttribute(
+            "aria-expanded",
+            "true"
+        );
+
+
+        menuButton.setAttribute(
+            "aria-label",
+            "Close navigation"
+        );
+
+
+        drawer.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+    }
+
+
+
+    /* =====================================================
+       CLOSE MENU
+       ===================================================== */
+
+    function closeMobileMenu() {
+
+        document.body
+            .classList
+            .remove(
+                "mobile-menu-open"
+            );
+
+
+        menuButton.classList.remove(
+            "open"
+        );
+
+
+        drawer.classList.remove(
+            "open"
+        );
+
+
+        backdrop.classList.remove(
+            "open"
+        );
+
+
+        menuButton.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+
+
+        menuButton.setAttribute(
+            "aria-label",
+            "Open navigation"
+        );
+
+
+        drawer.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+    }
+
+
+
+    /* =====================================================
+       BUTTON
+       ===================================================== */
+
+    menuButton.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+
+            if (
+                drawer.classList.contains(
+                    "open"
+                )
+            ) {
+
+                closeMobileMenu();
+
+            }
+
+            else {
+
+                openMobileMenu();
+
+            }
+
+        }
+    );
+
+
+
+    /* =====================================================
+       BACKDROP
+       ===================================================== */
+
+    backdrop.addEventListener(
+        "click",
+        closeMobileMenu
+    );
+
+
+
+    /* =====================================================
+       CLOSE AFTER NAVIGATION
+       ===================================================== */
+
+    mobileNavigation
+        .querySelectorAll(
+            "a"
+        )
+        .forEach(
+            link => {
+
+                link.addEventListener(
+                    "click",
+                    closeMobileMenu
+                );
+
+            }
+        );
+
+
+
+    /* =====================================================
+       ESCAPE
+       ===================================================== */
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key ===
+                "Escape"
+
+                &&
+
+                drawer.classList.contains(
+                    "open"
+                )
+            ) {
+
+                closeMobileMenu();
+
+            }
+
+        }
+    );
+
+
+
+    /* =====================================================
+       DESKTOP RESIZE
+       ===================================================== */
+
+    window.addEventListener(
+        "resize",
+        () => {
+
+            if (
+                window.innerWidth >
+                700
+            ) {
+
+                closeMobileMenu();
+
+            }
+
+        }
+    );
+
+}
+
+
+
+/* =========================================================
+   SYNC MOBILE DASHBOARD ACCESS
+   ========================================================= */
+
+function syncMobileNavigationAccess() {
+
+    const desktopDashboard =
+        document.getElementById(
+            "dashboardLink"
+        );
+
+
+    const mobileDashboard =
+        document.querySelector(
+            ".mobile-dashboard-link"
+        );
+
+
+    if (
+        !desktopDashboard ||
+        !mobileDashboard
+    ) {
+
+        return;
+
+    }
+
+
+    const dashboardVisible =
+        window
+            .getComputedStyle(
+                desktopDashboard
+            )
+            .display !==
+        "none";
+
+
+    mobileDashboard.hidden =
+        !dashboardVisible;
+
+}
+
+
+/* =========================================================
+   MOBILE ADMIN DASHBOARD GUARD
+   ========================================================= */
+
+const MOBILE_DASHBOARD_BREAKPOINT =
+    700;
+
+
+function isMobileDashboardViewport() {
+
+    return window.matchMedia(
+        `(max-width: ${MOBILE_DASHBOARD_BREAKPOINT}px)`
+    ).matches;
+
+}
+
+
+
+/* =========================================================
+   CHECK IF LINK GOES TO ADMIN DASHBOARD
+   ========================================================= */
+
+function isAdminDashboardLink(
+    link
+) {
+
+    if (
+        !link
+    ) {
+
+        return false;
+
+    }
+
+
+    const href =
+        String(
+            link.getAttribute(
+                "href"
+            ) ||
+            ""
+        );
+
+
+    return /admin-dashboard\.html(?:[?#].*)?$/i
+        .test(
+            href
+        );
+
+}
+
+
+
+/* =========================================================
+   CHECK IF WE ARE CURRENTLY ON ADMIN DASHBOARD
+   ========================================================= */
+
+function isAdminDashboardPage() {
+
+    return /\/admin-dashboard\.html$/i
+        .test(
+            window.location.pathname
+        );
+
+}
+
+
+
+/* =========================================================
+   CLOSE MOBILE DRAWER
+   ========================================================= */
+
+function closeMobileNavigationForDashboardNotice() {
+
+    document.body.classList.remove(
+        "mobile-menu-open"
+    );
+
+
+    const menuButton =
+        document.getElementById(
+            "mobileMenuButton"
+        );
+
+
+    const drawer =
+        document.getElementById(
+            "mobileMenuDrawer"
+        );
+
+
+    const backdrop =
+        document.getElementById(
+            "mobileMenuBackdrop"
+        );
+
+
+    if (
+        menuButton
+    ) {
+
+        menuButton.classList.remove(
+            "open"
+        );
+
+
+        menuButton.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+
+    }
+
+
+    if (
+        drawer
+    ) {
+
+        drawer.classList.remove(
+            "open"
+        );
+
+
+        drawer.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+    }
+
+
+    if (
+        backdrop
+    ) {
+
+        backdrop.classList.remove(
+            "open"
+        );
+
+    }
+
+}
+
+
+
+/* =========================================================
+   CREATE DASHBOARD NOTICE
+   ========================================================= */
+
+function createMobileDashboardNotice() {
+
+    const existing =
+        document.getElementById(
+            "mobileDashboardNotice"
+        );
+
+
+    if (
+        existing
+    ) {
+
+        return existing;
+
+    }
+
+
+    const overlay =
+        document.createElement(
+            "div"
+        );
+
+
+    overlay.id =
+        "mobileDashboardNotice";
+
+
+    overlay.className =
+        "mobile-dashboard-notice";
+
+
+    overlay.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+
+    overlay.innerHTML = `
+
+        <div
+            class="mobile-dashboard-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mobileDashboardNoticeTitle"
+        >
+
+            <button
+                type="button"
+                class="mobile-dashboard-dialog-close"
+                id="mobileDashboardNoticeClose"
+                aria-label="Close"
+            >
+                <span></span>
+                <span></span>
+            </button>
+
+
+            <div class="mobile-dashboard-dialog-icon">
+
+                <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <rect
+                        x="3"
+                        y="4"
+                        width="18"
+                        height="12"
+                        rx="2"
+                    ></rect>
+
+                    <path
+                        d="M8 20h8"
+                    ></path>
+
+                    <path
+                        d="M12 16v4"
+                    ></path>
+                </svg>
+
+            </div>
+
+
+            <span class="mobile-dashboard-dialog-label">
+                ALTRIUM RECRUITMENT
+            </span>
+
+
+            <h2 id="mobileDashboardNoticeTitle">
+                Desktop experience required.
+            </h2>
+
+
+            <p>
+
+                The recruitment dashboard is designed
+                for desktop and laptop screens.
+
+            </p>
+
+
+            <p>
+
+                Open Altrium on a larger device to manage
+                vacancies, applicants, evaluations and
+                interview sessions.
+
+            </p>
+
+
+            <div class="mobile-dashboard-device-note">
+
+                <span class="mobile-dashboard-device-dot"></span>
+
+                Recommended for screens wider than 700px
+
+            </div>
+
+
+            <button
+                type="button"
+                class="mobile-dashboard-dialog-action"
+                id="mobileDashboardNoticeAction"
+            >
+                Got it
+            </button>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        overlay
+    );
+
+
+
+    const closeButton =
+        overlay.querySelector(
+            "#mobileDashboardNoticeClose"
+        );
+
+
+    const actionButton =
+        overlay.querySelector(
+            "#mobileDashboardNoticeAction"
+        );
+
+
+
+    closeButton.addEventListener(
+        "click",
+        () => {
+
+            hideMobileDashboardNotice();
+
+        }
+    );
+
+
+
+    actionButton.addEventListener(
+        "click",
+        () => {
+
+            const blocking =
+                overlay.dataset.blocking ===
+                "true";
+
+
+            if (
+                blocking
+            ) {
+
+                window.location.href =
+                    "/index.html";
+
+
+                return;
+
+            }
+
+
+            hideMobileDashboardNotice();
+
+        }
+    );
+
+
+
+    overlay.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target !==
+                    overlay
+
+                ||
+
+                overlay.dataset.blocking ===
+                    "true"
+            ) {
+
+                return;
+
+            }
+
+
+            hideMobileDashboardNotice();
+
+        }
+    );
+
+
+    return overlay;
+
+}
+
+
+
+/* =========================================================
+   SHOW NOTICE
+   ========================================================= */
+
+function showMobileDashboardNotice(
+    blocking = false
+) {
+
+    closeMobileNavigationForDashboardNotice();
+
+
+    const overlay =
+        createMobileDashboardNotice();
+
+
+    const closeButton =
+        overlay.querySelector(
+            "#mobileDashboardNoticeClose"
+        );
+
+
+    const actionButton =
+        overlay.querySelector(
+            "#mobileDashboardNoticeAction"
+        );
+
+
+    overlay.dataset.blocking =
+        blocking
+            ? "true"
+            : "false";
+
+
+    if (
+        blocking
+    ) {
+
+        closeButton.hidden =
+            true;
+
+
+        actionButton.textContent =
+            "Back to home";
+
+    }
+
+    else {
+
+        closeButton.hidden =
+            false;
+
+
+        actionButton.textContent =
+            "Got it";
+
+    }
+
+
+    overlay.classList.add(
+        "show"
+    );
+
+
+    overlay.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+
+    document.body.classList.add(
+        "mobile-dashboard-notice-open"
+    );
+
+}
+
+
+
+/* =========================================================
+   HIDE NOTICE
+   ========================================================= */
+
+function hideMobileDashboardNotice(
+    force = false
+) {
+
+    const overlay =
+        document.getElementById(
+            "mobileDashboardNotice"
+        );
+
+
+    if (
+        !overlay
+    ) {
+
+        return;
+
+    }
+
+
+    const blocking =
+        overlay.dataset.blocking ===
+        "true";
+
+
+    if (
+        blocking &&
+        !force
+    ) {
+
+        return;
+
+    }
+
+
+    overlay.classList.remove(
+        "show"
+    );
+
+
+    overlay.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+
+    document.body.classList.remove(
+        "mobile-dashboard-notice-open"
+    );
+
+}
+
+
+
+/* =========================================================
+   BLOCK DASHBOARD LINK CLICKS ON MOBILE
+   ========================================================= */
+
+document.addEventListener(
+    "click",
+    event => {
+
+        if (
+            !isMobileDashboardViewport()
+        ) {
+
+            return;
+
+        }
+
+
+        const link =
+            event.target.closest(
+                "a[href]"
+            );
+
+
+        if (
+            !isAdminDashboardLink(
+                link
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+
+        showMobileDashboardNotice(
+            false
+        );
+
+    },
+    true
+);
+
+
+
+/* =========================================================
+   ESCAPE KEY
+   ========================================================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key !==
+            "Escape"
+        ) {
+
+            return;
+
+        }
+
+
+        const overlay =
+            document.getElementById(
+                "mobileDashboardNotice"
+            );
+
+
+        if (
+            !overlay ||
+            !overlay.classList.contains(
+                "show"
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            overlay.dataset.blocking ===
+            "true"
+        ) {
+
+            return;
+
+        }
+
+
+        hideMobileDashboardNotice();
+
+    }
+);
+
+
+
+/* =========================================================
+   DIRECT DASHBOARD MOBILE ACCESS
+   ========================================================= */
+
+function enforceMobileDashboardPageGuard() {
+
+    if (
+        !isAdminDashboardPage()
+    ) {
+
+        return;
+
+    }
+
+
+    function checkDashboardViewport() {
+
+        if (
+            isMobileDashboardViewport()
+        ) {
+
+            showMobileDashboardNotice(
+                true
+            );
+
+        }
+
+        else {
+
+            hideMobileDashboardNotice(
+                true
+            );
+
+        }
+
+    }
+
+
+    checkDashboardViewport();
+
+
+    window.addEventListener(
+        "resize",
+        checkDashboardViewport
+    );
+
+}
+
+
+/* =========================================================
    START NAVBAR
    ========================================================= */
 
-loadNavbarUser();
+createMobileNavigation();
+
+
+enforceMobileDashboardPageGuard();
+
+
+loadNavbarUser()
+    .finally(
+        () => {
+
+            syncMobileNavigationAccess();
+
+        }
+    );

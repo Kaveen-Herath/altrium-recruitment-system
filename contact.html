@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <link
+        rel="icon"
+        type="image/x-icon"
+        href="favicon.ico?v=2"
+    >
+
+    <title>Contact Altrium</title>
+
+
+    <!-- SAME FONT -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- EXISTING GLOBAL STYLE -->
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+
+    <!-- CONTACT PAGE ONLY -->
+
+    <link
+        rel="stylesheet"
+        href="css/contact.css?v=1"
+    >
+
+</head>
+
+
+<body>
+
+
+<!-- BACKGROUND GLOWS -->
+
+<div class="glow glow-one"></div>
+<div class="glow glow-two"></div>
+
+
+
+<!-- =========================================================
+     EXISTING NAVBAR
+     ========================================================= -->
+
+<header class="navbar">
+
+
+    <a
+        href="index.html"
+        class="logo"
+    >
+
+        <img
+            src="assets/altrium_logoW.png"
+            alt="Altrium"
+            style="height: 30px; width: auto;"
+        >
+
+    </a>
+
+
+
+    <nav class="nav-links">
+
+        <a
+            href="index.html"
+            class="nav-home"
+        >
+            Home
+        </a>
+
+
+        <a
+            href="jobs.html"
+            class="nav-jobs"
+        >
+            Find jobs
+        </a>
+
+
+        <a
+            href="about.html"
+            class="nav-about"
+        >
+            About Altrium
+        </a>
+
+
+        <a
+            href="contact.html"
+            class="nav-contact active"
+        >
+            Contact Us
+        </a>
+
+
+        <a
+            href="admin/admin-dashboard.html"
+            id="dashboardLink"
+        >
+            Dashboard
+        </a>
+
+    </nav>
+
+
+
+    <div class="nav-right">
+
+
+        <a
+            href="login.html"
+            id="signInLink"
+            class="signin-btn"
+        >
+            Sign in
+        </a>
+
+
+
+        <a
+            href="profile.html"
+            id="profileLink"
+            class="profile-nav-icon"
+            aria-label="My profile"
+        ></a>
+
+
+
+        <!-- NOTIFICATIONS -->
+
+        <div
+            class="notification-nav"
+            id="notificationNav"
+        >
+
+            <button
+                type="button"
+                class="notification-trigger"
+                id="notificationTrigger"
+                aria-label="Notifications"
+            >
+
+                <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+
+                    <path
+                        d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"
+                    ></path>
+
+                    <path
+                        d="M10 21h4"
+                    ></path>
+
+                </svg>
+
+
+                <span
+                    class="notification-unread-dot"
+                    id="notificationUnreadDot"
+                ></span>
+
+            </button>
+
+
+
+            <div
+                class="notification-panel"
+                id="notificationPanel"
+            >
+
+                <div class="notification-panel-header">
+
+                    <div>
+
+                        <span>
+                            NOTIFICATIONS
+                        </span>
+
+                        <h3>
+                            Updates
+                        </h3>
+
+                    </div>
+
+
+                    <span
+                        class="notification-count"
+                        id="notificationCount"
+                    >
+                        0 unread
+                    </span>
+
+                </div>
+
+
+
+                <div
+                    class="notification-list"
+                    id="notificationList"
+                >
+
+                    <div class="notification-empty">
+
+                        <strong>
+                            You're all caught up.
+                        </strong>
+
+                        <p>
+                            New job and application updates
+                            will appear here.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+
+<!-- =========================================================
+     CONTACT PAGE
+     ========================================================= -->
+
+<main class="contact-page">
+
+
+    <!-- =====================================================
+         HERO
+         ===================================================== -->
+
+    <section class="contact-hero">
+
+
+        <div class="contact-hero-copy">
+
+
+            <span class="section-label">
+                CONTACT ALTRIUM
+            </span>
+
+
+            <h1>
+
+                Let's start a
+                <em>conversation.</em>
+
+            </h1>
+
+
+            <p>
+
+                Have a question about Altrium,
+                our opportunities or the recruitment process?
+                Send us a message and we'll point you
+                in the right direction.
+
+            </p>
+
+        </div>
+
+
+        <div class="contact-hero-status glass">
+
+            <div class="contact-status-dot"></div>
+
+
+            <div>
+
+                <span>
+                    AVAILABLE TO CONNECT
+                </span>
+
+                <strong>
+                    We're here to help.
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         CONTACT CARD
+         ===================================================== -->
+
+    <section class="contact-main glass">
+
+
+        <!-- =================================================
+             LEFT SIDE - DETAILS
+             ================================================= -->
+
+        <div class="contact-details">
+
+
+            <div class="contact-details-heading">
+
+                <span class="section-label">
+                    GET IN TOUCH
+                </span>
+
+
+                <h2>
+                    Contact details.
+                </h2>
+
+
+                <p>
+
+                    Reach Altrium directly or use the
+                    message form to send an enquiry.
+
+                </p>
+
+            </div>
+
+
+
+            <!-- EMAIL -->
+
+            <div class="contact-detail-item">
+
+                <div class="contact-detail-number">
+                    01
+                </div>
+
+
+                <div>
+
+                    <span>
+                        EMAIL
+                    </span>
+
+                    <a href="mailto:noreplyaltrium@gmail.com">
+                        noreplyaltrium@gmail.com
+                    </a>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- PHONE -->
+
+            <div class="contact-detail-item">
+
+                <div class="contact-detail-number">
+                    02
+                </div>
+
+
+                <div>
+
+                    <span>
+                        SRI LANKA
+                    </span>
+
+                    <a href="tel:+94767347799">
+                        +94 76 734 7799
+                    </a>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- OFFICES -->
+
+            <div class="contact-offices">
+
+
+                <div class="contact-office-card">
+
+                    <span>
+                        UNITED STATES
+                    </span>
+
+
+                    <strong>
+                        New York 🇺🇸
+                    </strong>
+
+
+                    <p>
+
+                        1250 Broadway,<br>
+
+                        36th Floor,<br>
+
+                        New York,<br>
+
+                        NY 10001
+
+                    </p>
+
+                </div>
+
+
+
+                <div class="contact-office-card">
+
+                    <span>
+                        SRI LANKA
+                    </span>
+
+
+                    <strong>
+                        Colombo 🇱🇰
+                    </strong>
+
+
+                    <p>
+
+                        Level 3, Onyx Tower,<br>
+
+                        Sri Jayawardenepura Mawatha,<br>
+
+                        Sri Jayawardenepura Kotte 10100
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <!-- =================================================
+                FEEDBACK & SYSTEM SUPPORT
+                ================================================= -->
+
+            <div class="contact-support">
+
+                <div class="contact-support-heading">
+
+                    <span class="section-label">
+                        FEEDBACK & SUPPORT
+                    </span>
+
+                    <h3>
+                        Help us improve Altrium.
+                    </h3>
+
+                    <p>
+                        Found something that could be better,
+                        or noticed an issue while using the system?
+                        Let us know.
+                    </p>
+
+                </div>
+
+
+                <div class="contact-support-options">
+
+
+                    <!-- FEEDBACK -->
+
+                    <button
+                        type="button"
+                        class="contact-support-option"
+                        data-contact-type="feedback"
+                    >
+
+                        <span class="contact-support-icon">
+
+                            <svg
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"
+                                ></path>
+
+                                <path
+                                    d="M8 9h8"
+                                ></path>
+
+                                <path
+                                    d="M8 13h5"
+                                ></path>
+
+                            </svg>
+
+                        </span>
+
+
+                        <span class="contact-support-copy">
+
+                            <strong>
+                                Share feedback
+                            </strong>
+
+                            <small>
+                                Suggestions, ideas or comments
+                                about your Altrium experience.
+                            </small>
+
+                        </span>
+
+                    </button>
+
+
+
+                    <!-- BUG / ERROR -->
+
+                    <button
+                        type="button"
+                        class="contact-support-option"
+                        data-contact-type="bug"
+                    >
+
+                        <span class="contact-support-icon">
+
+                            <svg
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    d="M8 6h8"
+                                ></path>
+
+                                <path
+                                    d="M9 3l1 3"
+                                ></path>
+
+                                <path
+                                    d="M15 3l-1 3"
+                                ></path>
+
+                                <rect
+                                    x="6"
+                                    y="6"
+                                    width="12"
+                                    height="14"
+                                    rx="6"
+                                ></rect>
+
+                                <path
+                                    d="M3 13h3"
+                                ></path>
+
+                                <path
+                                    d="M18 13h3"
+                                ></path>
+
+                                <path
+                                    d="M4 8l3 2"
+                                ></path>
+
+                                <path
+                                    d="M20 8l-3 2"
+                                ></path>
+
+                                <path
+                                    d="M4 18l3-2"
+                                ></path>
+
+                                <path
+                                    d="M20 18l-3-2"
+                                ></path>
+
+                            </svg>
+
+                        </span>
+
+
+                        <span class="contact-support-copy">
+
+                            <strong>
+                                Report a system issue
+                            </strong>
+
+                            <small>
+                                Bugs, errors or features that
+                                aren't working as expected.
+                            </small>
+
+                        </span>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             RIGHT SIDE - FORM
+             ================================================= -->
+
+        <div class="contact-form-side">
+
+
+            <div class="contact-form-heading">
+
+                <span class="section-label">
+                    SEND A MESSAGE
+                </span>
+
+
+                <h2>
+                    How can we help?
+                </h2>
+
+            </div>
+
+
+
+            <form
+                class="contact-form"
+                id="contactForm"
+            >
+
+
+                <!-- NAME -->
+
+                <div class="contact-field">
+
+                    <label for="contactName">
+                        Your name
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="contactName"
+                        name="name"
+                        placeholder="Enter your name"
+                        autocomplete="name"
+                        required
+                    >
+
+                </div>
+
+
+
+                <!-- EMAIL -->
+
+                <div class="contact-field">
+
+                    <label for="contactEmail">
+                        Email address
+                    </label>
+
+
+                    <input
+                        type="email"
+                        id="contactEmail"
+                        name="email"
+                        placeholder="name@example.com"
+                        autocomplete="email"
+                        required
+                    >
+
+                </div>
+
+
+
+                <!-- SUBJECT -->
+
+                <div class="contact-field">
+
+                    <label for="contactSubject">
+                        Subject
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="contactSubject"
+                        name="subject"
+                        placeholder="What is this about?"
+                        required
+                    >
+
+                </div>
+
+
+
+                <!-- MESSAGE -->
+
+                <div class="contact-field">
+
+                    <label for="contactMessage">
+                        Message
+                    </label>
+
+
+                    <textarea
+                        id="contactMessage"
+                        name="message"
+                        rows="6"
+                        placeholder="Tell us how we can help..."
+                        required
+                    ></textarea>
+
+                </div>
+
+
+
+                <button
+                    type="submit"
+                    class="contact-submit"
+                >
+                    Send message
+                </button>
+
+
+                <p
+                    class="contact-form-note"
+                    id="contactFormNote"
+                >
+
+                    For recruitment opportunities,
+                    you can also explore current vacancies
+                    through the Altrium Career Portal.
+
+                </p>
+
+            </form>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+
+<!-- =========================================================
+     FOOTER
+     ========================================================= -->
+
+<footer class="contact-footer">
+
+    <div>
+
+        <img
+            src="assets/altrium_logoW.png"
+            alt="Altrium"
+        >
+
+    </div>
+
+
+    <span>
+        © 2026 ALTRIUM · CAREER PORTAL
+    </span>
+
+</footer>
+
+
+
+<!-- =========================================================
+     EXISTING NAVBAR AUTH
+     ========================================================= -->
+
+<script src="js/navbar-auth.js?v=3"></script>
+
+
+
+<script>
+
+/* =========================================================
+   ALTRIUM CONTACT FORM
+   ========================================================= */
+
+const contactForm =
+    document.getElementById(
+        "contactForm"
+    );
+
+
+const contactFormNote =
+    document.getElementById(
+        "contactFormNote"
+    );
+
+
+const contactSubmit =
+    contactForm?.querySelector(
+        ".contact-submit"
+    );
+
+
+let selectedContactCategory =
+    "general";
+
+
+
+/* =========================================================
+   SUPPORT SHORTCUTS
+   ========================================================= */
+
+const contactSupportOptions =
+    document.querySelectorAll(
+        ".contact-support-option"
+    );
+
+
+const contactSubject =
+    document.getElementById(
+        "contactSubject"
+    );
+
+
+const contactMessage =
+    document.getElementById(
+        "contactMessage"
+    );
+
+
+
+contactSupportOptions.forEach(
+    option => {
+
+        option.addEventListener(
+            "click",
+            () => {
+
+                const type =
+                    option.dataset
+                        .contactType;
+
+
+
+                /* =============================================
+                   REMOVE OLD ACTIVE STATE
+                   ============================================= */
+
+                contactSupportOptions
+                    .forEach(
+                        item => {
+
+                            item.classList.remove(
+                                "active"
+                            );
+
+                        }
+                    );
+
+
+                option.classList.add(
+                    "active"
+                );
+
+
+
+                /* =============================================
+                   FEEDBACK
+                   ============================================= */
+
+                if (
+                    type ===
+                    "feedback"
+                ) {
+
+                    selectedContactCategory =
+                        "feedback";
+
+
+                    contactSubject.value =
+                        "Altrium Feedback";
+
+
+                    contactMessage.placeholder =
+                        "Tell us what you liked, what could be improved, or share an idea...";
+
+                }
+
+
+
+                /* =============================================
+                   BUG REPORT
+                   ============================================= */
+
+                if (
+                    type ===
+                    "bug"
+                ) {
+
+                    selectedContactCategory =
+                        "bug";
+
+
+                    contactSubject.value =
+                        "System Issue / Bug Report";
+
+
+                    contactMessage.placeholder =
+                        "Describe what went wrong, what page you were using, and what you expected to happen...";
+
+                }
+
+
+
+                contactMessage.scrollIntoView(
+                    {
+
+                        behavior:
+                            "smooth",
+
+                        block:
+                            "center"
+
+                    }
+                );
+
+
+                setTimeout(
+                    () => {
+
+                        contactMessage.focus();
+
+                    },
+                    400
+                );
+
+            }
+        );
+
+    }
+);
+
+
+
+/* =========================================================
+   SUBMIT CONTACT FORM
+   ========================================================= */
+
+contactForm?.addEventListener(
+    "submit",
+    async event => {
+
+        event.preventDefault();
+
+
+
+        const name =
+            document
+                .getElementById(
+                    "contactName"
+                )
+                .value
+                .trim();
+
+
+        const email =
+            document
+                .getElementById(
+                    "contactEmail"
+                )
+                .value
+                .trim();
+
+
+        const subject =
+            document
+                .getElementById(
+                    "contactSubject"
+                )
+                .value
+                .trim();
+
+
+        const message =
+            document
+                .getElementById(
+                    "contactMessage"
+                )
+                .value
+                .trim();
+
+
+
+        /* =================================================
+           FRONTEND VALIDATION
+           ================================================= */
+
+        if (
+            !name ||
+            !email ||
+            !subject ||
+            !message
+        ) {
+
+            contactFormNote.textContent =
+                "Please complete all fields before sending your message.";
+
+
+            contactFormNote.classList.remove(
+                "success"
+            );
+
+
+            contactFormNote.classList.add(
+                "error"
+            );
+
+
+            return;
+
+        }
+
+
+
+        /* =================================================
+           SUBMITTING STATE
+           ================================================= */
+
+        if (
+            contactSubmit
+        ) {
+
+            contactSubmit.disabled =
+                true;
+
+
+            contactSubmit.textContent =
+                "Sending...";
+
+        }
+
+
+        contactFormNote.classList.remove(
+            "error",
+            "success"
+        );
+
+
+        contactFormNote.textContent =
+            "Sending your message...";
+
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/contact/feedback",
+                    {
+
+                        method:
+                            "POST",
+
+                        credentials:
+                            "same-origin",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json"
+
+                        },
+
+                        body:
+                            JSON.stringify({
+
+                                name,
+
+                                email,
+
+                                category:
+                                    selectedContactCategory,
+
+                                subject,
+
+                                message
+
+                            })
+
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+
+                throw new Error(
+                    data.message ||
+                    "Unable to send message."
+                );
+
+            }
+
+
+
+            /* =================================================
+               SUCCESS
+               ================================================= */
+
+            contactFormNote.classList.remove(
+                "error"
+            );
+
+
+            contactFormNote.classList.add(
+                "success"
+            );
+
+
+            contactFormNote.textContent =
+                "Message sent successfully. Thank you for helping us improve Altrium.";
+
+
+
+            contactForm.reset();
+
+
+            selectedContactCategory =
+                "general";
+
+
+            contactMessage.placeholder =
+                "Tell us how we can help...";
+
+
+            contactSupportOptions
+                .forEach(
+                    option => {
+
+                        option.classList.remove(
+                            "active"
+                        );
+
+                    }
+                );
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Contact submission error:",
+                error
+            );
+
+
+            contactFormNote.classList.remove(
+                "success"
+            );
+
+
+            contactFormNote.classList.add(
+                "error"
+            );
+
+
+            contactFormNote.textContent =
+                error.message ||
+                "Unable to send your message right now.";
+
+        }
+
+        finally {
+
+            if (
+                contactSubmit
+            ) {
+
+                contactSubmit.disabled =
+                    false;
+
+
+                contactSubmit.textContent =
+                    "Send message";
+
+            }
+
+        }
+
+    }
+);
+
+</script>
+
+
+</body>
+
+</html>

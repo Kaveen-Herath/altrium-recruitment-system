@@ -398,15 +398,13 @@
             <button
                 type="button"
                 class="admin-nav-item system-panel-nav-item"
-                data-section="system-vacancies"
+                data-section="system-feedback"
             >
-
                 <span class="admin-nav-number">
                     08
                 </span>
 
-                Vacancy Oversight
-
+                Feedback & Issues
             </button>
 
 
@@ -2227,20 +2225,635 @@
         </section>
 
 
+        <!-- =====================================================
+            SYSTEM ADMIN - FEEDBACK & ISSUES
+            ===================================================== -->
+
         <section
             class="admin-section system-admin-section"
-            id="system-vacancies"
+            id="system-feedback"
         >
 
-            <div class="admin-placeholder">
+            <div class="admin-page-heading system-admin-page-heading">
 
-                <h2>
-                    Vacancy Oversight
-                </h2>
+                <span class="admin-section-label system-admin-label">
+                    FEEDBACK & ISSUES
+                </span>
+
+                <h1>
+                    Review system
+                    <em>feedback.</em>
+                </h1>
 
                 <p>
-                    System-wide vacancy oversight will be added here.
+                    Review contact messages, user feedback and
+                    reported system issues submitted through Altrium.
                 </p>
+
+            </div>
+
+
+            <!-- =================================================
+                FEEDBACK STATS
+                ================================================= -->
+
+            <div class="system-feedback-stats">
+
+                <article class="system-feedback-stat">
+
+                    <span>
+                        TOTAL
+                    </span>
+
+                    <strong id="systemFeedbackTotal">
+                        0
+                    </strong>
+
+                    <p>
+                        All submissions
+                    </p>
+
+                </article>
+
+
+                <article class="system-feedback-stat new">
+
+                    <span>
+                        NEW
+                    </span>
+
+                    <strong id="systemFeedbackNew">
+                        0
+                    </strong>
+
+                    <p>
+                        Awaiting review
+                    </p>
+
+                </article>
+
+
+                <article class="system-feedback-stat reviewing">
+
+                    <span>
+                        REVIEWING
+                    </span>
+
+                    <strong id="systemFeedbackReviewing">
+                        0
+                    </strong>
+
+                    <p>
+                        Currently being reviewed
+                    </p>
+
+                </article>
+
+
+                <article class="system-feedback-stat resolved">
+
+                    <span>
+                        RESOLVED
+                    </span>
+
+                    <strong id="systemFeedbackResolved">
+                        0
+                    </strong>
+
+                    <p>
+                        Completed reports
+                    </p>
+
+                </article>
+
+            </div>
+
+
+            <!-- =================================================
+                TOOLBAR
+                ================================================= -->
+
+            <div class="system-feedback-toolbar">
+
+
+                <!-- SEARCH -->
+
+                <div class="system-feedback-search">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <circle
+                            cx="11"
+                            cy="11"
+                            r="7"
+                        ></circle>
+
+                        <path
+                            d="m20 20-3.8-3.8"
+                        ></path>
+                    </svg>
+
+
+                    <input
+                        type="text"
+                        id="systemFeedbackSearch"
+                        placeholder="Search sender, email, subject or message..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+
+
+                <!-- CATEGORY FILTER -->
+
+                <div
+                    class="admin-custom-select system-feedback-filter"
+                    id="systemFeedbackCategoryDropdown"
+                >
+
+                    <button
+                        type="button"
+                        class="admin-custom-select-trigger"
+                        id="systemFeedbackCategoryTrigger"
+                    >
+
+                        <span id="systemFeedbackCategoryText">
+                            All types
+                        </span>
+
+                    </button>
+
+
+                    <div
+                        class="admin-custom-select-menu"
+                        id="systemFeedbackCategoryMenu"
+                    >
+
+                        <button
+                            type="button"
+                            data-value="all"
+                        >
+                            All types
+                        </button>
+
+                        <button
+                            type="button"
+                            data-value="general"
+                        >
+                            Contact messages
+                        </button>
+
+                        <button
+                            type="button"
+                            data-value="feedback"
+                        >
+                            Feedback
+                        </button>
+
+                        <button
+                            type="button"
+                            data-value="bug"
+                        >
+                            System issues
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- STATUS FILTER -->
+
+                <div
+                    class="admin-custom-select system-feedback-filter"
+                    id="systemFeedbackStatusDropdown"
+                >
+
+                    <button
+                        type="button"
+                        class="admin-custom-select-trigger"
+                        id="systemFeedbackStatusTrigger"
+                    >
+
+                        <span id="systemFeedbackStatusText">
+                            All statuses
+                        </span>
+
+                    </button>
+
+
+                    <div
+                        class="admin-custom-select-menu"
+                        id="systemFeedbackStatusMenu"
+                    >
+
+                        <button
+                            type="button"
+                            data-value="all"
+                        >
+                            All statuses
+                        </button>
+
+                        <button
+                            type="button"
+                            data-value="new"
+                        >
+                            New
+                        </button>
+
+                        <button
+                            type="button"
+                            data-value="reviewing"
+                        >
+                            Reviewing
+                        </button>
+
+                        <button
+                            type="button"
+                            data-value="resolved"
+                        >
+                            Resolved
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                LIST HEADING
+                ================================================= -->
+
+            <div class="system-feedback-list-heading">
+
+                <span>
+                    SUBMISSIONS
+                </span>
+
+                <strong id="systemFeedbackVisibleCount">
+                    0 submissions
+                </strong>
+
+            </div>
+
+
+            <!-- =================================================
+                FEEDBACK LIST
+                ================================================= -->
+
+            <div
+                class="system-feedback-list"
+                id="systemFeedbackList"
+            >
+
+                <div class="system-feedback-empty">
+
+                    <strong>
+                        Loading feedback...
+                    </strong>
+
+                    <p>
+                        Feedback and system issue reports will appear here.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <!-- =================================================
+                FEEDBACK PAGINATION
+                ================================================= -->
+
+            <div
+                class="system-feedback-pagination"
+                id="systemFeedbackPagination"
+            ></div>
+
+
+            <!-- =================================================
+                FEEDBACK DETAIL MODAL
+                ================================================= -->
+
+            <div
+                class="system-feedback-modal"
+                id="systemFeedbackModal"
+                aria-hidden="true"
+            >
+
+                <div
+                    class="system-feedback-modal-backdrop"
+                    id="systemFeedbackModalBackdrop"
+                ></div>
+
+
+                <div
+                    class="system-feedback-modal-dialog"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="systemFeedbackModalTitle"
+                >
+
+                    <div class="system-feedback-modal-header">
+
+                        <div>
+
+                            <span
+                                class="system-feedback-modal-category"
+                                id="systemFeedbackModalCategory"
+                            >
+                                FEEDBACK
+                            </span>
+
+                            <h2 id="systemFeedbackModalTitle">
+                                Feedback details
+                            </h2>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="system-feedback-modal-close"
+                            id="closeSystemFeedbackModal"
+                            aria-label="Close feedback details"
+                        >
+                            <span></span>
+                            <span></span>
+                        </button>
+
+                    </div>
+
+
+                    <div class="system-feedback-modal-body">
+
+
+                        <div class="system-feedback-detail-grid">
+
+                            <div class="system-feedback-detail-item">
+
+                                <span>
+                                    STATUS
+                                </span>
+
+                                <strong id="systemFeedbackModalStatus">
+                                    New
+                                </strong>
+
+                            </div>
+
+
+                            <div class="system-feedback-detail-item">
+
+                                <span>
+                                    SUBMITTED
+                                </span>
+
+                                <strong id="systemFeedbackModalDate">
+                                    —
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="system-feedback-detail-sender">
+
+                            <span>
+                                SUBMITTED BY
+                            </span>
+
+                            <strong id="systemFeedbackModalSender">
+                                —
+                            </strong>
+
+                            <a
+                                href="#"
+                                id="systemFeedbackModalEmail"
+                            >
+                                —
+                            </a>
+
+                        </div>
+
+
+
+                        <div
+                            class="system-feedback-account-note"
+                            id="systemFeedbackAccountNote"
+                            hidden
+                        >
+
+                            <span>
+                                ALTRIUM ACCOUNT
+                            </span>
+
+                            <strong id="systemFeedbackAccountName">
+                                —
+                            </strong>
+
+                        </div>
+
+
+
+                        <div class="system-feedback-message-block">
+
+                            <span>
+                                MESSAGE
+                            </span>
+
+                            <p id="systemFeedbackModalMessage">
+                                —
+                            </p>
+
+                        </div>
+
+                        <!-- =================================================
+                            SYSTEM ADMIN MANAGEMENT
+                            ================================================= -->
+
+                        <div class="system-feedback-management">
+
+                            <div class="system-feedback-management-heading">
+
+                                <span>
+                                    SYSTEM ADMIN MANAGEMENT
+                                </span>
+
+                                <h3>
+                                    Review this submission.
+                                </h3>
+
+                            </div>
+
+
+                            <!-- STATUS -->
+
+                            <div class="system-feedback-management-field">
+
+                                <label>
+                                    Status
+                                </label>
+
+
+                                <div
+                                    class="system-feedback-status-options"
+                                    id="systemFeedbackStatusOptions"
+                                >
+
+                                    <button
+                                        type="button"
+                                        class="system-feedback-status-option"
+                                        data-feedback-status="new"
+                                    >
+                                        <span class="feedback-status-dot new"></span>
+
+                                        New
+                                    </button>
+
+
+                                    <button
+                                        type="button"
+                                        class="system-feedback-status-option"
+                                        data-feedback-status="reviewing"
+                                    >
+                                        <span class="feedback-status-dot reviewing"></span>
+
+                                        Reviewing
+                                    </button>
+
+
+                                    <button
+                                        type="button"
+                                        class="system-feedback-status-option"
+                                        data-feedback-status="resolved"
+                                    >
+                                        <span class="feedback-status-dot resolved"></span>
+
+                                        Resolved
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- INTERNAL NOTE -->
+
+                            <div class="system-feedback-management-field">
+
+                                <label for="systemFeedbackInternalNote">
+                                    Internal note
+                                </label>
+
+
+                                <textarea
+                                    id="systemFeedbackInternalNote"
+                                    maxlength="2000"
+                                    rows="5"
+                                    placeholder="Add a note for other System Admins..."
+                                ></textarea>
+
+
+                                <div class="system-feedback-note-footer">
+
+                                    <span>
+                                        Visible only to System Admins
+                                    </span>
+
+                                    <span id="systemFeedbackNoteCount">
+                                        0 / 2000
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- REVIEW INFORMATION -->
+
+                            <div
+                                class="system-feedback-review-info"
+                                id="systemFeedbackReviewInfo"
+                                hidden
+                            >
+
+                                <div>
+
+                                    <span>
+                                        REVIEWED BY
+                                    </span>
+
+                                    <strong id="systemFeedbackReviewedBy">
+                                        —
+                                    </strong>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span>
+                                        REVIEW STARTED
+                                    </span>
+
+                                    <strong id="systemFeedbackReviewedAt">
+                                        —
+                                    </strong>
+
+                                </div>
+
+
+                                <div
+                                    id="systemFeedbackResolvedInfo"
+                                    hidden
+                                >
+
+                                    <span>
+                                        RESOLVED
+                                    </span>
+
+                                    <strong id="systemFeedbackResolvedAt">
+                                        —
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+
+    <!-- SAVE -->
+
+    <div class="system-feedback-management-actions">
+
+        <p
+            class="system-feedback-save-message"
+            id="systemFeedbackSaveMessage"
+        ></p>
+
+
+        <button
+            type="button"
+            class="system-feedback-save-button"
+            id="saveSystemFeedbackChanges"
+        >
+            Save changes
+        </button>
+
+    </div>
+
+</div>
+
+                    </div>
+
+                </div>
 
             </div>
 
@@ -5161,7 +5774,7 @@
 
 
 <script src="admin-dashboard.js?v=6"></script>
-<script src="../js/navbar-auth.js?v=1"></script>
+<script src="../js/navbar-auth.js?v=3"></script>
 
 </body>
 
