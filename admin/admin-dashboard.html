@@ -1791,30 +1791,6 @@
 
     </div>
 
-
-
-    <!-- =================================================
-         LIST HEADING
-         ================================================= -->
-
-    <div class="system-users-list-heading">
-
-        <div>
-
-            <span id="systemUsersListLabel">
-                TEAM MEMBERS
-            </span>
-
-            <strong id="systemUsersResultCount">
-                0 users
-            </strong>
-
-        </div>
-
-    </div>
-
-
-
     <!-- =================================================
          USER DIRECTORY
          ================================================= -->
@@ -3063,45 +3039,84 @@
                 </div>
 
             </div>
-
-
-
-            <!-- =================================================
-                LIST HEADING
-                ================================================= -->
-
-            <div class="system-audit-list-heading">
-
-                <span>
-                    ACTIVITY
-                </span>
-
-                <strong id="systemAuditVisibleCount">
-                    0 events
-                </strong>
-
-            </div>
-
-
+            
 
             <!-- =================================================
                 AUDIT LIST
                 ================================================= -->
 
-            <div
-                class="system-audit-list"
-                id="systemAuditList"
-            >
+            <div class="system-audit-table-section">
 
-                <div class="system-audit-empty">
+                <div class="system-audit-table-heading">
 
-                    <strong>
-                        Loading audit logs...
+                    <span>
+                        AUDIT EVENTS
+                    </span>
+
+                    <strong id="systemAuditVisibleCount">
+                        0 events
                     </strong>
 
-                    <p>
-                        Recorded System Admin activity will appear here.
-                    </p>
+                </div>
+
+
+                <div class="system-audit-table-scroll">
+
+                    <table class="system-audit-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th class="audit-col-time">
+                                    TIME
+                                </th>
+
+                                <th class="audit-col-action">
+                                    ACTION
+                                </th>
+
+                                <th class="audit-col-module">
+                                    MODULE
+                                </th>
+
+                                <th class="audit-col-actor">
+                                    PERFORMED BY
+                                </th>
+
+                                <th class="audit-col-target">
+                                    TARGET
+                                </th>
+
+                                <th class="audit-col-event">
+                                    EVENT
+                                </th>
+
+                                <th class="audit-col-details">
+                                    DETAILS
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="systemAuditList">
+
+                            <tr>
+
+                                <td
+                                    colspan="7"
+                                    class="system-audit-table-empty"
+                                >
+                                    Loading audit logs...
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
 
                 </div>
 

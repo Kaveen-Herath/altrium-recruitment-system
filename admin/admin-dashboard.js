@@ -3281,14 +3281,18 @@ function renderSystemAuditList(
         0;
 
 
+
+    /* =====================================================
+       RESULT COUNT
+       ===================================================== */
+
     if (
         count
     ) {
 
         count.textContent =
             `${total} ${
-                total ===
-                1
+                total === 1
                     ? "event"
                     : "events"
             }`;
@@ -3296,9 +3300,15 @@ function renderSystemAuditList(
     }
 
 
+
     list.innerHTML =
         "";
 
+
+
+    /* =====================================================
+       EMPTY STATE
+       ===================================================== */
 
     if (
         items.length ===
@@ -3307,18 +3317,16 @@ function renderSystemAuditList(
 
         list.innerHTML = `
 
-            <div class="system-audit-empty">
+            <tr>
 
-                <strong>
-                    No audit events found.
-                </strong>
+                <td
+                    colspan="7"
+                    class="system-audit-table-empty"
+                >
+                    No audit events match the current filters.
+                </td>
 
-                <p>
-                    Try changing the current search
-                    or filters.
-                </p>
-
-            </div>
+            </tr>
 
         `;
 
@@ -3329,98 +3337,197 @@ function renderSystemAuditList(
 
 
 
+    /* =====================================================
+       ROWS
+       ===================================================== */
+
     items.forEach(
         log => {
 
-            const card =
+            const row =
                 document.createElement(
-                    "article"
+                    "tr"
                 );
 
 
-            card.className =
-                "system-audit-card";
+            const target =
+                getSystemAuditTarget(
+                    log
+                );
 
 
-            card.innerHTML = `
+            const timestamp =
+                formatSystemAuditTableDate(
+                    log.createdAt
+                );
 
-                <div class="system-audit-card-main">
 
-                    <span class="system-audit-action-tag">
+            const moduleName =
+                getSystemAuditEntityLabel(
+                    log.entity?.type
+                );
+
+
+            const actionName =
+                getSystemAuditActionLabel(
+                    log.actionKey
+                );
+
+
+            row.innerHTML = `
+
+                <!-- TIME -->
+
+                <td>
+
+                    <div class="system-audit-time">
+
+                        <strong>
+                            ${escapeHTML(
+                                timestamp.date
+                            )}
+                        </strong>
+
+                        <br>
 
                         ${escapeHTML(
-                            getSystemAuditEntityLabel(
-                                log.entity?.type
-                            )
+                            timestamp.time
+                        )}
+
+                    </div>
+
+                </td>
+
+
+
+                <!-- ACTION -->
+
+                <td>
+
+                    <span class="system-audit-action-name">
+
+                        ${escapeHTML(
+                            actionName
                         )}
 
                     </span>
 
 
-                    <h3>
+                    <span class="system-audit-action-key">
 
                         ${escapeHTML(
-                            getSystemAuditActionLabel(
-                                log.actionKey
-                            )
+                            log.actionKey ||
+                            ""
                         )}
 
-                    </h3>
-
-
-                    <p>
-
-                        ${escapeHTML(
-                            log.description ||
-                            "System activity recorded."
-                        )}
-
-                    </p>
-
-                </div>
-
-
-
-                <div class="system-audit-card-actor">
-
-                    <span>
-                        PERFORMED BY
                     </span>
 
-                    <strong>
+                </td>
+
+
+
+                <!-- MODULE -->
+
+                <td>
+
+                    <span
+                        class="
+                            system-audit-module
+                            ${escapeHTML(
+                                log.entity?.type ||
+                                ""
+                            )}
+                        "
+                    >
+
+                        ${escapeHTML(
+                            moduleName
+                        )}
+
+                    </span>
+
+                </td>
+
+
+
+                <!-- PERFORMED BY -->
+
+                <td>
+
+                    <span class="system-audit-actor-name">
 
                         ${escapeHTML(
                             log.actor?.name ||
                             "System"
                         )}
 
-                    </strong>
+                    </span>
 
-                    <p>
+
+                    <span class="system-audit-actor-email">
 
                         ${escapeHTML(
                             log.actor?.email ||
-                            ""
-                        )}
-
-                    </p>
-
-                </div>
-
-
-
-                <div class="system-audit-card-right">
-
-                    <span>
-
-                        ${escapeHTML(
-                            formatSystemFeedbackDate(
-                                log.createdAt
-                            )
+                            "System process"
                         )}
 
                     </span>
 
+                </td>
+
+
+
+                <!-- TARGET -->
+
+                <td>
+
+                    <span class="system-audit-target">
+
+                        ${escapeHTML(
+                            target.name
+                        )}
+
+                    </span>
+
+
+                    <span class="system-audit-target-type">
+
+                        ${escapeHTML(
+                            target.type
+                        )}
+
+                    </span>
+
+                </td>
+
+
+
+                <!-- EVENT -->
+
+                <td>
+
+                    <div
+                        class="system-audit-event"
+                        title="${escapeHTML(
+                            log.description ||
+                            ""
+                        )}"
+                    >
+
+                        ${escapeHTML(
+                            log.description ||
+                            "System activity recorded."
+                        )}
+
+                    </div>
+
+                </td>
+
+
+
+                <!-- DETAILS -->
+
+                <td>
 
                     <button
                         type="button"
@@ -3432,18 +3539,23 @@ function renderSystemAuditList(
                         View details
                     </button>
 
-                </div>
+                </td>
 
             `;
 
 
             list.appendChild(
-                card
+                row
             );
 
         }
     );
 
+
+
+    /* =====================================================
+       VIEW DETAILS
+       ===================================================== */
 
     list
         .querySelectorAll(
@@ -3654,21 +3766,20 @@ async function loadSystemAuditLogs(
         "";
 
 
-    list.innerHTML = `
+        list.innerHTML = `
 
-        <div class="system-audit-empty">
+            <tr>
 
-            <strong>
-                Loading audit logs...
-            </strong>
+                <td
+                    colspan="7"
+                    class="system-audit-table-empty"
+                >
+                    Loading audit logs...
+                </td>
 
-            <p>
-                Retrieving recorded system activity.
-            </p>
+            </tr>
 
-        </div>
-
-    `;
+        `;
 
 
     try {
@@ -3779,20 +3890,19 @@ async function loadSystemAuditLogs(
 
         list.innerHTML = `
 
-            <div class="system-audit-empty">
+            <tr>
 
-                <strong>
-                    Unable to load audit logs.
-                </strong>
-
-                <p>
+                <td
+                    colspan="7"
+                    class="system-audit-table-empty"
+                >
                     ${escapeHTML(
                         error.message ||
-                        "Please try again."
+                        "Unable to load audit logs."
                     )}
-                </p>
+                </td>
 
-            </div>
+            </tr>
 
         `;
 
@@ -3800,6 +3910,162 @@ async function loadSystemAuditLogs(
 
 }
 
+
+/* =========================================================
+   AUDIT TARGET LABEL
+   ========================================================= */
+
+function getSystemAuditTarget(
+    log
+) {
+
+    /*
+        If the audit event points at an actual
+        user, display their name.
+    */
+
+    if (
+        log.targetUser
+    ) {
+
+        return {
+
+            name:
+                log.targetUser.name ||
+                log.targetUser.email ||
+                `User #${log.targetUser.id}`,
+
+            type:
+                "User"
+
+        };
+
+    }
+
+
+    /*
+        Otherwise use the affected entity.
+    */
+
+    const entityType =
+        getSystemAuditEntityLabel(
+            log.entity?.type
+        );
+
+
+    const entityId =
+        log.entity?.id;
+
+
+    return {
+
+        name:
+            entityId
+
+                ? `${entityType} #${entityId}`
+
+                : entityType,
+
+        type:
+            entityType
+
+    };
+
+}
+
+/* =========================================================
+   AUDIT TABLE DATE
+   ========================================================= */
+
+function formatSystemAuditTableDate(
+    value
+) {
+
+    if (
+        !value
+    ) {
+
+        return "—";
+
+    }
+
+
+    const date =
+        new Date(
+            value
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "—";
+
+    }
+
+
+    const datePart =
+        new Intl.DateTimeFormat(
+            "en-GB",
+            {
+
+                day:
+                    "2-digit",
+
+                month:
+                    "short",
+
+                year:
+                    "numeric",
+
+                timeZone:
+                    "Asia/Colombo"
+
+            }
+        )
+        .format(
+            date
+        );
+
+
+    const timePart =
+        new Intl.DateTimeFormat(
+            "en-US",
+            {
+
+                hour:
+                    "2-digit",
+
+                minute:
+                    "2-digit",
+
+                hour12:
+                    false,
+
+                timeZone:
+                    "Asia/Colombo"
+
+            }
+        )
+        .format(
+            date
+        );
+
+
+    return {
+
+        date:
+            datePart,
+
+        time:
+            timePart
+
+    };
+
+}
 
 
 /* =========================================================
