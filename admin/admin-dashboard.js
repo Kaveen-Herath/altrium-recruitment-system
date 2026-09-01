@@ -2769,6 +2769,1458 @@ document
     );
 
 
+
+/* =========================================================
+   SYSTEM ADMIN - AUDIT LOGS
+   ========================================================= */
+
+let systemAuditLogs =
+    [];
+
+
+let systemAuditEntity =
+    "all";
+
+
+let systemAuditAction =
+    "all";
+
+
+let systemAuditPage =
+    1;
+
+
+let systemAuditTotalPages =
+    1;
+
+
+let systemAuditSearchTimer =
+    null;
+
+
+
+/* =========================================================
+   DISPLAY HELPERS
+   ========================================================= */
+
+function getSystemAuditEntityLabel(
+    value
+) {
+
+    const labels = {
+
+        feedback:
+            "Feedback",
+
+        user:
+            "User"
+
+    };
+
+
+    return labels[value]
+        ||
+        value
+        ||
+        "System";
+
+}
+
+
+
+function getSystemAuditActionLabel(
+    value
+) {
+
+    const labels = {
+
+        "feedback.updated":
+            "Feedback updated",
+
+        "user.team_member.created":
+            "Team member created",
+
+        "user.access_role.changed":
+            "Access role changed"
+
+    };
+
+
+    return labels[value]
+        ||
+        String(value || "")
+            .replaceAll(
+                ".",
+                " "
+            );
+
+}
+
+
+
+/* =========================================================
+   SAFE VALUE DISPLAY
+   ========================================================= */
+
+function formatSystemAuditValue(
+    value
+) {
+
+    if (
+        value ===
+        null
+
+        ||
+
+        value ===
+        undefined
+
+        ||
+
+        value ===
+        ""
+    ) {
+
+        return "—";
+
+    }
+
+
+    if (
+        typeof value ===
+        "object"
+    ) {
+
+        return JSON.stringify(
+            value
+        );
+
+    }
+
+
+    return String(
+        value
+    );
+
+}
+
+
+
+/* =========================================================
+   RENDER BEFORE / AFTER DATA
+   ========================================================= */
+
+function renderSystemAuditObject(
+    target,
+    object,
+    emptyMessage
+) {
+
+    if (
+        !target
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        !object
+
+        ||
+
+        typeof object !==
+        "object"
+
+        ||
+
+        Object.keys(
+            object
+        ).length ===
+        0
+    ) {
+
+        target.textContent =
+            emptyMessage;
+
+        return;
+
+    }
+
+
+    target.innerHTML =
+        "";
+
+
+    Object.entries(
+        object
+    )
+    .forEach(
+        ([key, value]) => {
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+
+            row.className =
+                "system-audit-value-row";
+
+
+            row.innerHTML = `
+
+                <span>
+                    ${escapeHTML(
+                        key
+                    )}
+                </span>
+
+                <strong>
+                    ${escapeHTML(
+                        formatSystemAuditValue(
+                            value
+                        )
+                    )}
+                </strong>
+
+            `;
+
+
+            target.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+
+/* =========================================================
+   UPDATE STATS
+   ========================================================= */
+
+function updateSystemAuditStats(
+    stats
+) {
+
+    const total =
+        document.getElementById(
+            "systemAuditTotal"
+        );
+
+
+    const today =
+        document.getElementById(
+            "systemAuditToday"
+        );
+
+
+    const actors =
+        document.getElementById(
+            "systemAuditActors"
+        );
+
+
+    if (
+        total
+    ) {
+
+        total.textContent =
+            Number(
+                stats?.totalEvents
+            ) ||
+            0;
+
+    }
+
+
+    if (
+        today
+    ) {
+
+        today.textContent =
+            Number(
+                stats?.todayEvents
+            ) ||
+            0;
+
+    }
+
+
+    if (
+        actors
+    ) {
+
+        actors.textContent =
+            Number(
+                stats?.activeActors
+            ) ||
+            0;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   RENDER FILTER OPTIONS
+   ========================================================= */
+
+function renderSystemAuditFilters(
+    filters
+) {
+
+    const entityMenu =
+        document.getElementById(
+            "systemAuditEntityMenu"
+        );
+
+
+    const actionMenu =
+        document.getElementById(
+            "systemAuditActionMenu"
+        );
+
+
+    if (
+        entityMenu
+    ) {
+
+        entityMenu.innerHTML = `
+
+            <button
+                type="button"
+                data-value="all"
+                class="${
+                    systemAuditEntity ===
+                    "all"
+                        ? "selected"
+                        : ""
+                }"
+            >
+                All modules
+            </button>
+
+        `;
+
+
+        (
+            filters?.entityOptions ||
+            []
+        )
+        .forEach(
+            entity => {
+
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                button.type =
+                    "button";
+
+
+                button.dataset.value =
+                    entity;
+
+
+                button.textContent =
+                    getSystemAuditEntityLabel(
+                        entity
+                    );
+
+
+                if (
+                    entity ===
+                    systemAuditEntity
+                ) {
+
+                    button.classList.add(
+                        "selected"
+                    );
+
+                }
+
+
+                entityMenu.appendChild(
+                    button
+                );
+
+            }
+        );
+
+    }
+
+
+
+    if (
+        actionMenu
+    ) {
+
+        actionMenu.innerHTML = `
+
+            <button
+                type="button"
+                data-value="all"
+                class="${
+                    systemAuditAction ===
+                    "all"
+                        ? "selected"
+                        : ""
+                }"
+            >
+                All actions
+            </button>
+
+        `;
+
+
+        (
+            filters?.actionOptions ||
+            []
+        )
+        .forEach(
+            action => {
+
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                button.type =
+                    "button";
+
+
+                button.dataset.value =
+                    action;
+
+
+                button.textContent =
+                    getSystemAuditActionLabel(
+                        action
+                    );
+
+
+                if (
+                    action ===
+                    systemAuditAction
+                ) {
+
+                    button.classList.add(
+                        "selected"
+                    );
+
+                }
+
+
+                actionMenu.appendChild(
+                    button
+                );
+
+            }
+        );
+
+    }
+
+
+    bindSystemAuditFilterOptions();
+
+}
+
+
+
+/* =========================================================
+   RENDER AUDIT LIST
+   ========================================================= */
+
+function renderSystemAuditList(
+    logs,
+    pagination
+) {
+
+    const list =
+        document.getElementById(
+            "systemAuditList"
+        );
+
+
+    const count =
+        document.getElementById(
+            "systemAuditVisibleCount"
+        );
+
+
+    if (
+        !list
+    ) {
+
+        return;
+
+    }
+
+
+    const items =
+        Array.isArray(
+            logs
+        )
+            ? logs
+            : [];
+
+
+    const total =
+        Number(
+            pagination?.total
+        ) ||
+        0;
+
+
+    if (
+        count
+    ) {
+
+        count.textContent =
+            `${total} ${
+                total ===
+                1
+                    ? "event"
+                    : "events"
+            }`;
+
+    }
+
+
+    list.innerHTML =
+        "";
+
+
+    if (
+        items.length ===
+        0
+    ) {
+
+        list.innerHTML = `
+
+            <div class="system-audit-empty">
+
+                <strong>
+                    No audit events found.
+                </strong>
+
+                <p>
+                    Try changing the current search
+                    or filters.
+                </p>
+
+            </div>
+
+        `;
+
+
+        return;
+
+    }
+
+
+
+    items.forEach(
+        log => {
+
+            const card =
+                document.createElement(
+                    "article"
+                );
+
+
+            card.className =
+                "system-audit-card";
+
+
+            card.innerHTML = `
+
+                <div class="system-audit-card-main">
+
+                    <span class="system-audit-action-tag">
+
+                        ${escapeHTML(
+                            getSystemAuditEntityLabel(
+                                log.entity?.type
+                            )
+                        )}
+
+                    </span>
+
+
+                    <h3>
+
+                        ${escapeHTML(
+                            getSystemAuditActionLabel(
+                                log.actionKey
+                            )
+                        )}
+
+                    </h3>
+
+
+                    <p>
+
+                        ${escapeHTML(
+                            log.description ||
+                            "System activity recorded."
+                        )}
+
+                    </p>
+
+                </div>
+
+
+
+                <div class="system-audit-card-actor">
+
+                    <span>
+                        PERFORMED BY
+                    </span>
+
+                    <strong>
+
+                        ${escapeHTML(
+                            log.actor?.name ||
+                            "System"
+                        )}
+
+                    </strong>
+
+                    <p>
+
+                        ${escapeHTML(
+                            log.actor?.email ||
+                            ""
+                        )}
+
+                    </p>
+
+                </div>
+
+
+
+                <div class="system-audit-card-right">
+
+                    <span>
+
+                        ${escapeHTML(
+                            formatSystemFeedbackDate(
+                                log.createdAt
+                            )
+                        )}
+
+                    </span>
+
+
+                    <button
+                        type="button"
+                        class="system-audit-view-button"
+                        data-audit-id="${escapeHTML(
+                            log.id
+                        )}"
+                    >
+                        View details
+                    </button>
+
+                </div>
+
+            `;
+
+
+            list.appendChild(
+                card
+            );
+
+        }
+    );
+
+
+    list
+        .querySelectorAll(
+            ".system-audit-view-button"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        openSystemAuditDetail(
+                            button.dataset
+                                .auditId
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+
+/* =========================================================
+   PAGINATION
+   ========================================================= */
+
+function renderSystemAuditPagination(
+    pagination
+) {
+
+    const container =
+        document.getElementById(
+            "systemAuditPagination"
+        );
+
+
+    if (
+        !container
+    ) {
+
+        return;
+
+    }
+
+
+    const page =
+        Number(
+            pagination?.page
+        ) ||
+        1;
+
+
+    const totalPages =
+        Math.max(
+            1,
+            Number(
+                pagination?.totalPages
+            ) ||
+            1
+        );
+
+
+    systemAuditPage =
+        page;
+
+
+    systemAuditTotalPages =
+        totalPages;
+
+
+    if (
+        totalPages <=
+        1
+    ) {
+
+        container.innerHTML =
+            "";
+
+        return;
+
+    }
+
+
+    container.innerHTML = `
+
+        <button
+            type="button"
+            id="previousSystemAuditPage"
+            ${
+                page <=
+                1
+                    ? "disabled"
+                    : ""
+            }
+        >
+            Previous
+        </button>
+
+
+        <span>
+            Page ${page} of ${totalPages}
+        </span>
+
+
+        <button
+            type="button"
+            id="nextSystemAuditPage"
+            ${
+                page >=
+                totalPages
+                    ? "disabled"
+                    : ""
+            }
+        >
+            Next
+        </button>
+
+    `;
+
+
+    document
+        .getElementById(
+            "previousSystemAuditPage"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                if (
+                    systemAuditPage >
+                    1
+                ) {
+
+                    loadSystemAuditLogs(
+                        systemAuditPage -
+                        1
+                    );
+
+                }
+
+            }
+        );
+
+
+    document
+        .getElementById(
+            "nextSystemAuditPage"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                if (
+                    systemAuditPage <
+                    systemAuditTotalPages
+                ) {
+
+                    loadSystemAuditLogs(
+                        systemAuditPage +
+                        1
+                    );
+
+                }
+
+            }
+        );
+
+}
+
+
+
+/* =========================================================
+   LOAD AUDIT LOGS
+   ========================================================= */
+
+async function loadSystemAuditLogs(
+    page = 1
+) {
+
+    const list =
+        document.getElementById(
+            "systemAuditList"
+        );
+
+
+    if (
+        !list
+    ) {
+
+        return;
+
+    }
+
+
+    const search =
+        document
+            .getElementById(
+                "systemAuditSearch"
+            )
+            ?.value
+            .trim()
+        ||
+        "";
+
+
+    list.innerHTML = `
+
+        <div class="system-audit-empty">
+
+            <strong>
+                Loading audit logs...
+            </strong>
+
+            <p>
+                Retrieving recorded system activity.
+            </p>
+
+        </div>
+
+    `;
+
+
+    try {
+
+        const parameters =
+            new URLSearchParams();
+
+
+        parameters.set(
+            "page",
+            String(page)
+        );
+
+
+        parameters.set(
+            "limit",
+            "25"
+        );
+
+
+        parameters.set(
+            "entity",
+            systemAuditEntity
+        );
+
+
+        parameters.set(
+            "action",
+            systemAuditAction
+        );
+
+
+        if (
+            search
+        ) {
+
+            parameters.set(
+                "search",
+                search
+            );
+
+        }
+
+
+        const response =
+            await fetch(
+                `/api/system/audit-logs?${parameters.toString()}`,
+                {
+
+                    credentials:
+                        "same-origin"
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load audit logs."
+            );
+
+        }
+
+
+        systemAuditLogs =
+            data.logs ||
+            [];
+
+
+        updateSystemAuditStats(
+            data.stats
+        );
+
+
+        renderSystemAuditFilters(
+            data.filters
+        );
+
+
+        renderSystemAuditList(
+            systemAuditLogs,
+            data.pagination
+        );
+
+
+        renderSystemAuditPagination(
+            data.pagination
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Load audit logs error:",
+            error
+        );
+
+
+        list.innerHTML = `
+
+            <div class="system-audit-empty">
+
+                <strong>
+                    Unable to load audit logs.
+                </strong>
+
+                <p>
+                    ${escapeHTML(
+                        error.message ||
+                        "Please try again."
+                    )}
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   FILTER BUTTON BINDING
+   ========================================================= */
+
+function bindSystemAuditFilterOptions() {
+
+    document
+        .querySelectorAll(
+            "#systemAuditEntityMenu button"
+        )
+        .forEach(
+            option => {
+
+                option.onclick =
+                    () => {
+
+                        systemAuditEntity =
+                            option.dataset.value ||
+                            "all";
+
+
+                        document
+                            .getElementById(
+                                "systemAuditEntityText"
+                            )
+                            .textContent =
+                                option.textContent
+                                    .trim();
+
+
+                        document
+                            .getElementById(
+                                "systemAuditEntityDropdown"
+                            )
+                            ?.classList
+                            .remove(
+                                "open"
+                            );
+
+
+                        loadSystemAuditLogs(
+                            1
+                        );
+
+                    };
+
+            }
+        );
+
+
+    document
+        .querySelectorAll(
+            "#systemAuditActionMenu button"
+        )
+        .forEach(
+            option => {
+
+                option.onclick =
+                    () => {
+
+                        systemAuditAction =
+                            option.dataset.value ||
+                            "all";
+
+
+                        document
+                            .getElementById(
+                                "systemAuditActionText"
+                            )
+                            .textContent =
+                                option.textContent
+                                    .trim();
+
+
+                        document
+                            .getElementById(
+                                "systemAuditActionDropdown"
+                            )
+                            ?.classList
+                            .remove(
+                                "open"
+                            );
+
+
+                        loadSystemAuditLogs(
+                            1
+                        );
+
+                    };
+
+            }
+        );
+
+}
+
+
+
+/* =========================================================
+   DROPDOWN TRIGGERS
+   ========================================================= */
+
+document
+    .getElementById(
+        "systemAuditEntityTrigger"
+    )
+    ?.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+
+            const dropdown =
+                document.getElementById(
+                    "systemAuditEntityDropdown"
+                );
+
+
+            closeAllAdminCustomSelects(
+                dropdown
+            );
+
+
+            dropdown
+                ?.classList
+                .toggle(
+                    "open"
+                );
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "systemAuditActionTrigger"
+    )
+    ?.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+
+            const dropdown =
+                document.getElementById(
+                    "systemAuditActionDropdown"
+                );
+
+
+            closeAllAdminCustomSelects(
+                dropdown
+            );
+
+
+            dropdown
+                ?.classList
+                .toggle(
+                    "open"
+                );
+
+        }
+    );
+
+
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+document
+    .getElementById(
+        "systemAuditSearch"
+    )
+    ?.addEventListener(
+        "input",
+        () => {
+
+            clearTimeout(
+                systemAuditSearchTimer
+            );
+
+
+            systemAuditSearchTimer =
+                setTimeout(
+                    () => {
+
+                        loadSystemAuditLogs(
+                            1
+                        );
+
+                    },
+                    350
+                );
+
+        }
+    );
+
+
+
+/* =========================================================
+   OPEN DETAIL
+   ========================================================= */
+
+function openSystemAuditDetail(
+    auditId
+) {
+
+    const log =
+        systemAuditLogs.find(
+            item =>
+                String(item.id) ===
+                String(auditId)
+        );
+
+
+    if (
+        !log
+    ) {
+
+        return;
+
+    }
+
+
+    document
+        .getElementById(
+            "systemAuditModalAction"
+        )
+        .textContent =
+            getSystemAuditEntityLabel(
+                log.entity?.type
+            )
+            .toUpperCase();
+
+
+    document
+        .getElementById(
+            "systemAuditModalTitle"
+        )
+        .textContent =
+            getSystemAuditActionLabel(
+                log.actionKey
+            );
+
+
+    document
+        .getElementById(
+            "systemAuditModalActor"
+        )
+        .textContent =
+            log.actor?.name ||
+            "System";
+
+
+    document
+        .getElementById(
+            "systemAuditModalActorEmail"
+        )
+        .textContent =
+            log.actor?.email ||
+            "No account information";
+
+
+    document
+        .getElementById(
+            "systemAuditModalDate"
+        )
+        .textContent =
+            formatSystemFeedbackDate(
+                log.createdAt
+            );
+
+
+    document
+        .getElementById(
+            "systemAuditModalEntity"
+        )
+        .textContent =
+            `${
+                getSystemAuditEntityLabel(
+                    log.entity?.type
+                )
+            } #${
+                log.entity?.id ||
+                "—"
+            }`;
+
+
+    document
+        .getElementById(
+            "systemAuditModalDescription"
+        )
+        .textContent =
+            log.description ||
+            "System activity recorded.";
+
+
+    document
+        .getElementById(
+            "systemAuditModalIp"
+        )
+        .textContent =
+            log.ipAddress ||
+            "Unavailable";
+
+
+    document
+        .getElementById(
+            "systemAuditModalClient"
+        )
+        .textContent =
+            log.userAgent ||
+            "Unavailable";
+
+
+    renderSystemAuditObject(
+
+        document.getElementById(
+            "systemAuditModalBefore"
+        ),
+
+        log.before,
+
+        "No previous values recorded."
+
+    );
+
+
+    renderSystemAuditObject(
+
+        document.getElementById(
+            "systemAuditModalAfter"
+        ),
+
+        log.after,
+
+        "No updated values recorded."
+
+    );
+
+
+    const modal =
+        document.getElementById(
+            "systemAuditModal"
+        );
+
+
+    modal.classList.add(
+        "open"
+    );
+
+
+    modal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+
+    document.body.style.overflow =
+        "hidden";
+
+}
+
+
+
+/* =========================================================
+   CLOSE DETAIL
+   ========================================================= */
+
+function closeSystemAuditDetail() {
+
+    const modal =
+        document.getElementById(
+            "systemAuditModal"
+        );
+
+
+    modal
+        ?.classList
+        .remove(
+            "open"
+        );
+
+
+    modal?.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+
+    document.body.style.overflow =
+        "";
+
+}
+
+
+document
+    .getElementById(
+        "closeSystemAuditModal"
+    )
+    ?.addEventListener(
+        "click",
+        closeSystemAuditDetail
+    );
+
+
+document
+    .getElementById(
+        "systemAuditModalBackdrop"
+    )
+    ?.addEventListener(
+        "click",
+        closeSystemAuditDetail
+    );
+
+
+
+
 /* =========================================================
    ADMIN NAVIGATION
    ========================================================= */
@@ -2874,6 +4326,17 @@ adminNavItems.forEach(
                 ) {
 
                     loadSystemFeedback(
+                        1
+                    );
+
+                }
+
+                if (
+                    target ===
+                    "system-audit"
+                ) {
+
+                    loadSystemAuditLogs(
                         1
                     );
 

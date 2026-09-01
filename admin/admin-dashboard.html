@@ -2860,20 +2860,453 @@
         </section>
 
 
+        <!-- =====================================================
+            SYSTEM ADMIN - AUDIT LOGS
+            ===================================================== -->
+
         <section
             class="admin-section system-admin-section"
             id="system-audit"
         >
 
-            <div class="admin-placeholder">
+            <div class="admin-page-heading system-admin-page-heading">
 
-                <h2>
-                    Audit Logs
-                </h2>
+                <span class="admin-section-label system-admin-label">
+                    AUDIT LOGS
+                </span>
+
+                <h1>
+                    System activity,
+                    <em>recorded.</em>
+                </h1>
 
                 <p>
-                    Altrium audit history will be displayed here.
+                    Review important administrative actions performed
+                    across the Altrium recruitment system.
                 </p>
+
+            </div>
+
+
+            <!-- =================================================
+                AUDIT STATS
+                ================================================= -->
+
+            <div class="system-audit-stats">
+
+                <article class="system-audit-stat">
+
+                    <span>
+                        TOTAL EVENTS
+                    </span>
+
+                    <strong id="systemAuditTotal">
+                        0
+                    </strong>
+
+                    <p>
+                        Recorded activity
+                    </p>
+
+                </article>
+
+
+                <article class="system-audit-stat">
+
+                    <span>
+                        TODAY
+                    </span>
+
+                    <strong id="systemAuditToday">
+                        0
+                    </strong>
+
+                    <p>
+                        Events today
+                    </p>
+
+                </article>
+
+
+                <article class="system-audit-stat">
+
+                    <span>
+                        ACTIVE ACTORS
+                    </span>
+
+                    <strong id="systemAuditActors">
+                        0
+                    </strong>
+
+                    <p>
+                        Users in audit history
+                    </p>
+
+                </article>
+
+            </div>
+
+
+
+            <!-- =================================================
+                TOOLBAR
+                ================================================= -->
+
+            <div class="system-audit-toolbar">
+
+
+                <!-- SEARCH -->
+
+                <div class="system-audit-search">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <circle
+                            cx="11"
+                            cy="11"
+                            r="7"
+                        ></circle>
+
+                        <path
+                            d="m20 20-3.8-3.8"
+                        ></path>
+                    </svg>
+
+
+                    <input
+                        type="text"
+                        id="systemAuditSearch"
+                        placeholder="Search actor, action or activity..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+
+
+                <!-- ENTITY FILTER -->
+
+                <div
+                    class="admin-custom-select system-audit-filter"
+                    id="systemAuditEntityDropdown"
+                >
+
+                    <button
+                        type="button"
+                        class="admin-custom-select-trigger"
+                        id="systemAuditEntityTrigger"
+                    >
+
+                        <span id="systemAuditEntityText">
+                            All modules
+                        </span>
+
+                    </button>
+
+
+                    <div
+                        class="admin-custom-select-menu"
+                        id="systemAuditEntityMenu"
+                    >
+
+                        <button
+                            type="button"
+                            data-value="all"
+                            class="selected"
+                        >
+                            All modules
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- ACTION FILTER -->
+
+                <div
+                    class="admin-custom-select system-audit-filter"
+                    id="systemAuditActionDropdown"
+                >
+
+                    <button
+                        type="button"
+                        class="admin-custom-select-trigger"
+                        id="systemAuditActionTrigger"
+                    >
+
+                        <span id="systemAuditActionText">
+                            All actions
+                        </span>
+
+                    </button>
+
+
+                    <div
+                        class="admin-custom-select-menu"
+                        id="systemAuditActionMenu"
+                    >
+
+                        <button
+                            type="button"
+                            data-value="all"
+                            class="selected"
+                        >
+                            All actions
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                LIST HEADING
+                ================================================= -->
+
+            <div class="system-audit-list-heading">
+
+                <span>
+                    ACTIVITY
+                </span>
+
+                <strong id="systemAuditVisibleCount">
+                    0 events
+                </strong>
+
+            </div>
+
+
+
+            <!-- =================================================
+                AUDIT LIST
+                ================================================= -->
+
+            <div
+                class="system-audit-list"
+                id="systemAuditList"
+            >
+
+                <div class="system-audit-empty">
+
+                    <strong>
+                        Loading audit logs...
+                    </strong>
+
+                    <p>
+                        Recorded System Admin activity will appear here.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                PAGINATION
+                ================================================= -->
+
+            <div
+                class="system-audit-pagination"
+                id="systemAuditPagination"
+            ></div>
+
+
+
+            <!-- =================================================
+                AUDIT DETAIL MODAL
+                ================================================= -->
+
+            <div
+                class="system-audit-modal"
+                id="systemAuditModal"
+                aria-hidden="true"
+            >
+
+                <div
+                    class="system-audit-modal-backdrop"
+                    id="systemAuditModalBackdrop"
+                ></div>
+
+
+                <div
+                    class="system-audit-modal-dialog"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="systemAuditModalTitle"
+                >
+
+                    <div class="system-audit-modal-header">
+
+                        <div>
+
+                            <span id="systemAuditModalAction">
+                                SYSTEM ACTIVITY
+                            </span>
+
+                            <h2 id="systemAuditModalTitle">
+                                Audit event
+                            </h2>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="system-audit-modal-close"
+                            id="closeSystemAuditModal"
+                            aria-label="Close audit details"
+                        >
+                            <span></span>
+                            <span></span>
+                        </button>
+
+                    </div>
+
+
+                    <div class="system-audit-modal-body">
+
+
+                        <div class="system-audit-detail-grid">
+
+                            <div class="system-audit-detail-box">
+
+                                <span>
+                                    PERFORMED BY
+                                </span>
+
+                                <strong id="systemAuditModalActor">
+                                    —
+                                </strong>
+
+                                <p id="systemAuditModalActorEmail">
+                                    —
+                                </p>
+
+                            </div>
+
+
+                            <div class="system-audit-detail-box">
+
+                                <span>
+                                    RECORDED
+                                </span>
+
+                                <strong id="systemAuditModalDate">
+                                    —
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="system-audit-detail-box system-audit-entity-box">
+
+                            <span>
+                                ENTITY
+                            </span>
+
+                            <strong id="systemAuditModalEntity">
+                                —
+                            </strong>
+
+                        </div>
+
+
+
+                        <div class="system-audit-description">
+
+                            <span>
+                                ACTIVITY
+                            </span>
+
+                            <p id="systemAuditModalDescription">
+                                —
+                            </p>
+
+                        </div>
+
+
+
+                        <!-- BEFORE / AFTER -->
+
+                        <div
+                            class="system-audit-change-grid"
+                            id="systemAuditChangeGrid"
+                        >
+
+                            <div class="system-audit-change-box">
+
+                                <span>
+                                    BEFORE
+                                </span>
+
+                                <div id="systemAuditModalBefore">
+                                    No previous values recorded.
+                                </div>
+
+                            </div>
+
+
+                            <div class="system-audit-change-box">
+
+                                <span>
+                                    AFTER
+                                </span>
+
+                                <div id="systemAuditModalAfter">
+                                    No updated values recorded.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- TECHNICAL -->
+
+                        <div class="system-audit-technical">
+
+                            <div>
+
+                                <span>
+                                    IP ADDRESS
+                                </span>
+
+                                <strong id="systemAuditModalIp">
+                                    —
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span>
+                                    CLIENT
+                                </span>
+
+                                <strong id="systemAuditModalClient">
+                                    —
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
 
             </div>
 

@@ -3812,7 +3812,6 @@ body.mobile-dashboard-notice-open {
 }
 
 
-/* TOP → DIAGONAL */
 
 .mobile-menu-button.open
 > span:nth-child(1) {
@@ -3834,7 +3833,6 @@ body.mobile-dashboard-notice-open {
 }
 
 
-/* BOTTOM → DIAGONAL */
 
 .mobile-menu-button.open
 > span:nth-child(3) {

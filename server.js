@@ -3236,6 +3236,786 @@ app.patch(
 
 
 /* =========================================================
+   SYSTEM ADMIN - AUDIT LOGS
+   READ ONLY
+   ========================================================= */
+
+app.get(
+    "/api/system/audit-logs",
+    requireSystemAdmin,
+    async (req, res) => {
+
+        try {
+
+            /* =================================================
+               SEARCH
+               ================================================= */
+
+            const search =
+                String(
+                    req.query.search ||
+                    ""
+                )
+                .trim()
+                .slice(
+                    0,
+                    200
+                );
+
+
+
+            /* =================================================
+               ENTITY FILTER
+               ================================================= */
+
+            const requestedEntity =
+                String(
+                    req.query.entity ||
+                    "all"
+                )
+                .trim()
+                .toLowerCase();
+
+
+            /*
+                "all" is always allowed.
+
+                Other entity types are still checked
+                against what actually exists in audit_logs
+                before they are used.
+            */
+
+            let entity =
+                requestedEntity;
+
+
+
+            /* =================================================
+               ACTION FILTER
+               ================================================= */
+
+            const requestedAction =
+                String(
+                    req.query.action ||
+                    "all"
+                )
+                .trim();
+
+
+            let action =
+                requestedAction;
+
+
+
+            /* =================================================
+               PAGINATION
+               ================================================= */
+
+            let page =
+                Number(
+                    req.query.page
+                ) ||
+                1;
+
+
+            let limit =
+                Number(
+                    req.query.limit
+                ) ||
+                25;
+
+
+            page =
+                Math.max(
+                    1,
+                    page
+                );
+
+
+            limit =
+                Math.min(
+                    50,
+                    Math.max(
+                        10,
+                        limit
+                    )
+                );
+
+
+            const offset =
+                (
+                    page -
+                    1
+                ) *
+                limit;
+
+
+
+            /* =================================================
+               LOAD AVAILABLE FILTER VALUES
+               ================================================= */
+
+            const filterOptionsResult =
+                await pool.query(
+                    `
+                    SELECT
+
+                        ARRAY_REMOVE(
+                            ARRAY_AGG(
+                                DISTINCT entity_type
+                                ORDER BY entity_type
+                            ),
+                            NULL
+                        )
+                            AS entity_types,
+
+
+                        ARRAY_REMOVE(
+                            ARRAY_AGG(
+                                DISTINCT action_key
+                                ORDER BY action_key
+                            ),
+                            NULL
+                        )
+                            AS action_keys
+
+                    FROM audit_logs
+                    `
+                );
+
+
+            const availableEntities =
+                filterOptionsResult
+                    .rows[0]
+                    .entity_types ||
+                [];
+
+
+            const availableActions =
+                filterOptionsResult
+                    .rows[0]
+                    .action_keys ||
+                [];
+
+
+
+            /* =================================================
+               VALIDATE FILTERS
+
+               We never blindly trust browser-supplied
+               entity/action values.
+               ================================================= */
+
+            if (
+                entity !==
+                    "all"
+
+                &&
+
+                !availableEntities.includes(
+                    entity
+                )
+            ) {
+
+                entity =
+                    "all";
+
+            }
+
+
+            if (
+                action !==
+                    "all"
+
+                &&
+
+                !availableActions.includes(
+                    action
+                )
+            ) {
+
+                action =
+                    "all";
+
+            }
+
+
+
+            /* =================================================
+               COMMON FILTER SQL
+               ================================================= */
+
+            const filterSql = `
+                WHERE
+
+                    (
+                        $1 = ''
+
+                        OR
+
+                        al.action_key
+                            ILIKE
+                            '%' || $1 || '%'
+
+                        OR
+
+                        al.entity_type
+                            ILIKE
+                            '%' || $1 || '%'
+
+                        OR
+
+                        COALESCE(
+                            al.entity_id,
+                            ''
+                        )
+                            ILIKE
+                            '%' || $1 || '%'
+
+                        OR
+
+                        COALESCE(
+                            al.description,
+                            ''
+                        )
+                            ILIKE
+                            '%' || $1 || '%'
+
+                        OR
+
+                        COALESCE(
+                            actor.first_name,
+                            ''
+                        )
+                            ILIKE
+                            '%' || $1 || '%'
+
+                        OR
+
+                        COALESCE(
+                            actor.last_name,
+                            ''
+                        )
+                            ILIKE
+                            '%' || $1 || '%'
+
+                        OR
+
+                        (
+                            COALESCE(
+                                actor.first_name,
+                                ''
+                            )
+                            ||
+                            ' '
+                            ||
+                            COALESCE(
+                                actor.last_name,
+                                ''
+                            )
+                        )
+                            ILIKE
+                            '%' || $1 || '%'
+
+                        OR
+
+                        COALESCE(
+                            actor.email,
+                            ''
+                        )
+                            ILIKE
+                            '%' || $1 || '%'
+                    )
+
+
+                    AND
+
+                    (
+                        $2 = 'all'
+
+                        OR
+
+                        al.entity_type =
+                            $2
+                    )
+
+
+                    AND
+
+                    (
+                        $3 = 'all'
+
+                        OR
+
+                        al.action_key =
+                            $3
+                    )
+            `;
+
+
+
+            /* =================================================
+               FILTERED TOTAL
+               ================================================= */
+
+            const countResult =
+                await pool.query(
+                    `
+                    SELECT
+
+                        COUNT(*)::INT
+                            AS total
+
+                    FROM audit_logs al
+
+
+                    LEFT JOIN users actor
+
+                        ON actor.id =
+                            al.actor_user_id
+
+
+                    ${filterSql}
+                    `,
+                    [
+
+                        search,
+
+                        entity,
+
+                        action
+
+                    ]
+                );
+
+
+            const total =
+                Number(
+                    countResult
+                        .rows[0]
+                        .total
+                ) ||
+                0;
+
+
+
+            /* =================================================
+               LOAD AUDIT LOG PAGE
+               ================================================= */
+
+            const logsResult =
+                await pool.query(
+                    `
+                    SELECT
+
+                        al.id,
+
+                        al.actor_user_id,
+                        al.target_user_id,
+
+                        al.action_key,
+
+                        al.entity_type,
+                        al.entity_id,
+
+                        al.description,
+
+                        al.before_data,
+                        al.after_data,
+                        al.metadata,
+
+                        al.ip_address,
+                        al.user_agent,
+
+                        al.created_at,
+
+
+                        actor.first_name
+                            AS actor_first_name,
+
+                        actor.last_name
+                            AS actor_last_name,
+
+                        actor.email
+                            AS actor_email,
+
+                        actor.role
+                            AS actor_role,
+
+
+                        target.first_name
+                            AS target_first_name,
+
+                        target.last_name
+                            AS target_last_name,
+
+                        target.email
+                            AS target_email,
+
+                        target.role
+                            AS target_role
+
+
+                    FROM audit_logs al
+
+
+                    LEFT JOIN users actor
+
+                        ON actor.id =
+                            al.actor_user_id
+
+
+                    LEFT JOIN users target
+
+                        ON target.id =
+                            al.target_user_id
+
+
+                    ${filterSql}
+
+
+                    ORDER BY
+
+                        al.created_at DESC,
+
+                        al.id DESC
+
+
+                    LIMIT $4
+
+                    OFFSET $5
+                    `,
+                    [
+
+                        search,
+
+                        entity,
+
+                        action,
+
+                        limit,
+
+                        offset
+
+                    ]
+                );
+
+
+
+            /* =================================================
+               GLOBAL AUDIT STATS
+               ================================================= */
+
+            const statsResult =
+                await pool.query(
+                    `
+                    SELECT
+
+                        COUNT(*)::INT
+                            AS total_events,
+
+
+                        COUNT(*)
+                        FILTER (
+
+                            WHERE
+
+                                created_at >=
+
+                                (
+                                    date_trunc(
+                                        'day',
+                                        NOW()
+                                        AT TIME ZONE
+                                        'Asia/Colombo'
+                                    )
+
+                                    AT TIME ZONE
+                                    'Asia/Colombo'
+                                )
+
+                        )::INT
+                            AS today_events,
+
+
+                        COUNT(
+                            DISTINCT actor_user_id
+                        )
+                        FILTER (
+                            WHERE
+                                actor_user_id
+                                IS NOT NULL
+                        )::INT
+                            AS active_actors
+
+
+                    FROM audit_logs
+                    `
+                );
+
+
+            const stats =
+                statsResult.rows[0];
+
+
+
+            /* =================================================
+               MAP SAFE AUDIT DATA
+               ================================================= */
+
+            const logs =
+                logsResult
+                    .rows
+                    .map(
+                        log => {
+
+                            const actorName =
+                                `${
+                                    log.actor_first_name ||
+                                    ""
+                                } ${
+                                    log.actor_last_name ||
+                                    ""
+                                }`
+                                .trim();
+
+
+                            const targetName =
+                                `${
+                                    log.target_first_name ||
+                                    ""
+                                } ${
+                                    log.target_last_name ||
+                                    ""
+                                }`
+                                .trim();
+
+
+
+                            return {
+
+                                id:
+                                    log.id,
+
+
+                                actionKey:
+                                    log.action_key,
+
+
+                                entity: {
+
+                                    type:
+                                        log.entity_type,
+
+                                    id:
+                                        log.entity_id
+
+                                },
+
+
+                                description:
+                                    log.description,
+
+
+                                actor:
+
+                                    log.actor_user_id
+
+                                        ? {
+
+                                            id:
+                                                log.actor_user_id,
+
+                                            name:
+                                                actorName ||
+                                                log.actor_email ||
+                                                "Unknown user",
+
+                                            email:
+                                                log.actor_email,
+
+                                            role:
+                                                log.actor_role
+
+                                        }
+
+                                        : null,
+
+
+                                targetUser:
+
+                                    log.target_user_id
+
+                                        ? {
+
+                                            id:
+                                                log.target_user_id,
+
+                                            name:
+                                                targetName ||
+                                                log.target_email ||
+                                                "Unknown user",
+
+                                            email:
+                                                log.target_email,
+
+                                            role:
+                                                log.target_role
+
+                                        }
+
+                                        : null,
+
+
+                                before:
+                                    log.before_data,
+
+
+                                after:
+                                    log.after_data,
+
+
+                                metadata:
+                                    log.metadata,
+
+
+                                ipAddress:
+                                    log.ip_address,
+
+
+                                userAgent:
+                                    log.user_agent,
+
+
+                                createdAt:
+                                    log.created_at
+
+                            };
+
+                        }
+                    );
+
+
+
+            /* =================================================
+               PAGINATION
+               ================================================= */
+
+            const totalPages =
+                Math.max(
+                    1,
+                    Math.ceil(
+                        total /
+                        limit
+                    )
+                );
+
+
+
+            /* =================================================
+               RESPONSE
+               ================================================= */
+
+            return res.json({
+
+                success:
+                    true,
+
+
+                logs,
+
+
+                stats: {
+
+                    totalEvents:
+                        Number(
+                            stats.total_events
+                        ) ||
+                        0,
+
+                    todayEvents:
+                        Number(
+                            stats.today_events
+                        ) ||
+                        0,
+
+                    activeActors:
+                        Number(
+                            stats.active_actors
+                        ) ||
+                        0
+
+                },
+
+
+                filters: {
+
+                    search,
+
+                    entity,
+
+                    action,
+
+
+                    entityOptions:
+                        availableEntities,
+
+
+                    actionOptions:
+                        availableActions
+
+                },
+
+
+                pagination: {
+
+                    page,
+
+                    limit,
+
+                    total,
+
+                    totalPages,
+
+                    hasPrevious:
+                        page >
+                        1,
+
+                    hasNext:
+                        page <
+                        totalPages
+
+                }
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "System audit logs error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success:
+                    false,
+
+                message:
+                    "Unable to load system audit logs."
+
+            });
+
+        }
+
+    }
+);
+
+
+/* =========================================================
    SYSTEM ADMIN - CREATE TEAM MEMBER
    ========================================================= */
 
