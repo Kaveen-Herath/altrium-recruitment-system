@@ -81,11 +81,16 @@
 }
 
 
-.avatar-wrapper img {
+/* =========================================================
+   PROFILE INITIALS AVATAR
+   ========================================================= */
+
+.profile-initials {
     width: 100%;
     height: 100%;
 
-    object-fit: cover;
+    display: grid;
+    place-items: center;
 
     border-radius: 50%;
 
@@ -93,35 +98,23 @@
         2px solid
         rgba(255, 132, 31, 0.5);
 
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 132, 31, 0.18),
+            rgba(255, 255, 255, 0.04)
+        );
+
     box-shadow:
         0 0 35px
-        rgba(255, 132, 31, 0.1);
-}
+        rgba(255, 132, 31, 0.10);
 
+    color: var(--orange);
 
-.avatar-edit {
-    position: absolute;
+    font-size: 30px;
+    font-weight: 700;
 
-    right: -3px;
-    bottom: 0;
-
-    width: 30px;
-    height: 30px;
-
-    display: grid;
-    place-items: center;
-
-    border-radius: 50%;
-
-    background: var(--orange);
-
-    color: #111;
-
-    font-size: 18px;
-
-    cursor: pointer;
-
-    border: 3px solid #111;
+    letter-spacing: 1px;
 }
 
 
@@ -753,15 +746,168 @@
 
 
 .application-card {
-    padding: 22px 24px;
-
+    padding: 24px 22px;
     border-radius: 18px;
-
-    display: flex;
+    display: grid;
+    grid-template-columns: 1.15fr 1.15fr auto;
     align-items: center;
-    justify-content: space-between;
+    gap: 40px;
+    min-height: 125px;
+}
 
-    gap: 20px;
+.application-card-left {
+    min-width: 0;
+}
+
+.application-label {
+    display: block;
+    color: #999;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    margin-bottom: 7px;
+}
+
+.application-card-left h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.application-reference {
+    display: block;
+    margin-top: 7px;
+    color: #ff841f;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.application-department {
+    margin-top: 5px;
+    color: #777;
+    font-size: 9px;
+}
+
+.application-card-middle {
+    min-width: 0;
+}
+
+.application-card-middle p {
+    margin: 0;
+    color: #888;
+    font-size: 10px;
+}
+
+.application-card-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    min-width: 145px;
+}
+
+/* STATUS CHIPS */
+
+.application-status {
+    padding: 6px 14px;
+    border-radius: 18px;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    white-space: nowrap;
+    background: transparent;
+}
+
+/* Interview */
+
+.application-status.interview {
+    color: #bf8cff;
+    border: 1px solid rgba(191, 140, 255, 0.4);
+    background: rgba(191, 140, 255, 0.04);
+}
+
+/* Screening */
+
+.application-status.screening {
+    color: #d9b34a;
+    border: 1px solid rgba(217, 179, 74, 0.35);
+    background: rgba(217, 179, 74, 0.04);
+}
+
+/* Submitted */
+
+.application-status.submitted {
+    color: #aaa;
+    border: 1px solid rgba(170, 170, 170, 0.3);
+    background: transparent;
+}
+
+/* Shortlisted */
+
+.application-status.shortlisted {
+    color: #d9b34a;
+    border: 1px solid rgba(217, 179, 74, 0.35);
+    background: rgba(217, 179, 74, 0.04);
+}
+
+/* Rejected */
+
+.application-status.rejected {
+    color: #999;
+    border: 1px solid rgba(150, 150, 150, 0.25);
+    background: transparent;
+}
+
+/* Evaluation Complete */
+
+.application-status.evaluation-complete {
+    color: #6fd18a;
+    border: 1px solid rgba(111, 209, 138, 0.35);
+    background: rgba(111, 209, 138, 0.04);
+}
+
+/* Applied date */
+
+.application-date {
+    color: #8a8a8a;
+    font-size: 9px;
+    white-space: nowrap;
+}
+
+/* View progress */
+
+.view-progress-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 108px;
+    padding: 10px 17px;
+    border: 1px solid rgba(255, 132, 31, 0.45);
+    border-radius: 22px;
+    background: transparent;
+    color: #ff841f;
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 800;
+    transition: all 0.2s ease;
+}
+
+.view-progress-btn:hover {
+    background: rgba(255, 132, 31, 0.08);
+    border-color: rgba(255, 132, 31, 0.7);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 800px) {
+    .application-card {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .application-card-actions {
+        align-items: flex-start;
+    }
 }
 
 
@@ -817,6 +963,47 @@
     font-weight: 600;
 
     white-space: nowrap;
+}
+
+.application-card-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.view-progress-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 130px;
+    height: 38px;
+
+    border: 1px solid rgba(255, 132, 31, 0.55);
+    border-radius: 22px;
+
+    background: rgba(255, 132, 31, 0.02);
+
+    color: #ff841f;
+    text-decoration: none;
+
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1px;
+
+    box-sizing: border-box;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.view-progress-btn:hover {
+    background: rgba(255, 132, 31, 0.08);
+    border-color: rgba(255, 132, 31, 0.8);
+    transform: translateY(-1px);
 }
 
 
@@ -1033,6 +1220,18 @@
 
 .toast.hide {
     animation: toastOut 0.25s ease forwards;
+}
+
+
+@media (max-width: 800px) {
+    .application-card {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .application-card-actions {
+        align-items: flex-start;
+    }
 }
 
 

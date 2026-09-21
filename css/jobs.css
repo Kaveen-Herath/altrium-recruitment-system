@@ -1059,6 +1059,88 @@ input[type="number"]::-webkit-outer-spin-button {
     font-weight: 700;
 }
 
+/* =========================================================
+   JOB CARD — WORK MODE + EMPLOYMENT TYPE TAGS
+   ========================================================= */
+
+.jobs-card-meta-pills {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    margin-top: 18px;
+}
+
+
+/* Base tag */
+
+.jobs-card-meta-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 36px;
+
+    padding: 7px 14px;
+
+    border-radius: 999px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   WORK MODE — ORANGE ACCENT
+   ========================================================= */
+
+.jobs-card-work-mode {
+    border: 1px solid rgba(255, 126, 38, 0.48);
+
+    background: rgba(255, 126, 38, 0.055);
+
+    color: #ffad5c;
+
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 126, 38, 0.025);
+}
+
+
+/* =========================================================
+   EMPLOYMENT TYPES — SUBTLE
+   ========================================================= */
+
+.jobs-card-employment-type {
+    border: 1px solid rgba(255, 255, 255, 0.10);
+
+    background: rgba(255, 255, 255, 0.025);
+
+    color: rgba(255, 255, 255, 0.78);
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .jobs-card-meta-pills {
+        gap: 7px;
+    }
+
+    .jobs-card-meta-tag {
+        min-height: 34px;
+
+        padding: 6px 12px;
+
+        font-size: 12px;
+    }
+
+}
 
 
 /* =========================================================
@@ -3672,6 +3754,24 @@ input:checked
         );
 }
 
+
+@media (max-width: 700px) {
+
+    .jobs-card-meta-pills {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .jobs-card-info-pill {
+        max-width: 100%;
+        white-space: normal;
+    }
+
+    .jobs-card-info-value {
+        overflow-wrap: anywhere;
+    }
+
+}
 
 @media (max-width: 700px) {
 

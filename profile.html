@@ -270,27 +270,13 @@
 
             <div class="avatar-wrapper">
 
-                <img
-                    id="profileImage"
-                    src="https://ui-avatars.com/api/?name=User&background=ff841f&color=111&size=200&bold=true"
-                    alt="Profile picture"
+                <div
+                    class="profile-initials"
+                    id="profileInitials"
+                    aria-label="Profile initials"
                 >
-
-
-                <label
-                    for="avatarUpload"
-                    class="avatar-edit"
-                >
-                    +
-                </label>
-
-
-                <input
-                    type="file"
-                    id="avatarUpload"
-                    accept="image/*"
-                    hidden
-                >
+                    U
+                </div>
 
             </div>
 
@@ -627,125 +613,6 @@
 
                     </div>
 
-
-
-                    <div class="profile-input">
-
-                        <label>
-                            Preferred job type
-                        </label>
-
-
-                        <div
-                            class="job-type-dropdown"
-                            id="jobTypeDropdown"
-                        >
-
-
-                            <button
-                                type="button"
-                                class="job-type-trigger"
-                                id="jobTypeTrigger"
-                            >
-
-                                <span id="jobTypeSelected">
-                                    Select job type
-                                </span>
-
-
-                                <span class="job-type-arrow">
-                                    ↓
-                                </span>
-
-                            </button>
-
-
-
-                            <div class="job-type-menu">
-
-
-                                <button
-                                    type="button"
-                                    data-value="Full time"
-                                >
-                                    Full time
-                                </button>
-
-
-                                <button
-                                    type="button"
-                                    data-value="Part time"
-                                >
-                                    Part time
-                                </button>
-
-
-                                <button
-                                    type="button"
-                                    data-value="Internship"
-                                >
-                                    Internship
-                                </button>
-
-
-                                <button
-                                    type="button"
-                                    data-value="Contract"
-                                >
-                                    Contract
-                                </button>
-
-
-                                <button
-                                    type="button"
-                                    data-value="Remote"
-                                >
-                                    Remote
-                                </button>
-
-                            </div>
-
-
-
-                            <!-- Actual database value -->
-
-                            <select
-                                id="preferredJobType"
-                                hidden
-                            >
-
-                                <option value="">
-                                    Select job type
-                                </option>
-
-                                <option value="Full time">
-                                    Full time
-                                </option>
-
-                                <option value="Part time">
-                                    Part time
-                                </option>
-
-                                <option value="Internship">
-                                    Internship
-                                </option>
-
-                                <option value="Contract">
-                                    Contract
-                                </option>
-
-                                <option value="Remote">
-                                    Remote
-                                </option>
-
-                            </select>
-
-                        </div>
-
-                    </div>
-
-
-
                     <button
                         type="button"
                         class="save-btn"
@@ -855,91 +722,10 @@
 
                 <div class="applications-list">
 
-
-                    <article class="application-card glass">
-
-                        <div>
-
-                            <span>
-                                SOFTWARE ENGINEERING
-                            </span>
-
-
-                            <h3>
-                                Software Engineer
-                            </h3>
-
-
-                            <p>
-                                Technology Department
-                            </p>
-
-                        </div>
-
-
-                        <div class="application-status reviewing">
-                            Under review
-                        </div>
-
-                    </article>
-
-
-
-                    <article class="application-card glass">
-
-                        <div>
-
-                            <span>
-                                DESIGN
-                            </span>
-
-
-                            <h3>
-                                UI/UX Designer
-                            </h3>
-
-
-                            <p>
-                                Creative Studio
-                            </p>
-
-                        </div>
-
-
-                        <div class="application-status interview">
-                            Interview
-                        </div>
-
-                    </article>
-
-
-
-                    <article class="application-card glass">
-
-                        <div>
-
-                            <span>
-                                MARKETING
-                            </span>
-
-
-                            <h3>
-                                Marketing Intern
-                            </h3>
-
-
-                            <p>
-                                Growth Department
-                            </p>
-
-                        </div>
-
-
-                        <div class="application-status submitted">
-                            Submitted
-                        </div>
-
-                    </article>
+                    <div
+                        id="applicationsList"
+                        class="applications-list"
+                    ></div>
 
                 </div>
 

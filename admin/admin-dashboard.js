@@ -11095,26 +11095,86 @@ createVacancyBackdrop
 
 
 /* =========================================================
-   EMPLOYMENT TYPE CUSTOM DROPDOWN
+   VACANCY CUSTOM DROPDOWNS
    ========================================================= */
+
+const departmentDropdown =
+    document.getElementById(
+        "departmentDropdown"
+    );
+
+const departmentDropdownTrigger =
+    document.getElementById(
+        "departmentDropdownTrigger"
+    );
+
+const departmentText =
+    document.getElementById(
+        "departmentText"
+    );
+
+const jobDepartment =
+    document.getElementById(
+        "jobDepartment"
+    );
+
+
+const locationDropdown =
+    document.getElementById(
+        "locationDropdown"
+    );
+
+const locationDropdownTrigger =
+    document.getElementById(
+        "locationDropdownTrigger"
+    );
+
+const locationText =
+    document.getElementById(
+        "locationText"
+    );
+
+const jobLocation =
+    document.getElementById(
+        "jobLocation"
+    );
+
+
+const workModeDropdown =
+    document.getElementById(
+        "workModeDropdown"
+    );
+
+const workModeDropdownTrigger =
+    document.getElementById(
+        "workModeDropdownTrigger"
+    );
+
+const workModeText =
+    document.getElementById(
+        "workModeText"
+    );
+
+const workMode =
+    document.getElementById(
+        "workMode"
+    );
+
 
 const employmentDropdown =
     document.getElementById(
         "employmentDropdown"
     );
 
-
 const employmentDropdownTrigger =
     document.getElementById(
         "employmentDropdownTrigger"
     );
 
-
 const employmentTypeText =
     document.getElementById(
         "employmentTypeText"
     );
-
 
 const employmentType =
     document.getElementById(
@@ -11122,106 +11182,398 @@ const employmentType =
     );
 
 
-if (
-    employmentDropdown &&
-    employmentDropdownTrigger
+/* =========================================================
+   GENERIC DROPDOWN OPEN / CLOSE
+   ========================================================= */
+
+function closeVacancyDropdowns(
+    exceptDropdown = null
 ) {
 
-    employmentDropdownTrigger
-        .addEventListener(
-            "click",
-            event => {
+    [
+        departmentDropdown,
+        locationDropdown,
+        workModeDropdown,
+        employmentDropdown
+    ]
+        .filter(Boolean)
+        .forEach(
+            dropdown => {
 
-                event.stopPropagation();
+                if (
+                    dropdown !==
+                    exceptDropdown
+                ) {
 
-
-                closeAllAdminCustomSelects(
-                    employmentDropdown
-                );
-
-
-                employmentDropdown
-                    .classList
-                    .toggle(
+                    dropdown.classList.remove(
                         "open"
                     );
 
-            }
-        );
-
-
-    employmentDropdown
-        .querySelectorAll(
-            ".admin-custom-select-menu button"
-        )
-        .forEach(
-            option => {
-
-                option.addEventListener(
-                    "click",
-                    event => {
-
-                        event.stopPropagation();
-
-
-                        const value =
-                            option.dataset.value ||
-                            "";
-
-
-                        if (
-                            employmentType
-                        ) {
-
-                            employmentType.value =
-                                value;
-
-                        }
-
-
-                        if (
-                            employmentTypeText
-                        ) {
-
-                            employmentTypeText.textContent =
-                                value;
-
-                        }
-
-
-                        employmentDropdown
-                            .querySelectorAll(
-                                ".admin-custom-select-menu button"
-                            )
-                            .forEach(
-                                item => {
-
-                                    item.classList.remove(
-                                        "selected"
-                                    );
-
-                                }
-                            );
-
-
-                        option.classList.add(
-                            "selected"
-                        );
-
-
-                        employmentDropdown
-                            .classList
-                            .remove(
-                                "open"
-                            );
-
-                    }
-                );
+                }
 
             }
         );
 
 }
+
+
+/* =========================================================
+   DEPARTMENT DROPDOWN
+   ========================================================= */
+
+departmentDropdownTrigger
+    ?.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+            const isOpen =
+                departmentDropdown.classList.contains(
+                    "open"
+                );
+
+            closeVacancyDropdowns(
+                departmentDropdown
+            );
+
+            departmentDropdown.classList.toggle(
+                "open",
+                !isOpen
+            );
+
+        }
+    );
+
+
+departmentDropdown
+    ?.querySelectorAll(
+        ".admin-custom-select-menu button"
+    )
+    .forEach(
+        option => {
+
+            option.addEventListener(
+                "click",
+                () => {
+
+                    const value =
+                        option.dataset.value;
+
+                    if (jobDepartment) {
+
+                        jobDepartment.value =
+                            value;
+
+                    }
+
+                    if (departmentText) {
+
+                        departmentText.textContent =
+                            value;
+
+                    }
+
+                    departmentDropdown
+                        .querySelectorAll(
+                            ".admin-custom-select-menu button"
+                        )
+                        .forEach(
+                            item => {
+
+                                item.classList.remove(
+                                    "selected"
+                                );
+
+                            }
+                        );
+
+                    option.classList.add(
+                        "selected"
+                    );
+
+                    departmentDropdown.classList.remove(
+                        "open"
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+/* =========================================================
+   LOCATION DROPDOWN
+   ========================================================= */
+
+locationDropdownTrigger
+    ?.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+            const isOpen =
+                locationDropdown.classList.contains(
+                    "open"
+                );
+
+            closeVacancyDropdowns(
+                locationDropdown
+            );
+
+            locationDropdown.classList.toggle(
+                "open",
+                !isOpen
+            );
+
+        }
+    );
+
+
+locationDropdown
+    ?.querySelectorAll(
+        ".admin-custom-select-menu button"
+    )
+    .forEach(
+        option => {
+
+            option.addEventListener(
+                "click",
+                () => {
+
+                    const value =
+                        option.dataset.value;
+
+                    if (jobLocation) {
+
+                        jobLocation.value =
+                            value;
+
+                    }
+
+                    if (locationText) {
+
+                        locationText.textContent =
+                            value;
+
+                    }
+
+                    locationDropdown
+                        .querySelectorAll(
+                            ".admin-custom-select-menu button"
+                        )
+                        .forEach(
+                            item => {
+
+                                item.classList.remove(
+                                    "selected"
+                                );
+
+                            }
+                        );
+
+                    option.classList.add(
+                        "selected"
+                    );
+
+                    locationDropdown.classList.remove(
+                        "open"
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+/* =========================================================
+   WORK MODE DROPDOWN
+   ========================================================= */
+
+workModeDropdownTrigger
+    ?.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+            const isOpen =
+                workModeDropdown.classList.contains(
+                    "open"
+                );
+
+            closeVacancyDropdowns(
+                workModeDropdown
+            );
+
+            workModeDropdown.classList.toggle(
+                "open",
+                !isOpen
+            );
+
+        }
+    );
+
+
+workModeDropdown
+    ?.querySelectorAll(
+        ".admin-custom-select-menu button"
+    )
+    .forEach(
+        option => {
+
+            option.addEventListener(
+                "click",
+                () => {
+
+                    const value =
+                        option.dataset.value;
+
+                    if (workMode) {
+
+                        workMode.value =
+                            value;
+
+                    }
+
+                    if (workModeText) {
+
+                        workModeText.textContent =
+                            value;
+
+                    }
+
+                    workModeDropdown
+                        .querySelectorAll(
+                            ".admin-custom-select-menu button"
+                        )
+                        .forEach(
+                            item => {
+
+                                item.classList.remove(
+                                    "selected"
+                                );
+
+                            }
+                        );
+
+                    option.classList.add(
+                        "selected"
+                    );
+
+                    workModeDropdown.classList.remove(
+                        "open"
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+/* =========================================================
+   EMPLOYMENT TYPE MULTI-SELECT
+   ========================================================= */
+
+employmentDropdownTrigger
+    ?.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+            const isOpen =
+                employmentDropdown.classList.contains(
+                    "open"
+                );
+
+            closeVacancyDropdowns(
+                employmentDropdown
+            );
+
+            employmentDropdown.classList.toggle(
+                "open",
+                !isOpen
+            );
+
+        }
+    );
+
+
+employmentDropdown
+    ?.querySelectorAll(
+        ".admin-custom-select-menu button"
+    )
+    .forEach(
+        option => {
+
+            option.addEventListener(
+                "click",
+                event => {
+
+                    event.stopPropagation();
+
+                    option.classList.toggle(
+                        "selected"
+                    );
+
+
+                    const selectedValues =
+                        Array.from(
+                            employmentDropdown.querySelectorAll(
+                                ".admin-custom-select-menu button.selected"
+                            )
+                        )
+                        .map(
+                            button =>
+                                button.dataset.value
+                        );
+
+
+                    if (employmentType) {
+
+                        employmentType.value =
+                            selectedValues.join(
+                                ", "
+                            );
+
+                    }
+
+
+                    if (employmentTypeText) {
+
+                        employmentTypeText.textContent =
+                            selectedValues.length
+                                ? selectedValues.join(
+                                    " + "
+                                )
+                                : "Select employment type";
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+/* =========================================================
+   CLOSE DROPDOWNS WHEN CLICKING OUTSIDE
+   ========================================================= */
+
+document.addEventListener(
+    "click",
+    () => {
+
+        closeVacancyDropdowns();
+
+    }
+);
 
 
 
@@ -11619,12 +11971,11 @@ createJobForm
                 "";
 
 
-            const salary =
+            const selectedWorkMode =
                 document.getElementById(
-                    "jobSalary"
+                    "workMode"
                 )
-                ?.value
-                .trim() ||
+                ?.value ||
                 "";
 
 
@@ -11694,6 +12045,7 @@ createJobForm
                 !department ||
                 !location ||
                 !selectedEmploymentType ||
+                !selectedWorkMode ||
                 !description
             ) {
 
@@ -11770,7 +12122,8 @@ createJobForm
                                     location,
                                     employmentType:
                                         selectedEmploymentType,
-                                    salary,
+                                    workMode:
+                                        selectedWorkMode,
                                     applicationDeadline,
                                     experienceRequired,
                                     educationRequired,
@@ -12186,6 +12539,40 @@ async function loadAdminJobs() {
                                 ↓
                             </span>
 
+                            <button
+                                type="button"
+                                class="delete-vacancy-button"
+                                data-job-id="${job.id}"
+                                data-job-title="${String(job.job_title).replace(/"/g, '&quot;')}"
+                                aria-label="Delete vacancy"
+                                title="Delete vacancy"
+                            >
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    aria-hidden="true"
+                                >
+                                    <path
+                                        d="M4 7h16"
+                                    ></path>
+
+                                    <path
+                                        d="M10 11v6"
+                                    ></path>
+
+                                    <path
+                                        d="M14 11v6"
+                                    ></path>
+
+                                    <path
+                                        d="M6 7l1 13h10l1-13"
+                                    ></path>
+
+                                    <path
+                                        d="M9 7V4h6v3"
+                                    ></path>
+                                </svg>
+                            </button>
+
                         </div>
 
                     </summary>
@@ -12353,7 +12740,7 @@ async function loadAdminJobs() {
                 card
                     .querySelector(
                         ".edit-vacancy-button"
-                    )
+                    )              
                     ?.addEventListener(
                         "click",
                         event => {
@@ -12371,8 +12758,50 @@ async function loadAdminJobs() {
                         }
                     );
 
-            }
+            }  
         );
+
+card
+    .querySelector(
+        ".delete-vacancy-button"
+    )
+    ?.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+
+            openDeleteVacancyModal(
+                job.id,
+                job.job_title
+            );
+
+        }
+    );
+
+card
+    .querySelector(
+        ".delete-vacancy-button"
+    )
+    ?.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+
+            openDeleteVacancyModal(
+                job.id,
+                job.job_title
+            );
+
+        }
+    );
 
     }
 
@@ -12416,7 +12845,156 @@ const closeVacancyBackdrop =
         "closeVacancyBackdrop"
     );
 
+const deleteVacancyModal =
+    document.getElementById(
+        "deleteVacancyModal"
+    );
 
+
+const cancelDeleteVacancy =
+    document.getElementById(
+        "cancelDeleteVacancy"
+    );
+
+
+const confirmDeleteVacancy =
+    document.getElementById(
+        "confirmDeleteVacancy"
+    );
+
+
+const deleteVacancyBackdrop =
+    document.getElementById(
+        "deleteVacancyBackdrop"
+    );
+
+
+const deleteVacancyMessage =
+    document.getElementById(
+        "deleteVacancyMessage"
+    );
+
+
+let selectedJobForDeletion =
+    null;
+
+function openDeleteVacancyModal(
+    jobId,
+    jobTitle
+) {
+
+    selectedJobForDeletion =
+        jobId;
+
+
+    if (
+        deleteVacancyMessage
+    ) {
+
+        deleteVacancyMessage.textContent =
+            `"${jobTitle}" will be permanently deleted and cannot be restored.`;
+
+    }
+
+
+    if (
+        confirmDeleteVacancy
+    ) {
+
+        confirmDeleteVacancy.disabled =
+            false;
+
+        confirmDeleteVacancy.textContent =
+            "Delete vacancy";
+
+    }
+
+
+    deleteVacancyModal
+        ?.classList
+        .add(
+            "open"
+        );
+
+
+    document.body.style.overflow =
+        "hidden";
+
+}
+
+document.addEventListener(
+    "click",
+    event => {
+
+        const deleteButton =
+            event.target.closest(
+                ".delete-vacancy-button"
+            );
+
+
+        if (
+            !deleteButton
+        ) {
+
+            return;
+
+        }
+
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+
+        const jobId =
+            deleteButton.dataset.jobId;
+
+
+        const jobTitle =
+            deleteButton.dataset.jobTitle ||
+            "this vacancy";
+
+
+        openDeleteVacancyModal(
+            jobId,
+            jobTitle
+        );
+
+    }
+);
+
+
+
+function closeDeleteVacancyModal() {
+
+    selectedJobForDeletion =
+        null;
+
+
+    deleteVacancyModal
+        ?.classList
+        .remove(
+            "open"
+        );
+
+
+    document.body.style.overflow =
+        "";
+
+}
+
+cancelDeleteVacancy
+    ?.addEventListener(
+        "click",
+        closeDeleteVacancyModal
+    );
+
+
+deleteVacancyBackdrop
+    ?.addEventListener(
+        "click",
+        closeDeleteVacancyModal
+    );
 
 function openJobStatusModal(
     jobId,
@@ -12717,6 +13295,94 @@ confirmCloseVacancy
         }
     );
 
+    confirmDeleteVacancy
+    ?.addEventListener(
+        "click",
+        async () => {
+
+            if (
+                !selectedJobForDeletion
+            ) {
+
+                return;
+
+            }
+
+
+            const jobId =
+                selectedJobForDeletion;
+
+
+            try {
+
+                confirmDeleteVacancy.disabled =
+                    true;
+
+                confirmDeleteVacancy.textContent =
+                    "Deleting...";
+
+
+                const response =
+                    await fetch(
+                        `/api/admin/jobs/${jobId}`,
+                        {
+                            method:
+                                "DELETE",
+
+                            credentials:
+                                "same-origin"
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    throw new Error(
+                        data.message ||
+                        "Unable to delete vacancy."
+                    );
+
+                }
+
+
+                closeDeleteVacancyModal();
+
+
+                await loadAdminJobs();
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Delete vacancy error:",
+                    error
+                );
+
+
+                window.alert(
+                    error.message ||
+                    "Unable to delete vacancy."
+                );
+
+
+                confirmDeleteVacancy.disabled =
+                    false;
+
+                confirmDeleteVacancy.textContent =
+                    "Delete vacancy";
+
+            }
+
+        }
+    );
 
 
 function openEditVacancyModal(

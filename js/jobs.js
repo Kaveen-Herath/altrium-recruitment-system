@@ -46,11 +46,11 @@ const jobTitleFilter =
 const jobLocationFilter =
     document.getElementById("jobLocationFilter");
 
+const jobDepartmentFilter =
+    document.getElementById("jobDepartmentFilter");
+
 const jobPositionFilter =
     document.getElementById("jobPositionFilter");
-
-const jobSalaryFilter =
-    document.getElementById("jobSalaryFilter");
 
 const clearJobFilters =
     document.getElementById("clearJobFilters");
@@ -1673,13 +1673,41 @@ function createJobCard(job) {
 
 
 
-        <div class="jobs-card-salary">
+        <div class="jobs-card-meta-pills">
+
+            <!-- WORK MODE -->
+
+            <span class="jobs-card-meta-tag jobs-card-work-mode">
+
+                ${
+                    escapeHTML(
+                        job.work_mode ||
+                        "Not specified"
+                    )
+                }
+
+            </span>
+
+
+            <!-- EMPLOYMENT TYPES -->
 
             ${
-                escapeHTML(
-                    job.salary ||
-                    "Salary not specified"
+                String(
+                    job.employment_type || ""
                 )
+                .split(",")
+                .map(
+                    type => type.trim()
+                )
+                .filter(Boolean)
+                .map(
+                    type => `
+                        <span class="jobs-card-meta-tag jobs-card-employment-type">
+                            ${escapeHTML(type)}
+                        </span>
+                    `
+                )
+                .join("")
             }
 
         </div>
@@ -1849,7 +1877,11 @@ function renderJobs(jobs) {
 function applyJobFilters() {
 
     let filteredJobs =
-        [...allJobs];
+        [...allJobs]
+        .filter(
+            job =>
+                job.status === "active"
+        );
 
 
     /* =====================================================
@@ -1877,7 +1909,7 @@ function applyJobFilters() {
                             ${job.department || ""}
                             ${job.location || ""}
                             ${job.employment_type || ""}
-                            ${job.salary || ""}
+                            ${job.work_mode || ""}
                             ${job.description || ""}
                             ${job.responsibilities || ""}
                             ${job.required_skills || ""}
@@ -1964,6 +1996,35 @@ function applyJobFilters() {
     }
 
 
+    /*  =====================================================
+        DEPARTMENT
+        ===================================================== */
+
+        const departmentValue =
+            jobDepartmentFilter
+                ?.value
+                .trim()
+                .toLowerCase()
+            ||
+            "";
+
+        if (departmentValue) {
+
+            filteredJobs =
+                filteredJobs.filter(
+                    job =>
+
+                        String(
+                            job.department || ""
+                        )
+                        .toLowerCase()
+                        ===
+                        departmentValue
+
+                );
+
+        }
+
 
     /* =====================================================
        POSITION
@@ -1978,53 +2039,29 @@ function applyJobFilters() {
         "";
 
 
-    if (positionValue) {
+        if (positionValue) {
 
-        filteredJobs =
-            filteredJobs.filter(
-                job =>
+            filteredJobs =
+                filteredJobs.filter(
+                    job =>
 
-                    String(
-                        job.employment_type ||
-                        ""
-                    )
-                    .toLowerCase()
-                    ===
-                    positionValue
+                        String(
+                            job.employment_type ||
+                            ""
+                        )
+                        .toLowerCase()
+                        .split(",")
+                        .map(
+                            value =>
+                                value.trim()
+                        )
+                        .includes(
+                            positionValue
+                        )
 
-            );
+                );
 
-    }
-
-
-
-    /* =====================================================
-       SALARY
-       ===================================================== */
-
-    const minimumSalary =
-        Number(
-            jobSalaryFilter?.value
-        ) || 0;
-
-
-    if (
-        minimumSalary > 0
-    ) {
-
-        filteredJobs =
-            filteredJobs.filter(
-                job =>
-
-                    getSalaryNumber(
-                        job.salary
-                    )
-                    >=
-                    minimumSalary
-
-            );
-
-    }
+        }
 
 
 
@@ -2065,48 +2102,6 @@ function applyJobFilters() {
                 -
                 new Date(
                     b.created_at
-                )
-
-        );
-
-    }
-
-
-    else if (
-        currentSort ===
-        "salary-high"
-    ) {
-
-        filteredJobs.sort(
-            (a, b) =>
-
-                getSalaryNumber(
-                    b.salary
-                )
-                -
-                getSalaryNumber(
-                    a.salary
-                )
-
-        );
-
-    }
-
-
-    else if (
-        currentSort ===
-        "salary-low"
-    ) {
-
-        filteredJobs.sort(
-            (a, b) =>
-
-                getSalaryNumber(
-                    a.salary
-                )
-                -
-                getSalaryNumber(
-                    b.salary
                 )
 
         );
@@ -2305,18 +2300,18 @@ function openJobDetailsModal(job) {
 
 
     /* =====================================================
-       SALARY + DEADLINE
+       WORK MODE + DEADLINE
        ===================================================== */
 
-    const salary =
+    const workMode =
         document.getElementById(
-            "jobDetailsSalary"
+            "jobDetailsWorkMode"
         );
 
-    if (salary) {
+    if (workMode) {
 
-        salary.textContent =
-            job.salary ||
+        workMode.textContent =
+            job.work_mode ||
             "Not specified";
 
     }
@@ -3000,14 +2995,14 @@ jobTitleFilter
 
 jobLocationFilter
     ?.addEventListener(
-        "input",
+        "change",
         applyJobFilters
     );
 
 
-jobSalaryFilter
+jobDepartmentFilter
     ?.addEventListener(
-        "input",
+        "change",
         applyJobFilters
     );
 
@@ -3079,16 +3074,100 @@ clearJobFilters
 
             }
 
+            /* RESET LOCATION DROPDOWN UI */
+
+            const locationDropdown =
+                jobLocationFilter
+                    ?.closest(
+                        "[data-dropdown]"
+                    );
 
             if (
-                jobSalaryFilter
+                locationDropdown
             ) {
 
-                jobSalaryFilter.value =
+                const text =
+                    locationDropdown.querySelector(
+                        "[data-dropdown-text]"
+                    );
+
+                const options =
+                    locationDropdown.querySelectorAll(
+                        "[data-dropdown-option]"
+                    );
+
+                if (text) {
+
+                    text.textContent =
+                        "Any location";
+
+                }
+
+                options.forEach(
+                    option => {
+
+                        option.classList.toggle(
+                            "selected",
+                            option.dataset.value === ""
+                        );
+
+                    }
+                );
+
+            }
+
+
+            /* RESET DEPARTMENT */
+
+            if (
+                jobDepartmentFilter
+            ) {
+
+                jobDepartmentFilter.value =
                     "";
 
             }
 
+
+            const departmentDropdown =
+                jobDepartmentFilter
+                    ?.closest(
+                        "[data-dropdown]"
+                    );
+
+            if (
+                departmentDropdown
+            ) {
+
+                const text =
+                    departmentDropdown.querySelector(
+                        "[data-dropdown-text]"
+                    );
+
+                const options =
+                    departmentDropdown.querySelectorAll(
+                        "[data-dropdown-option]"
+                    );
+
+                if (text) {
+
+                    text.textContent =
+                        "Any department";
+
+                }
+
+                options.forEach(
+                    option => {
+
+                        option.classList.toggle(
+                            "selected",
+                            option.dataset.value === ""
+                        );
+
+                    }
+                );
+
+            }
 
             if (
                 jobPositionFilter

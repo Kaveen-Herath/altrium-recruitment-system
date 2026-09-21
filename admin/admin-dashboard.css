@@ -1829,7 +1829,6 @@ body {
     flex-shrink: 0;
 }
 
-
 .edit-vacancy-button,
 .close-vacancy-button {
     padding: 11px 18px;
@@ -1973,6 +1972,64 @@ body {
         rgba(255, 90, 90, 0.18);
 }
 
+/* =========================================================
+   DELETE VACANCY BUTTON
+   ========================================================= */
+
+.delete-vacancy-button {
+    width: 38px;
+    height: 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border:
+        1px solid
+        rgba(255, 90, 90, 0.20);
+
+    border-radius: 50%;
+
+    background:
+        rgba(255, 90, 90, 0.035);
+
+    color: #ff7474;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.delete-vacancy-button svg {
+    width: 16px;
+    height: 16px;
+
+    fill: none;
+
+    stroke: currentColor;
+
+    stroke-width: 1.7;
+
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.delete-vacancy-button:hover {
+    background:
+        rgba(255, 90, 90, 0.10);
+
+    border-color:
+        rgba(255, 90, 90, 0.40);
+
+    transform:
+        translateY(-1px);
+}
+
 .reopen-vacancy-button {
     padding: 9px 14px;
 
@@ -2032,6 +2089,37 @@ body {
     box-shadow:
         0 10px 25px
         rgba(126, 219, 141, 0.22);
+}
+
+.confirm-delete-vacancy-button {
+    min-width: 120px;
+    padding: 12px 20px;
+
+    border: none;
+    border-radius: 24px;
+
+    background: #ff5364;
+    color: #050505;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.confirm-delete-vacancy-button:hover {
+    background: #ff6978;
+    transform: translateY(-1px);
+}
+
+.confirm-delete-vacancy-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
 }
 
 /* =========================================================

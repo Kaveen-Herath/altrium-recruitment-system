@@ -327,17 +327,164 @@
 
             <div class="job-filter-field">
 
-                <label for="jobLocationFilter">
+                <label>
                     LOCATION
                 </label>
 
-
-                <input
-                    type="text"
-                    id="jobLocationFilter"
-                    placeholder="e.g. Colombo"
-                    autocomplete="off"
+                <div
+                    class="altrium-dropdown filter-dropdown-style"
+                    data-dropdown
                 >
+
+                    <button
+                        type="button"
+                        class="altrium-dropdown-trigger"
+                        data-dropdown-trigger
+                    >
+
+                        <span data-dropdown-text>
+                            Any location
+                        </span>
+
+                        <span class="altrium-dropdown-arrow">
+                            ↓
+                        </span>
+
+                    </button>
+
+
+                    <div class="altrium-dropdown-menu">
+
+                        <button
+                            type="button"
+                            class="altrium-dropdown-option selected"
+                            data-dropdown-option
+                            data-value=""
+                        >
+                            Any location
+                        </button>
+
+                        <button
+                            type="button"
+                            class="altrium-dropdown-option"
+                            data-dropdown-option
+                            data-value="Altrium Head Office - Sri Jayawardenepura Kotte"
+                        >
+                            Altrium Head Office - Sri Jayawardenepura Kotte
+                        </button>
+
+                    </div>
+
+
+                    <input
+                        type="hidden"
+                        id="jobLocationFilter"
+                        data-dropdown-value
+                        value=""
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- DEPARTMENT -->
+
+            <div class="job-filter-field">
+
+                <label>
+                    DEPARTMENT
+                </label>
+
+                <div
+                    class="altrium-dropdown filter-dropdown-style"
+                    data-dropdown
+                >
+
+                    <button
+                        type="button"
+                        class="altrium-dropdown-trigger"
+                        data-dropdown-trigger
+                    >
+
+                        <span data-dropdown-text>
+                            Any department
+                        </span>
+
+                        <span class="altrium-dropdown-arrow">
+                            ↓
+                        </span>
+
+                    </button>
+
+
+                    <div class="altrium-dropdown-menu">
+
+                        <button
+                            type="button"
+                            class="altrium-dropdown-option selected"
+                            data-dropdown-option
+                            data-value=""
+                        >
+                            Any department
+                        </button>
+
+                        <button
+                            type="button"
+                            class="altrium-dropdown-option"
+                            data-dropdown-option
+                            data-value="Information Technology"
+                        >
+                            Information Technology
+                        </button>
+
+                        <button
+                            type="button"
+                            class="altrium-dropdown-option"
+                            data-dropdown-option
+                            data-value="Finance & Accounting"
+                        >
+                            Finance & Accounting
+                        </button>
+
+                        <button
+                            type="button"
+                            class="altrium-dropdown-option"
+                            data-dropdown-option
+                            data-value="Human Resources"
+                        >
+                            Human Resources
+                        </button>
+
+                        <button
+                            type="button"
+                            class="altrium-dropdown-option"
+                            data-dropdown-option
+                            data-value="Marketing"
+                        >
+                            Marketing
+                        </button>
+
+                        <button
+                            type="button"
+                            class="altrium-dropdown-option"
+                            data-dropdown-option
+                            data-value="Sales"
+                        >
+                            Sales
+                        </button>
+
+                    </div>
+
+
+                    <input
+                        type="hidden"
+                        id="jobDepartmentFilter"
+                        data-dropdown-value
+                        value=""
+                    >
+
+                </div>
 
             </div>
 
@@ -348,7 +495,7 @@
             <div class="job-filter-field">
 
                 <label>
-                    POSITION
+                    EMPLOYMENT TYPE
                 </label>
 
 
@@ -364,7 +511,7 @@
                     >
 
                         <span data-dropdown-text>
-                            Any position
+                            Any Employment Type
                         </span>
 
 
@@ -385,7 +532,7 @@
                             data-dropdown-option
                             data-value=""
                         >
-                            Any position
+                            Any
                         </button>
 
 
@@ -428,16 +575,6 @@
                             Contract
                         </button>
 
-
-                        <button
-                            type="button"
-                            class="altrium-dropdown-option"
-                            data-dropdown-option
-                            data-value="Remote"
-                        >
-                            Remote
-                        </button>
-
                     </div>
 
 
@@ -453,25 +590,6 @@
 
             </div>
 
-
-
-            <!-- MINIMUM SALARY -->
-
-            <div class="job-filter-field">
-
-                <label for="jobSalaryFilter">
-                    MINIMUM SALARY
-                </label>
-
-
-                <input
-                    type="number"
-                    id="jobSalaryFilter"
-                    min="0"
-                    placeholder="e.g. 150000"
-                >
-
-            </div>
 
 
 
@@ -587,27 +705,6 @@
                         >
                             Oldest vacancies
                         </button>
-
-
-                        <button
-                            type="button"
-                            class="altrium-dropdown-option"
-                            data-dropdown-option
-                            data-value="salary-high"
-                        >
-                            Highest salary
-                        </button>
-
-
-                        <button
-                            type="button"
-                            class="altrium-dropdown-option"
-                            data-dropdown-option
-                            data-value="salary-low"
-                        >
-                            Lowest salary
-                        </button>
-
 
                         <button
                             type="button"
@@ -759,10 +856,10 @@
             <div>
 
                 <span>
-                    SALARY
+                    WORK MODE
                 </span>
 
-                <strong id="jobDetailsSalary">
+                <strong id="jobDetailsWorkMode">
                     Not specified
                 </strong>
 

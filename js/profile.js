@@ -302,148 +302,43 @@ function loadProfile() {
             user.experience || "";
     }
 
-    /* =========================================================
-   PREFERRED JOB TYPE DROPDOWN
-   ========================================================= */
-
-const jobTypeDropdown =
-    document.getElementById("jobTypeDropdown");
-
-const jobTypeTrigger =
-    document.getElementById("jobTypeTrigger");
-
-const jobTypeSelected =
-    document.getElementById("jobTypeSelected");
-
-const preferredJobTypeSelect =
-    document.getElementById("preferredJobType");
 
 
-if (jobTypeDropdown && jobTypeTrigger) {
+/* ---------------------------------------------
+   Profile initials
+--------------------------------------------- */
 
-    jobTypeTrigger.addEventListener(
-        "click",
-        () => {
-
-            jobTypeDropdown.classList.toggle(
-                "open"
-            );
-
-        }
+const profileInitials =
+    document.getElementById(
+        "profileInitials"
     );
 
+if (profileInitials) {
 
-    const options =
-        jobTypeDropdown.querySelectorAll(
-            ".job-type-menu button"
-        );
+    const firstInitial =
+        user.firstName
+            ? user.firstName
+                .trim()
+                .charAt(0)
+                .toUpperCase()
+            : "";
 
+    const lastInitial =
+        user.lastName
+            ? user.lastName
+                .trim()
+                .charAt(0)
+                .toUpperCase()
+            : "";
 
-    options.forEach(option => {
+    const initials =
+        `${firstInitial}${lastInitial}` ||
+        "U";
 
-        option.addEventListener(
-            "click",
-            () => {
-
-                const value =
-                    option.dataset.value;
-
-
-                preferredJobTypeSelect.value =
-                    value;
-
-
-                jobTypeSelected.textContent =
-                    value;
-
-
-                options.forEach(item => {
-                    item.classList.remove("selected");
-                });
-
-
-                option.classList.add(
-                    "selected"
-                );
-
-
-                jobTypeDropdown.classList.remove(
-                    "open"
-                );
-
-            }
-        );
-
-    });
-
-
-    document.addEventListener(
-        "click",
-        event => {
-
-            if (
-                !jobTypeDropdown.contains(
-                    event.target
-                )
-            ) {
-
-                jobTypeDropdown.classList.remove(
-                    "open"
-                );
-
-            }
-
-        }
-    );
+    profileInitials.textContent =
+        initials;
 
 }
-
-    const preferredJobType =
-        document.getElementById(
-            "preferredJobType"
-        );
-
-    if (preferredJobType) {
-
-        preferredJobType.value =
-            user.preferredJobType || "";
-    }
-
-    if (jobTypeSelected) {
-
-    jobTypeSelected.textContent =
-        user.preferredJobType ||
-        "Select job type";
-
-    }
-
-    /* ---------------------------------------------
-       Profile image / initials
-    --------------------------------------------- */
-
-    const profileImage =
-    document.getElementById("profileImage");
-
-        if (profileImage) {
-
-            if (user.profilePicture) {
-
-                // User has uploaded a real photo
-                profileImage.src =
-                    user.profilePicture;
-
-            } else {
-
-                // No photo — create avatar using real name
-                const fullName =
-                    `${user.firstName || ""} ${user.lastName || ""}`.trim();
-
-                profileImage.src =
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=ff841f&color=111&size=200&bold=true`;
-
-            }
-
-        }
 
 
     /* ---------------------------------------------
@@ -513,11 +408,6 @@ async function saveCareerDetails() {
             "profileSkills"
         );
 
-    const jobTypeInput =
-        document.getElementById(
-            "preferredJobType"
-        );
-
 
     const education =
         educationInput
@@ -531,18 +421,11 @@ async function saveCareerDetails() {
             : "";
 
 
-    const preferredJobType =
-        jobTypeInput
-            ? jobTypeInput.value
-            : "";
-
-
     console.log(
         "CAREER DETAILS:",
         {
             education,
-            skills,
-            preferredJobType
+            skills
         }
     );
 
@@ -552,10 +435,6 @@ async function saveCareerDetails() {
         education: education,
 
         skills: skills,
-
-        preferredJobType:
-            preferredJobType
-
     });
 
 }
@@ -691,9 +570,6 @@ function updateProfileStrength() {
         user.skills,
 
         user.experience,
-
-        user.preferredJobType
-
     ];
 
 
@@ -817,198 +693,6 @@ tabs.forEach(tab => {
 
 
 /* =========================================================
-   PROFILE IMAGE
-   ========================================================= */
-
-const avatarUpload =
-    document.getElementById(
-        "avatarUpload"
-    );
-
-
-if (avatarUpload) {
-
-    avatarUpload.addEventListener(
-        "change",
-        async function(event) {
-
-            const file =
-                event.target.files[0];
-
-
-            if (!file) return;
-
-
-            /* ---------------------------------------------
-               Check file type
-            --------------------------------------------- */
-
-            const allowedTypes = [
-                "image/jpeg",
-                "image/png",
-                "image/webp"
-            ];
-
-
-            if (!allowedTypes.includes(file.type)) {
-
-                showProfileToast(
-                    "Please select a JPG, PNG or WEBP image.",
-                    "error"
-                );
-
-                avatarUpload.value = "";
-
-                return;
-            }
-
-
-            /* ---------------------------------------------
-               Check size
-            --------------------------------------------- */
-
-            if (file.size > 5 * 1024 * 1024) {
-
-                showProfileToast(
-                    "Image must be smaller than 5MB.",
-                    "error"
-                );
-
-                avatarUpload.value = "";
-
-                return;
-            }
-
-
-            /* ---------------------------------------------
-               Prepare image for backend
-            --------------------------------------------- */
-
-            const formData =
-                new FormData();
-
-
-            formData.append(
-                "profilePhoto",
-                file
-            );
-
-
-            try {
-
-                /* -----------------------------------------
-                   Send image to Node backend
-                ----------------------------------------- */
-
-                const response =
-                    await fetch(
-                        "/api/profile/photo",
-                        {
-                            method: "POST",
-
-                            credentials:
-                                "same-origin",
-
-                            body: formData
-                        }
-                    );
-
-
-                const data =
-                    await response.json();
-
-
-                /* -----------------------------------------
-                   Handle upload error
-                ----------------------------------------- */
-
-                if (
-                    !response.ok ||
-                    !data.success
-                ) {
-
-                    showProfileToast(
-                        data.message ||
-                        "Unable to upload profile picture.",
-                        "error"
-                    );
-
-                    avatarUpload.value = "";
-
-                    return;
-                }
-
-
-                /* -----------------------------------------
-                   Display new image immediately
-                ----------------------------------------- */
-
-                const profileImage =
-                    document.getElementById(
-                        "profileImage"
-                    );
-
-
-                if (profileImage) {
-
-                    profileImage.src =
-                        data.profilePhotoUrl;
-                }
-
-
-                /* -----------------------------------------
-                   Update current JS user object
-                ----------------------------------------- */
-
-                if (user) {
-
-                    user.profilePicture =
-                        data.profilePhotoUrl;
-                }
-
-
-                /* -----------------------------------------
-                   Success notification
-                ----------------------------------------- */
-
-                showProfileToast(
-                    "Profile picture updated successfully.",
-                    "success"
-                );
-
-
-                /* -----------------------------------------
-                   Reset file input
-                ----------------------------------------- */
-
-                avatarUpload.value = "";
-
-            }
-
-            catch (error) {
-
-                console.error(
-                    "Image upload error:",
-                    error
-                );
-
-
-                showProfileToast(
-                    "Unable to upload profile picture.",
-                    "error"
-                );
-
-
-                avatarUpload.value = "";
-            }
-
-        }
-    );
-
-}
-
-
-/* =========================================================
    LOGOUT
    ========================================================= */
 
@@ -1067,7 +751,324 @@ async function logout() {
 
 
 /* =========================================================
+   LOAD APPLIED JOBS
+   ========================================================= */
+
+async function loadAppliedJobs() {
+
+    const applicationsList =
+        document.getElementById(
+            "applicationsList"
+        );
+
+    if (!applicationsList) {
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/my-applications",
+                {
+                    method: "GET",
+                    credentials: "same-origin"
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            applicationsList.innerHTML = `
+                <div class="applications-empty">
+                    Unable to load your applications.
+                </div>
+            `;
+
+            return;
+        }
+
+
+        const applications =
+            Array.isArray(data.applications)
+                ? data.applications
+                : [];
+
+
+        if (applications.length === 0) {
+
+            applicationsList.innerHTML = `
+                <div class="applications-empty">
+                    You haven't applied for any jobs yet.
+                </div>
+            `;
+
+            return;
+        }
+
+
+        applicationsList.innerHTML = "";
+
+
+        applications.forEach(
+            application => {
+
+                const card =
+                    document.createElement(
+                        "article"
+                    );
+
+
+                card.className =
+                    "application-card glass";
+
+
+                const statusClass =
+                    getApplicationStatusClass(
+                        application.status
+                    );
+
+
+                const statusLabel =
+                    getApplicationStatusLabel(
+                        application.status
+                    );
+
+
+                const appliedDate =
+                    application.appliedAt
+                        ? new Date(
+                            application.appliedAt
+                        ).toLocaleDateString(
+                            "en-GB",
+                            {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric"
+                            }
+                        )
+                        : "Unknown";
+
+
+card.innerHTML = `
+    <div class="application-card-left">
+
+        <span class="application-label">
+            APPLIED FOR
+        </span>
+
+        <h3>
+            ${application.job?.title || "Job Vacancy"}
+        </h3>
+
+        <span class="application-reference">
+            ${application.reference || "APPLICATION"}
+        </span>
+
+        <p class="application-department">
+            ${application.job?.department || "Department"}
+        </p>
+
+    </div>
+
+
+    <div class="application-card-middle">
+
+        <span class="application-label">
+            JOB DETAILS
+        </span>
+
+        <p>
+            ${application.job?.location || "Location"}
+            •
+            ${application.job?.employmentType || "Employment Type"}
+        </p>
+
+    </div>
+
+
+    <div class="application-card-actions">
+
+        <span class="application-status ${statusClass}">
+            ${statusLabel}
+        </span>
+
+        <span class="application-date">
+            Applied ${new Date(application.appliedAt).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            })}
+        </span>
+
+        <a
+            href="application-progress.html?id=${encodeURIComponent(
+                application.id
+            )}"
+            class="view-progress-btn"
+        >
+            View progress
+        </a>
+
+    </div>
+`;
+
+                applicationsList.appendChild(
+                    card
+                );
+
+            }
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Load applied jobs error:",
+            error
+        );
+
+
+        applicationsList.innerHTML = `
+            <div class="applications-empty">
+                Unable to load your applications.
+            </div>
+        `;
+
+    }
+
+}
+
+
+/* =========================================================
+   APPLICATION STATUS HELPERS
+   ========================================================= */
+
+function getApplicationStatusLabel(
+    status
+) {
+
+    const labels = {
+
+        submitted:
+            "Submitted",
+
+        screening:
+            "Screening",
+
+        shortlisted:
+            "Shortlisted",
+
+        interview:
+            "Interview",
+
+        offer:
+            "Offer",
+
+        hired:
+            "Hired",
+
+        rejected:
+            "Rejected",
+
+        withdrawn:
+            "Withdrawn"
+
+    };
+
+
+    return labels[status] ||
+        "Application";
+
+}
+
+
+function getApplicationStatusClass(
+    status
+) {
+
+    const classes = {
+
+        submitted:
+            "submitted",
+
+        screening:
+            "reviewing",
+
+        shortlisted:
+            "reviewing",
+
+        interview:
+            "interview",
+
+        offer:
+            "interview",
+
+        hired:
+            "interview",
+
+        rejected:
+            "rejected",
+
+        withdrawn:
+            "withdrawn"
+
+    };
+
+
+    return classes[status] ||
+        "submitted";
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+   ========================================================= */
+
+function escapeHTML(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+    .replaceAll(
+        "&",
+        "&amp;"
+    )
+    .replaceAll(
+        "<",
+        "&lt;"
+    )
+    .replaceAll(
+        ">",
+        "&gt;"
+    )
+    .replaceAll(
+        '"',
+        "&quot;"
+    )
+    .replaceAll(
+        "'",
+        "&#039;"
+    );
+
+}
+
+
+/* =========================================================
    START
    ========================================================= */
 
 loadUserProfile();
+loadAppliedJobs();

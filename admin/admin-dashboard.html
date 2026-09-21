@@ -383,25 +383,10 @@
             <button
                 type="button"
                 class="admin-nav-item system-panel-nav-item"
-                data-section="system-roles"
-            >
-
-                <span class="admin-nav-number">
-                    07
-                </span>
-
-                Roles & Permissions
-
-            </button>
-
-
-            <button
-                type="button"
-                class="admin-nav-item system-panel-nav-item"
                 data-section="system-feedback"
             >
                 <span class="admin-nav-number">
-                    08
+                    07
                 </span>
 
                 Feedback & Issues
@@ -415,40 +400,10 @@
             >
 
                 <span class="admin-nav-number">
-                    09
+                    08
                 </span>
 
                 Audit Logs
-
-            </button>
-
-
-            <button
-                type="button"
-                class="admin-nav-item system-panel-nav-item"
-                data-section="system-security"
-            >
-
-                <span class="admin-nav-number">
-                    10
-                </span>
-
-                Sessions & Security
-
-            </button>
-
-
-            <button
-                type="button"
-                class="admin-nav-item system-panel-nav-item"
-                data-section="system-settings"
-            >
-
-                <span class="admin-nav-number">
-                    11
-                </span>
-
-                System Settings
 
             </button>
 
@@ -3451,44 +3406,140 @@
                     </div>
 
 
+                    <!-- DEPARTMENT -->
                     <div class="admin-input">
 
-                        <label for="jobDepartment">
+                        <label>
                             Department *
                         </label>
 
-                        <input
-                            type="text"
-                            id="jobDepartment"
-                            placeholder="e.g. Technology"
-                            required
+                        <div
+                            class="admin-custom-select"
+                            id="departmentDropdown"
                         >
+
+                            <button
+                                type="button"
+                                class="admin-custom-select-trigger"
+                                id="departmentDropdownTrigger"
+                            >
+
+                                <span id="departmentText">
+                                    Select department
+                                </span>
+
+                                <span class="admin-select-arrow">
+                                    ↓
+                                </span>
+
+                            </button>
+
+                            <div class="admin-custom-select-menu">
+
+                                <button
+                                    type="button"
+                                    data-value="Information Technology"
+                                >
+                                    Information Technology
+                                </button>
+
+                                <button
+                                    type="button"
+                                    data-value="Finance & Accounting"
+                                >
+                                    Finance & Accounting
+                                </button>
+
+                                <button
+                                    type="button"
+                                    data-value="Human Resources"
+                                >
+                                    Human Resources
+                                </button>
+
+                                <button
+                                    type="button"
+                                    data-value="Marketing"
+                                >
+                                    Marketing
+                                </button>
+
+                                <button
+                                    type="button"
+                                    data-value="Sales"
+                                >
+                                    Sales
+                                </button>
+
+                            </div>
+
+                            <input
+                                type="hidden"
+                                id="jobDepartment"
+                                value=""
+                            >
+
+                        </div>
 
                     </div>
 
 
+                    <!-- LOCATION -->
                     <div class="admin-input">
 
-                        <label for="jobLocation">
+                        <label>
                             Location *
                         </label>
 
-                        <input
-                            type="text"
-                            id="jobLocation"
-                            placeholder="e.g. Colombo"
-                            required
+                        <div
+                            class="admin-custom-select"
+                            id="locationDropdown"
                         >
+
+                            <button
+                                type="button"
+                                class="admin-custom-select-trigger"
+                                id="locationDropdownTrigger"
+                            >
+
+                                <span id="locationText">
+                                    Select location
+                                </span>
+
+                                <span class="admin-select-arrow">
+                                    ↓
+                                </span>
+
+                            </button>
+
+                            <div class="admin-custom-select-menu">
+
+                                <button
+                                    type="button"
+                                    data-value="Altrium Head Office - Sri Jayawardenepura Kotte"
+                                >
+                                    Altrium Head Office - Sri Jayawardenepura Kotte
+                                </button>
+
+                            </div>
+
+                            <input
+                                type="hidden"
+                                id="jobLocation"
+                                value=""
+                            >
+
+                        </div>
 
                     </div>
 
 
+                    <!-- EMPLOYMENT TYPE -->
                     <div class="admin-input">
 
                         <label>
                             Employment type *
                         </label>
-
 
                         <div
                             class="admin-custom-select"
@@ -3511,7 +3562,6 @@
 
                             </button>
 
-
                             <div class="admin-custom-select-menu">
 
                                 <button
@@ -3530,16 +3580,73 @@
 
                                 <button
                                     type="button"
+                                    data-value="Contract"
+                                >
+                                    Contract
+                                </button>
+
+                                <button
+                                    type="button"
                                     data-value="Internship"
                                 >
                                     Internship
                                 </button>
 
+                            </div>
+
+                            <input
+                                type="hidden"
+                                id="employmentType"
+                                value=""
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- WORK MODE -->
+                    <div class="admin-input">
+
+                        <label>
+                            Work mode *
+                        </label>
+
+                        <div
+                            class="admin-custom-select"
+                            id="workModeDropdown"
+                        >
+
+                            <button
+                                type="button"
+                                class="admin-custom-select-trigger"
+                                id="workModeDropdownTrigger"
+                            >
+
+                                <span id="workModeText">
+                                    Select work mode
+                                </span>
+
+                                <span class="admin-select-arrow">
+                                    ↓
+                                </span>
+
+                            </button>
+
+                            <div class="admin-custom-select-menu">
+
                                 <button
                                     type="button"
-                                    data-value="Contract"
+                                    data-value="On-site"
                                 >
-                                    Contract
+                                    On-site
+                                </button>
+
+                                <button
+                                    type="button"
+                                    data-value="Hybrid"
+                                >
+                                    Hybrid
                                 </button>
 
                                 <button
@@ -3551,39 +3658,13 @@
 
                             </div>
 
-
-                            <!-- Actual value used when saving -->
-
-                            <select
-                                id="employmentType"
-                                hidden
+                            <input
+                                type="hidden"
+                                id="workMode"
+                                value=""
                             >
 
-                                <option value=""></option>
-                                <option value="Full time">Full time</option>
-                                <option value="Part time">Part time</option>
-                                <option value="Internship">Internship</option>
-                                <option value="Contract">Contract</option>
-                                <option value="Remote">Remote</option>
-
-                            </select>
-
                         </div>
-
-                    </div>
-
-
-                    <div class="admin-input">
-
-                        <label for="jobSalary">
-                            Salary
-                        </label>
-
-                        <input
-                            type="text"
-                            id="jobSalary"
-                            placeholder="e.g. LKR 150,000 - 200,000"
-                        >
 
                     </div>
 
@@ -3889,6 +3970,61 @@
 
 </div>
 
+
+<!-- =====================================================
+     DELETE VACANCY CONFIRMATION
+     ===================================================== -->
+
+<div
+    class="admin-modal"
+    id="deleteVacancyModal"
+>
+
+    <div
+        class="admin-modal-backdrop"
+        id="deleteVacancyBackdrop"
+    ></div>
+
+
+    <div class="close-vacancy-modal-card">
+
+        <span class="admin-section-label">
+            DELETE VACANCY
+        </span>
+
+        <h2>
+            Delete this position?
+        </h2>
+
+        <p id="deleteVacancyMessage">
+            This vacancy will be permanently deleted.
+        </p>
+
+
+        <div class="close-vacancy-actions">
+
+            <button
+                type="button"
+                class="admin-cancel-button"
+                id="cancelDeleteVacancy"
+            >
+                Cancel
+            </button>
+
+
+            <button
+                type="button"
+                class="confirm-delete-vacancy-button"
+                id="confirmDeleteVacancy"
+            >
+                Delete vacancy
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
 
 <!-- =====================================================
      APPLICATION REVIEW MODAL

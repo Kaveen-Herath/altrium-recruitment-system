@@ -62,32 +62,6 @@ app.use(
 );
 
 
-/* =========================================================
-   PROFILE PHOTO UPLOAD
-   ========================================================= */
-
-const profilePhotoUpload = multer({
-    storage: multer.memoryStorage(),
-
-    limits: {
-        fileSize: 5 * 1024 * 1024 // 5 MB
-    },
-
-    fileFilter: (req, file, cb) => {
-        const allowedTypes = [
-            "image/jpeg",
-            "image/png",
-            "image/webp"
-        ];
-
-        if (allowedTypes.includes(file.mimetype)) {
-            cb(null, true);
-        } else {
-            cb(new Error("Only JPG, PNG and WEBP images are allowed."));
-        }
-    }
-});
-
 
 /* =========================================================
    APPLICATION CV UPLOAD
@@ -722,7 +696,7 @@ app.post(
                 department,
                 location,
                 employmentType,
-                salary,
+                workMode,
                 applicationDeadline,
                 experienceRequired,
                 educationRequired,
@@ -739,6 +713,7 @@ app.post(
                 !department ||
                 !location ||
                 !employmentType ||
+                !workMode ||
                 !description
             ) {
 
@@ -772,7 +747,7 @@ app.post(
                     department,
                     location,
                     employment_type,
-                    salary,
+                    work_mode,
                     application_deadline,
                     experience_required,
                     education_required,
@@ -799,7 +774,7 @@ app.post(
                     location.trim(),
                     employmentType.trim(),
 
-                    salary?.trim() || null,
+                    workMode.trim(),
 
                     applicationDeadline || null,
 
@@ -826,6 +801,100 @@ app.post(
                 const createdJob =
                     result.rows[0];
 
+                    /*  =================================================
+                        AUDIT LOG - JOB VACANCY CREATED
+                        ================================================= */
+
+                        await pool.query(
+                            `
+                            INSERT INTO audit_logs (
+
+                                actor_user_id,
+                                target_user_id,
+
+                                action_key,
+
+                                entity_type,
+                                entity_id,
+
+                                description,
+
+                                after_data,
+
+                                metadata,
+
+                                ip_address,
+                                user_agent
+
+                            )
+
+                            VALUES (
+
+                                $1,
+                                NULL,
+
+                                'job.created',
+
+                                'job',
+                                $2,
+
+                                $3,
+
+                                $4::jsonb,
+
+                                $5::jsonb,
+
+                                $6,
+                                $7
+
+                            )
+                            `,
+                            [
+
+                                req.session.userId,
+
+                                createdJob.id,
+
+                                `Created job vacancy "${createdJob.job_title}".`,
+
+                                JSON.stringify({
+
+                                    jobTitle:
+                                        createdJob.job_title,
+
+                                    department:
+                                        createdJob.department,
+
+                                    location:
+                                        createdJob.location,
+
+                                    employmentType:
+                                        createdJob.employment_type,
+
+                                    workMode:
+                                        createdJob.work_mode,
+
+                                    applicationDeadline:
+                                        createdJob.application_deadline,
+
+                                    numberOfOpenings:
+                                        createdJob.number_of_openings
+
+                                }),
+
+                                JSON.stringify({
+
+                                    source:
+                                        "admin vacancy creation"
+
+                                }),
+
+                                req.ip,
+
+                                req.get("user-agent") || null
+
+                            ]
+                        );
 
                 const deadlineText =
                     createdJob.application_deadline
@@ -920,6 +989,7 @@ app.post(
 
     }
 );
+
 
 
 /* =========================================================
@@ -1322,8 +1392,6 @@ app.get(
 
                         u.created_at,
 
-                        u.profile_photo_path,
-
 
                         r.role_name,
 
@@ -1482,61 +1550,9 @@ app.get(
                 result.rows.map(
                     user => {
 
-                        let profilePhotoUrl =
-                            null;
-
-
-                        if (
-                            user.profile_photo_path
-                        ) {
-
-                            const {
-                                data
-                            } =
-                                supabase.storage
-                                    .from(
-                                        "profile-photos"
-                                    )
-                                    .getPublicUrl(
-                                        user.profile_photo_path
-                                    );
-
-
-                            profilePhotoUrl =
-                                data.publicUrl;
-
-                        }
-
-
                         const users =
     result.rows.map(
         user => {
-
-            let profilePhotoUrl =
-                null;
-
-
-            if (
-                user.profile_photo_path
-            ) {
-
-                const {
-                    data
-                } =
-                    supabase.storage
-                        .from(
-                            "profile-photos"
-                        )
-                        .getPublicUrl(
-                            user.profile_photo_path
-                        );
-
-
-                profilePhotoUrl =
-                    data.publicUrl;
-
-            }
-
 
 
             /* =============================================
@@ -1633,10 +1649,6 @@ app.get(
                     user.created_at,
 
 
-                profilePicture:
-                    profilePhotoUrl,
-
-
                 isCurrentUser:
                     String(
                         user.id
@@ -1693,9 +1705,6 @@ app.get(
                             createdAt:
                                 user.created_at,
 
-
-                            profilePicture:
-                                profilePhotoUrl,
 
 
                             isCurrentUser:
@@ -5444,7 +5453,7 @@ app.get(
                     jobs.department,
                     jobs.location,
                     jobs.employment_type,
-                    jobs.salary,
+                    jobs.work_mode,
                     jobs.application_deadline,
                     jobs.experience_required,
                     jobs.education_required,
@@ -5561,6 +5570,7 @@ app.patch(
                 });
 
             }
+            
 
 
             return res.json({
@@ -5613,7 +5623,7 @@ app.patch(
                 department,
                 location,
                 employmentType,
-                salary,
+                workMode,
                 applicationDeadline,
                 experienceRequired,
                 educationRequired,
@@ -5630,6 +5640,7 @@ app.patch(
                 !department ||
                 !location ||
                 !employmentType ||
+                !workMode ||
                 !description
             ) {
 
@@ -5667,7 +5678,7 @@ app.patch(
                         department = $2,
                         location = $3,
                         employment_type = $4,
-                        salary = $5,
+                        work_mode = $5,
                         application_deadline = $6,
                         experience_required = $7,
                         education_required = $8,
@@ -5690,7 +5701,7 @@ app.patch(
 
                         employmentType.trim(),
 
-                        salary?.trim() || null,
+                        workMode.trim(),
 
                         applicationDeadline || null,
 
@@ -5750,6 +5761,305 @@ app.patch(
     }
 );
 
+// ADMIN DELETE JOB VACANCY
+
+app.delete(
+    "/api/admin/jobs/:id",
+    requirePermission(
+        "vacancies.manage"
+    ),
+    async (req, res) => {
+
+        const client =
+            await pool.connect();
+
+
+        try {
+
+            const jobId =
+                req.params.id;
+
+
+            await client.query(
+                "BEGIN"
+            );
+
+
+            /* =================================================
+               LOAD VACANCY BEFORE DELETE
+               ================================================= */
+
+            const jobResult =
+                await client.query(
+                    `
+                    SELECT *
+
+                    FROM jobs
+
+                    WHERE id = $1
+
+                    FOR UPDATE
+                    `,
+                    [
+                        jobId
+                    ]
+                );
+
+
+            if (
+                jobResult.rows.length === 0
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(404).json({
+
+                    success: false,
+
+                    message:
+                        "Job vacancy not found."
+
+                });
+
+            }
+
+
+            const job =
+                jobResult.rows[0];
+
+
+            /* =================================================
+               CHECK APPLICATIONS
+               ================================================= */
+
+            const applicationCountResult =
+                await client.query(
+                    `
+                    SELECT
+                        COUNT(*)::INT AS count
+
+                    FROM applications
+
+                    WHERE job_id = $1
+                    `,
+                    [
+                        jobId
+                    ]
+                );
+
+
+            const applicationCount =
+                Number(
+                    applicationCountResult
+                        .rows[0]
+                        .count
+                ) || 0;
+
+
+            if (
+                applicationCount > 0
+            ) {
+
+                await client.query(
+                    "ROLLBACK"
+                );
+
+
+                return res.status(409).json({
+
+                    success: false,
+
+                    message:
+                        "This vacancy cannot be deleted because it already has applications. Close the vacancy instead."
+
+                });
+
+            }
+
+
+            /* =================================================
+               DELETE VACANCY
+               ================================================= */
+
+            await client.query(
+                `
+                DELETE FROM jobs
+
+                WHERE id = $1
+                `,
+                [
+                    jobId
+                ]
+            );
+
+
+            /* =================================================
+               AUDIT LOG
+               ================================================= */
+
+            await client.query(
+                `
+                INSERT INTO audit_logs (
+
+                    actor_user_id,
+                    target_user_id,
+
+                    action_key,
+
+                    entity_type,
+                    entity_id,
+
+                    description,
+
+                    before_data,
+                    after_data,
+
+                    metadata,
+
+                    ip_address,
+                    user_agent
+
+                )
+
+                VALUES (
+
+                    $1,
+                    NULL,
+
+                    'job.deleted',
+
+                    'job',
+                    $2,
+
+                    $3,
+
+                    $4::jsonb,
+                    NULL,
+
+                    $5::jsonb,
+
+                    $6,
+                    $7
+
+                )
+                `,
+                [
+
+                    req.session.userId,
+
+                    String(
+                        job.id
+                    ),
+
+                    `Deleted job vacancy "${job.job_title}".`,
+
+                    JSON.stringify({
+
+                        id:
+                            job.id,
+
+                        jobTitle:
+                            job.job_title,
+
+                        department:
+                            job.department,
+
+                        location:
+                            job.location,
+
+                        employmentType:
+                            job.employment_type,
+
+                        workMode:
+                            job.work_mode,
+
+                        applicationDeadline:
+                            job.application_deadline,
+
+                        numberOfOpenings:
+                            job.number_of_openings,
+
+                        status:
+                            job.status,
+
+                        createdBy:
+                            job.created_by,
+
+                        createdAt:
+                            job.created_at
+
+                    }),
+
+                    JSON.stringify({
+
+                        source:
+                            "admin vacancy deletion"
+
+                    }),
+
+                    req.ip ||
+                    null,
+
+                    req.get(
+                        "user-agent"
+                    ) ||
+                    null
+
+                ]
+            );
+
+
+            await client.query(
+                "COMMIT"
+            );
+
+
+            return res.json({
+
+                success: true,
+
+                message:
+                    "Job vacancy deleted successfully."
+
+            });
+
+        }
+
+        catch (error) {
+
+            await client.query(
+                "ROLLBACK"
+            );
+
+
+            console.error(
+                "Delete job vacancy error:",
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success: false,
+
+                message:
+                    "Unable to delete job vacancy."
+
+            });
+
+        }
+
+        finally {
+
+            client.release();
+
+        }
+
+    }
+);
 
 /* =========================================================
    GOOGLE CALENDAR OAUTH
@@ -9019,7 +9329,7 @@ app.get("/api/jobs", async (req, res) => {
                 department,
                 location,
                 employment_type,
-                salary,
+                work_mode,
                 application_deadline,
                 experience_required,
                 education_required,
@@ -9032,7 +9342,7 @@ app.get("/api/jobs", async (req, res) => {
 
             FROM jobs
 
-            WHERE status IN ('active', 'closed')
+            WHERE status IN ('active')
 
             ORDER BY created_at DESC
             `
@@ -9163,86 +9473,6 @@ app.get(
 );
 
 
-app.post(
-    "/api/profile/photo",
-    profilePhotoUpload.single("profilePhoto"),
-    async (req, res) => {
-        try {
-            // User must be logged in
-            if (!req.session.userId) {
-                return res.status(401).json({
-                    success: false,
-                    message: "You must be logged in."
-                });
-            }
-
-            if (!req.file) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Please select a profile photo."
-                });
-            }
-
-            const extensionMap = {
-                "image/jpeg": "jpg",
-                "image/png": "png",
-                "image/webp": "webp"
-            };
-
-            const extension = extensionMap[req.file.mimetype];
-
-            const filePath =
-                `user-${req.session.userId}/profile-${crypto.randomUUID()}.${extension}`;
-
-            // Upload actual image to Supabase Storage
-            const { error: uploadError } = await supabase.storage
-                .from("profile-photos")
-                .upload(filePath, req.file.buffer, {
-                    contentType: req.file.mimetype,
-                    upsert: false
-                });
-
-            if (uploadError) {
-                console.error("Profile photo upload error:", uploadError);
-
-                return res.status(500).json({
-                    success: false,
-                    message: "Unable to upload profile photo."
-                });
-            }
-
-            // Save only the file path in PostgreSQL
-            await pool.query(
-                `
-                UPDATE users
-                SET profile_photo_path = $1
-                WHERE id = $2
-                `,
-                [filePath, req.session.userId]
-            );
-
-            // Because your bucket is public, get its display URL
-            const { data: publicUrlData } = supabase.storage
-                .from("profile-photos")
-                .getPublicUrl(filePath);
-
-            return res.json({
-                success: true,
-                message: "Profile photo updated successfully.",
-                profilePhotoUrl: publicUrlData.publicUrl
-            });
-
-        } catch (error) {
-            console.error("Profile photo error:", error);
-
-            return res.status(500).json({
-                success: false,
-                message: "Something went wrong while uploading the photo."
-            });
-        }
-    }
-);
-
 app.post("/api/profile", async (req, res) => {
 
     try {
@@ -9303,7 +9533,6 @@ app.post("/api/profile", async (req, res) => {
                 phone_number,
                 role,
                 created_at,
-                profile_photo_path,
                 education,
                 skills,
                 preferred_job_type,
@@ -9330,22 +9559,6 @@ app.post("/api/profile", async (req, res) => {
                 success: false,
                 message: "User not found."
             });
-        }
-
-
-        // Get profile photo URL if user has one
-        let profilePhotoUrl = null;
-
-        if (dbUser.profile_photo_path) {
-
-            const { data } = supabase.storage
-                .from("profile-photos")
-                .getPublicUrl(
-                    dbUser.profile_photo_path
-                );
-
-            profilePhotoUrl =
-                data.publicUrl;
         }
 
 
@@ -9386,8 +9599,6 @@ app.post("/api/profile", async (req, res) => {
                 experience:
                     dbUser.work_experience,
 
-                profilePicture:
-                    profilePhotoUrl
             }
         });
 
@@ -10405,7 +10616,6 @@ app.get("/api/auth/me",
                         phone_number,
                         role,
                         created_at,
-                        profile_photo_path,
                         education,
                         skills,
                         preferred_job_type,
@@ -10425,31 +10635,7 @@ app.get("/api/auth/me",
                 });
             }
 
-
-            const dbUser =
-                result.rows[0];
-
-
-            /* ---------------------------------------------
-               Build profile photo URL
-            --------------------------------------------- */
-
-            let profilePhotoUrl = null;
-
-
-            if (dbUser.profile_photo_path) {
-
-                const { data } =
-                    supabase.storage
-                        .from("profile-photos")
-                        .getPublicUrl(
-                            dbUser.profile_photo_path
-                        );
-
-
-                profilePhotoUrl =
-                    data.publicUrl;
-            }
+            const dbUser = result.rows[0];
 
 
             /* ---------------------------------------------
@@ -10495,8 +10681,6 @@ app.get("/api/auth/me",
                     experience: 
                         dbUser.work_experience,
 
-                    profilePicture:
-                        profilePhotoUrl
                 }
 
             });
@@ -11909,17 +12093,37 @@ app.get(
                 await pool.query(
                     `
                     SELECT
-                        id,
-                        job_id,
-                        application_reference,
-                        status,
-                        applied_at
 
-                    FROM applications
+                        a.id,
+                        a.job_id,
+                        a.application_reference,
+                        a.status,
+                        a.applied_at,
+                        a.updated_at,
+                        a.current_version_number,
+                        a.is_locked,
 
-                    WHERE candidate_id = $1
+                        av.job_title_snapshot,
+                        av.department_snapshot,
 
-                    ORDER BY applied_at DESC
+                        j.location,
+                        j.employment_type,
+                        j.application_deadline
+
+                    FROM applications a
+
+                    INNER JOIN application_versions av
+                        ON av.application_id = a.id
+                        AND av.version_number =
+                            a.current_version_number
+
+                    INNER JOIN jobs j
+                        ON j.id = a.job_id
+
+                    WHERE a.candidate_id = $1
+
+                    ORDER BY
+                        a.applied_at DESC
                     `,
                     [
                         req.session.userId
@@ -11948,7 +12152,35 @@ app.get(
                                 application.status,
 
                             appliedAt:
-                                application.applied_at
+                                application.applied_at,
+
+                            updatedAt:
+                                application.updated_at,
+
+                            currentVersion:
+                                application.current_version_number,
+
+                            isLocked:
+                                application.is_locked,
+
+                            job: {
+
+                                title:
+                                    application.job_title_snapshot,
+
+                                department:
+                                    application.department_snapshot,
+
+                                location:
+                                    application.location,
+
+                                employmentType:
+                                    application.employment_type,
+
+                                applicationDeadline:
+                                    application.application_deadline
+
+                            }
 
                         })
                     )
