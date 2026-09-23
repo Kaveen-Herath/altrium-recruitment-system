@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Kaveen-Herath/altrium-recruitment-system.git"
@@ -29,5 +27,9 @@
     "multer": "^2.2.0",
     "nodemailer": "^9.0.5",
     "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.2"
   }
 }
