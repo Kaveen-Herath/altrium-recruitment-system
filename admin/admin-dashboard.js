@@ -19504,6 +19504,59 @@ manageTeamMemberForm
         }
     );
 
+    /* =========================================================
+   OPEN ADMIN SECTION FROM HOMEPAGE
+   ========================================================= */
+
+function openRequestedAdminSection() {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const section =
+        params.get("section");
+
+    const action =
+        params.get("action");
+
+    if (!section) {
+        return;
+    }
+
+    const navItem =
+        document.querySelector(
+            `.admin-nav-item[data-section="${section}"]`
+        );
+
+    if (navItem) {
+        navItem.click();
+    }
+
+    /* CREATE VACANCY */
+
+    if (
+        section === "vacancies" &&
+        action === "create"
+    ) {
+
+        setTimeout(() => {
+
+            const createButton =
+                document.getElementById(
+                    "openCreateVacancyModal"
+                );
+
+            createButton?.click();
+
+        }, 150);
+
+    }
+
+}
+
+openRequestedAdminSection();
 
 /* =========================================================
    START ADMIN DASHBOARD

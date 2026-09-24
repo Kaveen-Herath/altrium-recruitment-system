@@ -13575,3 +13575,631 @@ span:last-child {
 
     text-align: center !important;
 }
+
+
+
+/* =========================================================
+   FINAL MOBILE FIX
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+
+    .admin-content,
+    .admin-section,
+    .vacancy-list,
+    .vacancy-card {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+
+    /* -------------------------
+       MAIN LAYOUT
+       ------------------------- */
+
+    .admin-layout {
+        width: 100%;
+        max-width: 100%;
+        padding:
+            20px
+            4%
+            50px;
+
+        box-sizing: border-box;
+    }
+
+
+    /* -------------------------
+       PAGE HEADING
+       ------------------------- */
+
+    .admin-page-heading {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .admin-page-heading h1 {
+        max-width: 100%;
+
+        font-size: 38px;
+        line-height: 1.05;
+
+        letter-spacing: -2px;
+
+        overflow-wrap: anywhere;
+    }
+
+
+    .admin-page-heading p {
+        max-width: 100%;
+    }
+
+
+    /* -------------------------
+       VACANCY TOOLBAR
+       ------------------------- */
+
+    .vacancy-toolbar {
+        width: 100%;
+        max-width: 100%;
+
+        box-sizing: border-box;
+
+        flex-direction: column;
+        align-items: stretch;
+
+        gap: 18px;
+
+        padding: 20px;
+    }
+
+
+    .vacancy-toolbar-text {
+        width: 100%;
+        min-width: 0;
+    }
+
+
+    .vacancy-toolbar-text h2,
+    .vacancy-toolbar-text p {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+
+
+    .create-vacancy-button {
+        width: 100%;
+        max-width: 100%;
+
+        box-sizing: border-box;
+
+        justify-content: center;
+
+        white-space: normal;
+
+        min-width: 0;
+    }
+
+
+    /* -------------------------
+       CURRENT VACANCIES
+       ------------------------- */
+
+    .vacancies-heading {
+        width: 100%;
+        max-width: 100%;
+
+        box-sizing: border-box;
+    }
+
+
+    /* -------------------------
+       VACANCY CARD
+       ------------------------- */
+
+    .vacancy-card {
+        width: 100%;
+        max-width: 100%;
+
+        box-sizing: border-box;
+    }
+
+
+    .vacancy-summary {
+        width: 100%;
+        max-width: 100%;
+
+        box-sizing: border-box;
+
+        padding: 18px;
+
+        display: flex;
+        flex-direction: column;
+
+        align-items: stretch;
+        justify-content: flex-start;
+
+        gap: 16px;
+    }
+
+
+    .vacancy-summary-main {
+        width: 100%;
+        min-width: 0;
+    }
+
+
+    .vacancy-title-row {
+        width: 100%;
+        min-width: 0;
+
+        display: flex;
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 8px;
+    }
+
+
+    .vacancy-title-row h3 {
+        max-width: 100%;
+
+        font-size: 20px;
+
+        line-height: 1.2;
+
+        overflow-wrap: anywhere;
+    }
+
+
+    .vacancy-meta,
+    .vacancy-summary-bottom {
+        width: 100%;
+        min-width: 0;
+
+        flex-wrap: wrap;
+
+        overflow-wrap: anywhere;
+    }
+
+
+    /* -------------------------
+       ACTION BUTTONS
+       ------------------------- */
+
+    .vacancy-summary-controls {
+        width: 100%;
+        max-width: 100%;
+
+        margin-left: 0;
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+        gap: 8px;
+
+        box-sizing: border-box;
+    }
+
+
+    .vacancy-summary-controls
+    .edit-vacancy-button,
+
+    .vacancy-summary-controls
+    .close-vacancy-button,
+
+    .vacancy-summary-controls
+    .reopen-vacancy-button,
+
+    .vacancy-summary-controls
+    .delete-vacancy-button {
+        width: 100%;
+        min-width: 0;
+
+        box-sizing: border-box;
+    }
+
+
+    /* Keep arrow/delete compact */
+    .vacancy-summary-controls
+    .vacancy-expand-icon {
+        width: 100%;
+        min-width: 0;
+
+        box-sizing: border-box;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        min-height: 38px;
+
+        border-radius: 20px;
+    }
+
+
+    /* -------------------------
+       VACANCY DETAILS
+       ------------------------- */
+
+    .vacancy-details {
+        width: 100%;
+        max-width: 100%;
+
+        box-sizing: border-box;
+
+        padding:
+            0
+            18px
+            20px;
+    }
+
+
+    .vacancy-detail-grid {
+        width: 100%;
+        max-width: 100%;
+
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .vacancy-detail-grid > div {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+
+    .vacancy-detail-section {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+
+    .vacancy-detail-section p {
+        overflow-wrap: anywhere;
+    }
+
+}
+
+/* =========================================================
+   MOBILE - STACK ADMIN PANELS
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .admin-layout {
+        display: grid;
+
+        grid-template-columns: 1fr !important;
+
+        width: 100%;
+        max-width: 100%;
+
+        gap: 18px;
+
+        padding:
+            20px
+            4%
+            50px;
+
+        box-sizing: border-box;
+    }
+
+
+    /* Recruitment panel first */
+    .admin-sidebar {
+        order: 1;
+
+        width: 100%;
+        max-width: 100%;
+
+        position: static;
+
+        display: flex;
+        flex-direction: column;
+
+        gap: 18px;
+
+        min-width: 0;
+    }
+
+
+    /* System panel stays underneath Recruitment */
+    .system-sidebar-card {
+        order: 2;
+    }
+
+
+    /* Main page content comes underneath both panels */
+    .admin-content {
+        order: 3;
+
+        width: 100%;
+        max-width: 100%;
+
+        min-width: 0;
+
+        box-sizing: border-box;
+    }
+
+
+    /* Make each sidebar panel full width */
+    .admin-sidebar-card {
+        width: 100%;
+        max-width: 100%;
+
+        box-sizing: border-box;
+    }
+
+
+    /* Navigation becomes vertically stacked */
+    .admin-navigation {
+        display: flex;
+
+        flex-direction: column;
+
+        width: 100%;
+
+        overflow: visible;
+
+        gap: 6px;
+    }
+
+
+    .admin-nav-item {
+        width: 100%;
+        min-width: 0;
+
+        box-sizing: border-box;
+    }
+
+}
+
+/* =========================================================
+   MOBILE APPLICATION CARD FIX
+   ========================================================= */
+
+@media (max-width: 850px) {
+
+    .admin-application-card {
+        display: grid !important;
+
+        grid-template-columns: 1fr !important;
+
+        width: 100% !important;
+        max-width: 100% !important;
+
+        min-width: 0 !important;
+
+        gap: 18px !important;
+
+        padding: 18px !important;
+
+        box-sizing: border-box;
+    }
+
+
+    .admin-application-candidate,
+    .admin-application-job,
+    .admin-application-actions {
+        width: 100% !important;
+
+        min-width: 0 !important;
+
+        box-sizing: border-box;
+    }
+
+
+    .admin-application-candidate h3,
+    .admin-application-job strong {
+        overflow-wrap: anywhere;
+    }
+
+
+    .admin-application-candidate p,
+    .admin-application-job p {
+        line-height: 1.6;
+
+        overflow-wrap: anywhere;
+    }
+
+
+    .admin-application-actions {
+        display: flex !important;
+
+        flex-direction: column !important;
+
+        align-items: flex-start !important;
+
+        gap: 10px !important;
+    }
+
+
+    .admin-application-date {
+        white-space: normal !important;
+    }
+
+
+    .admin-view-application-button {
+        width: 100% !important;
+
+        box-sizing: border-box;
+    }
+
+}
+
+/* =========================================================
+   APPLICATION REVIEW MODAL - MOBILE
+   ========================================================= */
+
+@media (max-width: 850px) {
+
+    /* Modal itself */
+    .application-review-modal-card {
+        width: calc(100% - 24px) !important;
+        max-width: 100% !important;
+
+        max-height: 94vh !important;
+
+        padding: 20px !important;
+
+        box-sizing: border-box;
+    }
+
+
+    /* Header */
+    .application-review-header {
+        gap: 14px;
+
+        padding-bottom: 20px;
+    }
+
+    .application-review-header h2 {
+        font-size: 30px;
+
+        line-height: 1.08;
+
+        overflow-wrap: anywhere;
+    }
+
+    .application-review-header p {
+        font-size: 13px;
+    }
+
+
+    /* Summary cards */
+    .application-review-summary {
+        grid-template-columns: 1fr !important;
+
+        gap: 10px !important;
+
+        margin-top: 20px;
+    }
+
+
+    .application-review-summary > div {
+        width: 100% !important;
+
+        box-sizing: border-box;
+
+        padding: 16px !important;
+    }
+
+
+    .application-review-summary span {
+        font-size: 10px;
+
+        margin-bottom: 7px;
+    }
+
+    .application-review-summary strong {
+        font-size: 15px;
+
+        overflow-wrap: anywhere;
+    }
+
+
+    /* Detail fields */
+    .application-review-grid {
+        grid-template-columns: 1fr !important;
+
+        gap: 10px !important;
+    }
+
+
+    .application-review-field {
+        width: 100%;
+
+        box-sizing: border-box;
+    }
+
+
+    /* CV section */
+    .application-review-cv {
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 14px;
+
+        padding: 17px;
+    }
+
+
+    .application-review-cv-button {
+        width: 100%;
+
+        text-align: center;
+
+        box-sizing: border-box;
+    }
+
+
+    /* Status management */
+    .application-status-manager {
+        padding: 18px !important;
+    }
+
+
+    .application-status-manager-body {
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 18px;
+    }
+
+
+    .application-current-stage strong {
+        font-size: 22px;
+    }
+
+
+    .application-status-actions {
+        width: 100%;
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+        justify-content: flex-start;
+    }
+
+
+    .application-next-status-button,
+    .application-reject-button {
+        width: 100% !important;
+
+        box-sizing: border-box;
+    }
+
+
+    /* History */
+    .application-review-history-item {
+        grid-template-columns:
+            10px
+            minmax(0, 1fr);
+
+        gap: 11px;
+
+        padding: 14px;
+    }
+
+}   

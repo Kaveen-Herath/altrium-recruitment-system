@@ -2232,52 +2232,6 @@ function hideMobileDashboardNotice(
 
 
 
-/* =========================================================
-   BLOCK DASHBOARD LINK CLICKS ON MOBILE
-   ========================================================= */
-
-document.addEventListener(
-    "click",
-    event => {
-
-        if (
-            !isMobileDashboardViewport()
-        ) {
-
-            return;
-
-        }
-
-
-        const link =
-            event.target.closest(
-                "a[href]"
-            );
-
-
-        if (
-            !isAdminDashboardLink(
-                link
-            )
-        ) {
-
-            return;
-
-        }
-
-
-        event.preventDefault();
-
-        event.stopPropagation();
-
-
-        showMobileDashboardNotice(
-            false
-        );
-
-    },
-    true
-);
 
 
 
@@ -2388,10 +2342,6 @@ function enforceMobileDashboardPageGuard() {
    ========================================================= */
 
 createMobileNavigation();
-
-
-enforceMobileDashboardPageGuard();
-
 
 loadNavbarUser()
     .finally(
