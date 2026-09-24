@@ -88,7 +88,7 @@ function showProfileToast(message, type = "error") {
 
 
 /* =========================================================
-   ALTRIUM — FRONTEND PROFILE SYSTEM
+   ALTRIUM - FRONTEND PROFILE SYSTEM
    Node API ready version
    ========================================================= */
 

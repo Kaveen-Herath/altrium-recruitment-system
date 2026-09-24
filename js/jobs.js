@@ -125,10 +125,6 @@ const applicationJobMeta =
         "applicationJobMeta"
     );
 
-const applicationPreferredJobType =
-    document.getElementById(
-        "applicationPreferredJobType"
-    );
 
 const applicationCv =
     document.getElementById(
@@ -988,12 +984,6 @@ submitApplicationButton
                 document.getElementById(
                     "applicationProjects"
                 ).value.trim()
-            );
-
-
-            formData.append(
-                "preferredJobType",
-                applicationPreferredJobType.value
             );
 
 
@@ -3254,7 +3244,7 @@ async function loadSavedJobs() {
 
         /*
             Logged-out users receive 401.
-            That's fine — they simply
+            That's fine - they simply
             have no saved-job state.
         */
 
@@ -3393,72 +3383,6 @@ async function loadMyApplications() {
 }
 
 
-/* =========================================================
-   SET APPLICATION JOB TYPE DROPDOWN
-   ========================================================= */
-
-function setApplicationJobType(
-    value
-) {
-
-    if (
-        !applicationPreferredJobType
-    ) {
-
-        return;
-
-    }
-
-
-    const dropdown =
-        applicationPreferredJobType
-            .closest(
-                "[data-dropdown]"
-            );
-
-
-    const dropdownText =
-        dropdown
-            ?.querySelector(
-                "[data-dropdown-text]"
-            );
-
-
-    const options =
-        dropdown
-            ?.querySelectorAll(
-                "[data-dropdown-option]"
-            );
-
-
-    applicationPreferredJobType.value =
-        value ||
-        "";
-
-
-    if (
-        dropdownText
-    ) {
-
-        dropdownText.textContent =
-            value ||
-            "Select job type";
-
-    }
-
-
-    options?.forEach(
-        option => {
-
-            option.classList.toggle(
-                "selected",
-                option.dataset.value === value
-            );
-
-        }
-    );
-
-}
 
 
 /* =========================================================
@@ -3602,11 +3526,6 @@ function saveApplicationDraft() {
 
         preferredLanguages:
             languages,
-
-
-        preferredJobType:
-            applicationPreferredJobType
-                ?.value || "",
 
 
         consent:
@@ -3911,23 +3830,6 @@ function restoreApplicationDraft(
         }
 
 
-
-        /* =================================================
-           PREFERRED JOB TYPE
-           ================================================= */
-
-        if (
-            hasDraftValue(
-                "preferredJobType"
-            )
-        ) {
-
-            setApplicationJobType(
-                draft.preferredJobType ||
-                ""
-            );
-
-        }
 
 
 
@@ -4352,13 +4254,6 @@ async function openApplicationForm(
 
 
 
-        /* =================================================
-           PREFERRED JOB TYPE
-           ================================================= */
-
-        setApplicationJobType(
-            candidate.preferredJobType
-        );
 
 
 
@@ -5243,23 +5138,6 @@ function validateApplicationForm() {
     }
 
 
-    /* JOB TYPE */
-
-    if (
-        !applicationPreferredJobType
-            ?.value
-            .trim()
-    ) {
-
-        markInvalid(
-            applicationPreferredJobType
-                ?.closest(
-                    ".altrium-dropdown"
-                )
-        );
-
-    }
-
 
     /* CV */
 
@@ -5354,7 +5232,7 @@ function fillApplicationReview() {
         document
             .getElementById(id)
             ?.value
-            ?.trim() || "—";
+            ?.trim() || "-";
 
 
     const languages =
@@ -5484,20 +5362,12 @@ function fillApplicationReview() {
 
 
     document.getElementById(
-        "reviewJobType"
-    ).textContent =
-        applicationPreferredJobType
-            ?.value ||
-        "—";
-
-
-    document.getElementById(
         "reviewCvName"
     ).textContent =
         applicationCv
             ?.files[0]
             ?.name ||
-        "—";
+        "-";
 
 }
 
@@ -5640,7 +5510,7 @@ function showApplicationSuccess(
 
         applicationSuccessReference.textContent =
             application.reference ||
-            "—";
+            "-";
 
     }
 

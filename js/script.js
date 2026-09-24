@@ -1957,7 +1957,7 @@ const tips = [
             "Stay open to growth.",
 
         text:
-            "Your ideal first step may not have the perfect title — but it can open the right door.",
+            "Your ideal first step may not have the perfect title - but it can open the right door.",
 
         image:
             "assets/SlideImg4.png"

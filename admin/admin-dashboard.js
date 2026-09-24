@@ -414,7 +414,7 @@ function formatTimeValue(
 
     if (!value) {
 
-        return "—";
+        return "-";
 
     }
 
@@ -2881,7 +2881,7 @@ function formatSystemAuditValue(
         ""
     ) {
 
-        return "—";
+        return "-";
 
     }
 
@@ -3985,7 +3985,7 @@ function formatSystemAuditTableDate(
         !value
     ) {
 
-        return "—";
+        return "-";
 
     }
 
@@ -4002,7 +4002,7 @@ function formatSystemAuditTableDate(
         )
     ) {
 
-        return "—";
+        return "-";
 
     }
 
@@ -4353,7 +4353,7 @@ function openSystemAuditDetail(
                 )
             } #${
                 log.entity?.id ||
-                "—"
+                "-"
             }`;
 
 
@@ -4862,7 +4862,7 @@ function formatEvaluationScore(
         )
     ) {
 
-        return "—";
+        return "-";
 
     }
 
@@ -5046,7 +5046,7 @@ function updateEvaluationScoreControls() {
                         .technicalSkillsRating
                 } / 10`
 
-                : "—";
+                : "-";
 
     }
 
@@ -5064,7 +5064,7 @@ function updateEvaluationScoreControls() {
                         .relevantExperienceRating
                 } / 10`
 
-                : "—";
+                : "-";
 
     }
 
@@ -5082,7 +5082,7 @@ function updateEvaluationScoreControls() {
                         .qualificationsRating
                 } / 10`
 
-                : "—";
+                : "-";
 
     }
 
@@ -5100,7 +5100,7 @@ function updateEvaluationScoreControls() {
                         .overallSuitabilityRating
                 } / 10`
 
-                : "—";
+                : "-";
 
     }
 
@@ -5148,7 +5148,7 @@ function updateCurrentEvaluationScore() {
     ) {
 
         output.textContent =
-            "— / 10";
+            "- / 10";
 
 
         return;
@@ -5669,7 +5669,7 @@ function renderApplicationEvaluation(
         combined.averageRating ===
             undefined
 
-            ? "—"
+            ? "-"
 
             : `${formatEvaluationScore(
                 combined.averageRating
@@ -8706,10 +8706,10 @@ const applicationSortLabels = {
         "Oldest applications",
 
     score_high:
-        "Reviewer score — Highest first",
+        "Reviewer score - Highest first",
 
     score_low:
-        "Reviewer score — Lowest first",
+        "Reviewer score - Lowest first",
 
     review_progress:
         "Review progress"
@@ -9073,7 +9073,7 @@ function openBulkShortlistModal() {
                                         2
                                     )} / 10`
 
-                                    : "—"
+                                    : "-"
                             }
 
                         </strong>
@@ -14086,7 +14086,7 @@ function formatInterviewSlotTime(
 
     if (!value) {
 
-        return "—";
+        return "-";
 
     }
 
@@ -14103,7 +14103,7 @@ function formatInterviewSlotTime(
         )
     ) {
 
-        return "—";
+        return "-";
 
     }
 
@@ -14143,7 +14143,7 @@ function formatInterviewDatabaseTime(
 
     if (!value) {
 
-        return "—";
+        return "-";
 
     }
 

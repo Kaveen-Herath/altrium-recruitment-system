@@ -115,7 +115,7 @@ const statusDescriptions = {
         "You've reached the interview stage. Check your interview details below.",
 
     offer:
-        "Great news — your application has reached the offer stage.",
+        "Great news - your application has reached the offer stage.",
 
     hired:
         "Congratulations! Your application has successfully completed the recruitment process.",
@@ -143,7 +143,7 @@ function formatProgressDate(
         !dateValue
     ) {
 
-        return "—";
+        return "-";
 
     }
 
@@ -160,7 +160,7 @@ function formatProgressDate(
         )
     ) {
 
-        return "—";
+        return "-";
 
     }
 
@@ -265,7 +265,7 @@ function formatInterviewTime(
         !dateValue
     ) {
 
-        return "—";
+        return "-";
 
     }
 
@@ -282,7 +282,7 @@ function formatInterviewTime(
         )
     ) {
 
-        return "—";
+        return "-";
 
     }
 
@@ -1007,7 +1007,7 @@ function renderInterviews(
                             ? formatInterviewTime(
                                 interviewEnd
                             )
-                            : "—"
+                            : "-"
                     }`
 
                 );

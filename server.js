@@ -6555,7 +6555,7 @@ async function sendShortlistedCandidateEmail({
 
 Hi ${candidateName},
 
-Good news — your application for ${jobTitle} has been shortlisted.
+Good news - your application for ${jobTitle} has been shortlisted.
 
 Application reference:
 ${applicationReference}
@@ -6763,7 +6763,7 @@ Altrium Recruitment
 
                                 <br><br>
 
-                                Good news — your application for
+                                Good news - your application for
 
                                 <strong
                                     style="
@@ -12399,7 +12399,6 @@ app.post(
                 skills,
                 workExperience,
                 projects,
-                preferredJobType,
                 consent
             } = req.body;
 
@@ -12484,8 +12483,7 @@ app.post(
                 !country?.trim() ||
                 !education?.trim() ||
                 !skills?.trim() ||
-                !workExperience?.trim() ||
-                !preferredJobType?.trim()
+                !workExperience?.trim()
             ) {
 
                 return res
@@ -12536,41 +12534,6 @@ app.post(
                     });
 
             }
-
-
-
-            /* =================================================
-               JOB TYPE VALIDATION
-               ================================================= */
-
-            const allowedJobTypes = [
-                "Full time",
-                "Part time",
-                "Internship",
-                "Contract",
-                "Remote"
-            ];
-
-
-            if (
-                !allowedJobTypes.includes(
-                    preferredJobType.trim()
-                )
-            ) {
-
-                return res
-                    .status(400)
-                    .json({
-
-                        success: false,
-
-                        message:
-                            "Please select a valid preferred job type."
-
-                    });
-
-            }
-
 
 
             /* =================================================
@@ -12783,7 +12746,8 @@ app.post(
                         job_title,
                         department,
                         status,
-                        application_deadline
+                        application_deadline,
+                        employment_type
 
                     FROM jobs
 
@@ -12823,6 +12787,12 @@ app.post(
             const job =
                 jobResult.rows[0];
 
+                const appliedJobType =
+    Array.isArray(job.employment_type)
+        ? job.employment_type.join(", ")
+        : String(
+            job.employment_type ?? ""
+        ).trim();
 
 
             if (
@@ -13201,7 +13171,7 @@ app.post(
 
                     preferredLanguages,
 
-                    preferredJobType.trim(),
+                    appliedJobType,
 
                     uploadedCvPath,
 
@@ -13227,10 +13197,9 @@ app.post(
                     phone_number = $3,
                     education = $4,
                     skills = $5,
-                    work_experience = $6,
-                    preferred_job_type = $7
+                    work_experience = $6
 
-                WHERE id = $8
+                WHERE id = $7
                 `,
                 [
                     firstName.trim(),
@@ -13244,8 +13213,6 @@ app.post(
                     skills.trim(),
 
                     workExperience.trim(),
-
-                    preferredJobType.trim(),
 
                     candidateId
                 ]
@@ -14274,7 +14241,7 @@ app.post(
                     true,
 
                 message:
-                    "Thanks — your message has been sent to Altrium.",
+                    "Thanks - your message has been sent to Altrium.",
 
                 feedback: {
 
@@ -19380,7 +19347,7 @@ if (
                                 text: `
                 Hi ${candidateName},
 
-                Good news — your application for ${application.job_title} has been shortlisted.
+                Good news - your application for ${application.job_title} has been shortlisted.
 
                 Application reference:
                 ${application.application_reference}
