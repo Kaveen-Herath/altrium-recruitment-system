@@ -19994,7 +19994,9 @@ app.get(
                         av.first_name,
                         av.last_name,
                         av.email,
-                        av.phone_number
+                        av.phone_number,
+
+                        ai.meeting_url
 
                     FROM interview_session_slots sl
 
@@ -20008,6 +20010,19 @@ app.get(
 
                         AND av.version_number =
                             a.current_version_number
+
+                    LEFT JOIN LATERAL (
+    SELECT
+        meeting_url
+    FROM application_interviews
+    WHERE
+        session_id = sl.session_id
+        AND application_id = sl.application_id
+    ORDER BY
+        id DESC
+    LIMIT 1
+) ai
+    ON TRUE
 
                     WHERE sl.session_id = $1
 
@@ -20123,6 +20138,9 @@ app.get(
 
                                 assignedAt:
                                     slot.assigned_at,
+
+                                meetingUrl:
+                                    slot.meeting_url,
 
 
                                 candidate:

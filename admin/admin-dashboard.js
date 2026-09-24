@@ -14609,7 +14609,8 @@ function renderInterviewSessionReview(
 
 
     renderInterviewReviewSlots(
-        slots
+        slots,
+        session
     );
 
 }
@@ -14621,7 +14622,8 @@ function renderInterviewSessionReview(
    ========================================================= */
 
 function renderInterviewReviewSlots(
-    slots
+    slots,
+    session
 ) {
 
     const container =
@@ -14766,20 +14768,48 @@ function renderInterviewReviewSlots(
 
 
                 ${
-                    candidate
-                        ? `
+    candidate
+    ? `
 
-                            <button
-                                type="button"
-                                class="interview-review-application-button"
-                                data-application-id="${
-                                    candidate.applicationId
-                                }"
-                            >
-                                View application
-                            </button>
+        <div class="interview-review-slot-actions">
 
-                        `
+            <button
+                type="button"
+                class="interview-review-application-button"
+                data-application-id="${
+                    candidate.applicationId
+                }"
+            >
+                View application
+            </button>
+
+
+            ${
+                session.status === "confirmed" &&
+                session.interviewType === "online" &&
+                slot.meetingUrl
+
+                    ? `
+
+                        <a
+                            href="${escapeHTML(
+                                slot.meetingUrl
+                            )}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="interview-join-button"
+                        >
+                            Join meeting
+                        </a>
+
+                      `
+
+                    : ""
+            }
+
+        </div>
+
+    `
                         : `
                             <span></span>
                         `
