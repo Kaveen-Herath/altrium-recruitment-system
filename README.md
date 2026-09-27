@@ -92,7 +92,7 @@ https://altrium-staging.onrender.com
 
 ## Project Context
 
-University project — Staffordshire University / APIIT
+University project - Staffordshire University / APIIT
 
 ## Author
 
